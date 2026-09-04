@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>HITS Churn-Cohort Retention</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root{
+  --bg-canvas:#f4f6f4;
+  --surface:#ffffff;
+  --surface-2:#eef1ef;
+  --border:#dde3e0;
+  --ink-1:#161b19;
+  --ink-2:#4c5854;
+  --ink-3:#828e8a;
+  --accent:#0f6d5c;
+  --accent-ink:#ffffff;
+  --churn-bg:#fdeeec;
+  --churn-border:#d8695a;
+  --churn-ink:#a8402f;
+
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100;
+  --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7;
+  --rev:#c0392b;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg-canvas:#0e1210;
+    --surface:#171c1a;
+    --surface-2:#1e2422;
+    --border:#2b322f;
+    --ink-1:#f2f5f3;
+    --ink-2:#bcc7c2;
+    --ink-3:#7d8985;
+    --accent:#3fb69a;
+    --accent-ink:#08110d;
+    --churn-bg:#2a1713;
+    --churn-border:#a8402f;
+    --churn-ink:#e58c7a;
+
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+    --s5:#d55181; --s6:#008300; --s7:#9085e9;
+    --rev:#e0685a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg-canvas:#0e1210;
+  --surface:#171c1a;
+  --surface-2:#1e2422;
+  --border:#2b322f;
+  --ink-1:#f2f5f3;
+  --ink-2:#bcc7c2;
+  --ink-3:#7d8985;
+  --accent:#3fb69a;
+  --accent-ink:#08110d;
+  --churn-bg:#2a1713;
+  --churn-border:#a8402f;
+  --churn-ink:#e58c7a;
+
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+  --s5:#d55181; --s6:#008300; --s7:#9085e9;
+  --rev:#e0685a;
+}
+
+*{box-sizing:border-box;}
+body{background:var(--bg-canvas); color:var(--ink-1); font-family:'IBM Plex Sans',system-ui,sans-serif;}
+.wrap{max-width:1080px; margin:0 auto; padding:40px 24px 72px;}
+
+h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.5rem,2.4vw,2.05rem); letter-spacing:-0.01em; margin:0 0 6px; text-wrap:balance;}
+.subtitle{color:var(--ink-2); font-size:0.98rem; max-width:66ch; line-height:1.5; margin:0 0 22px;}
+
+.defrow{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:32px;}
+.chip{background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-size:0.82rem; color:var(--ink-2); display:flex; flex-direction:column; gap:2px; min-width:160px;}
+.chip b{font-family:'IBM Plex Mono',monospace; color:var(--ink-1); font-size:0.88rem; font-weight:500;}
+
+.panel{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:28px 28px 20px; margin-bottom:20px;}
+.panel-head{display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:6px; flex-wrap:wrap;}
+.panel-title{font-family:'Sora',system-ui,sans-serif; font-weight:600; font-size:1.05rem;}
+.toggle{background:var(--surface-2); border:1px solid var(--border); color:var(--ink-1); font-family:'IBM Plex Sans',sans-serif; font-size:0.82rem; font-weight:500; padding:6px 12px; border-radius:7px; cursor:pointer; transition:background .15s;}
+.toggle:hover{background:var(--border);}
+.toggle:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+.teamToggle{display:flex; gap:6px;}
+.teamToggle button{background:var(--surface-2); border:1px solid var(--border); color:var(--ink-2); font-family:'IBM Plex Sans',sans-serif; font-size:0.82rem; font-weight:500; padding:6px 14px; border-radius:7px; cursor:pointer; transition:background .15s, color .15s, border-color .15s;}
+.teamToggle button:hover{background:var(--border);}
+.teamToggle button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+.teamToggle button[data-team="ALL_HITS"][aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+.teamToggle button[data-team="ALL_REV"][aria-pressed="true"]{background:var(--rev); border-color:var(--rev); color:#fff;}
+
+.filterrow{display:flex; flex-wrap:wrap; align-items:center; gap:5px; margin:2px 0 14px;}
+.filter-chip{display:flex; align-items:center; gap:5px; background:var(--surface-2); border:1px solid var(--border); border-radius:14px; padding:3px 8px 3px 7px; font-family:'IBM Plex Sans',sans-serif; font-size:0.7rem; font-weight:500; color:var(--ink-1); cursor:pointer; transition:opacity .15s, background .15s, border-color .15s;}
+.filter-chip:hover{background:var(--border);}
+.filter-chip:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+.filter-chip .sw{width:9px; height:9px; border-radius:50%; flex:0 0 auto;}
+.filter-chip .n{color:var(--ink-3); font-family:'IBM Plex Mono',monospace; font-size:0.66rem;}
+.filter-chip[aria-pressed="false"]{opacity:.4; background:transparent;}
+.filter-chip[aria-pressed="false"] .sw{background:var(--ink-3)!important;}
+.filter-chip.all-chip{border-width:1.5px; font-weight:600;}
+.filter-chip.all-chip .sw{width:10px; height:10px;}
+.filter-chip.rev-chip{border-width:1.5px; border-style:dashed; font-weight:600;}
+.filter-chip.rev-chip .sw{width:10px; height:10px;}
+.filterlink{background:none; border:none; color:var(--ink-3); font-family:'IBM Plex Sans',sans-serif; font-size:0.7rem; text-decoration:underline; text-underline-offset:2px; cursor:pointer; padding:3px 2px;}
+.filterlink:hover{color:var(--ink-1);}
+.filtersep{width:1px; align-self:stretch; background:var(--border); margin:0 1px;}
+.grouplabel{color:var(--ink-3); font-size:0.7rem; font-weight:500; padding:0 1px;}
+
+.chart-scroll{overflow-x:auto;}
+svg{display:block; width:100%; height:auto; font-family:'IBM Plex Mono',monospace;}
+.gridline{stroke:var(--border); stroke-width:1;}
+.axis-label{fill:var(--ink-3); font-size:11px;}
+.axis-title{fill:var(--ink-2); font-size:11.5px; font-family:'IBM Plex Sans',sans-serif;}
+.mark{fill:currentColor;}
+.mark-prov{fill:var(--surface); stroke:currentColor; stroke-width:2;}
+.line{fill:none; stroke-width:2.25; stroke-linecap:round; stroke-linejoin:round;}
+.line-prov{fill:none; stroke-width:2.25; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:5 4; opacity:.85;}
+.line.weighted{stroke-width:3.5;}
+.endlabel{font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:500;}
+.endlabel.weighted{font-weight:700;}
+
+.crosshair{stroke:var(--ink-3); stroke-width:1; stroke-dasharray:2 3; opacity:0;}
+#tooltip{position:absolute; pointer-events:none; background:var(--ink-1); color:var(--bg-canvas); border-radius:9px; padding:10px 13px; font-size:0.78rem; line-height:1.5; opacity:0; transition:opacity .1s; box-shadow:0 8px 24px rgba(0,0,0,.22); z-index:5; min-width:180px;}
+#tooltip .tt-row{display:flex; justify-content:space-between; gap:14px; font-family:'IBM Plex Mono',monospace;}
+#tooltip .tt-month{font-family:'IBM Plex Sans',sans-serif; font-weight:600; margin-bottom:5px; color:var(--bg-canvas);}
+#tooltip .tt-prov{color:#e8b84b;}
+#tooltip .tt-dim{color:#9aa39f; font-size:0.9em;}
+#tooltip .tt-all{border-bottom:1px solid rgba(255,255,255,.18); padding-bottom:4px; margin-bottom:4px; font-weight:600;}
+
+table{width:100%; border-collapse:collapse; font-size:0.82rem;}
+thead th{text-align:right; font-weight:500; color:var(--ink-2); padding:8px 10px; border-bottom:1px solid var(--border); font-family:'IBM Plex Mono',monospace; white-space:nowrap;}
+thead th:first-child, tbody td:first-child{text-align:left; font-family:'IBM Plex Sans',sans-serif; font-weight:500; color:var(--ink-1);}
+tbody td{text-align:right; padding:7px 10px; font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; border-bottom:1px solid var(--border);}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr.all-row td{font-weight:600; background:var(--surface-2);}
+td.prov{color:var(--churn-ink); position:relative;}
+td.prov::after{content:"†"; font-size:0.7em; margin-left:2px;}
+td.tablegroup{text-align:left; font-family:'IBM Plex Sans',sans-serif; font-size:0.78rem; font-weight:500; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.03em; padding-top:14px; border-bottom:1px solid var(--border);}
+.table-scroll{overflow-x:auto;}
+
+.notes{display:flex; flex-direction:column; gap:10px; margin-top:6px;}
+.note{display:flex; gap:10px; font-size:0.83rem; color:var(--ink-2); line-height:1.5;}
+.note .dot{flex:0 0 auto; width:8px; height:8px; border-radius:2px; margin-top:6px;}
+.note.churn .dot{background:var(--churn-border);}
+.note.def .dot{background:var(--accent);}
+.note.watch .dot{background:var(--s2);}
+.note b{color:var(--ink-1); font-weight:600;}
+
+
+footer{color:var(--ink-3); font-size:0.76rem; margin-top:28px; line-height:1.6;}
+[hidden]{display:none!important;}
+</style>
+
+<div class="wrap">
+  <h1>HITS Churn-Cohort Retention</h1>
+  <p class="subtitle">Share of each HIT-month cohort that has <em>not yet</em> hit a sustained ad-spend drop-off, tracked by calendar month since the seller's own HIT month. Opens on the two bold "Overall" lines, comparing all-cohorts-combined retention for HITS against Revenue &mdash; click any chip below to add individual monthly cohorts back in.</p>
+
+  <div class="defrow">
+    <div class="chip">Churn means<b>3+ straight weeks &lt;&#8377;1,000/wk, never resumed</b></div>
+    <div class="chip">Cohorts<b>Feb&ndash;Aug 2026 HIT months</b></div>
+    <div class="chip">Sellers tracked<b>337</b></div>
+    <div class="chip">Month 0<b>the seller's own HIT month</b></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">Retention by month since HIT</div>
+      <button class="toggle" id="viewToggle" aria-pressed="false">Table view</button>
+    </div>
+
+    <div id="filterRow" class="filterrow"></div>
+
+    <div class="chart-scroll" id="chartView">
+      <svg id="chart" viewBox="0 0 1040 440" role="img" aria-label="Line chart of seller retention percentage by month since HIT, one line per monthly HIT cohort"></svg>
+    </div>
+
+    <div class="table-scroll" id="tableView" hidden>
+      <table id="dataTable"></table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">Overall retention &mdash; month-by-month detail</div>
+      <div class="teamToggle" id="overallToggle">
+        <button type="button" data-team="ALL_HITS" aria-pressed="true">HITS</button>
+        <button type="button" data-team="ALL_REV" aria-pressed="false">Revenue</button>
+      </div>
+    </div>
+    <p class="subtitle" style="margin:0 0 12px;">The sellers and cohorts behind each point on the bold "Overall" line above &mdash; base is only the sellers whose cohort has actually reached that relative month.</p>
+    <div class="table-scroll">
+      <table id="overallTable"></table>
+    </div>
+  </div>
+
+  <footer>HITS source: <code>csv_upload.hit_master_data</code> (team = HITS or hit2 = 1, excluding flagged good sellers) joined to weekly ad spend from <code>nushop.gc_view_3</code> via Metabase &mdash; HITSChurn-GCView3, card 14636 on dashboard 928 (Asia/Kolkata calendar). Revenue source: <code>eligible_sellers</code> (team is null and hit2 is null), same churn rule, via Metabase &mdash; Churn Cohort Matrix Revenue, question 14577; its per-cohort cumulative churn % is converted here as retention % = 100 &minus; cumulative churn %. Retention % = 1 &minus; (cumulative sellers whose terminal 3-week slump has started by that month &divide; cohort size); the projected point for the running month uses the same rule against only the fully-elapsed weeks posted so far. The two bold "Overall" lines recompute their base at every point to just the sellers whose cohort is old enough to have reached that relative month (337&rarr;15 for HITS M0&rarr;M6, 659&rarr;111 for Revenue), rather than holding the denominator fixed at the full tracked population &mdash; so a point's "n" shrinks as the line moves right, and the percentage reflects only cohorts that have actually lived that long. Click any chip above the chart to add or remove that line. † in the table marks a projected (still-open-month) cell.</footer>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+const DATA = {"2026-02":[{"pct":100.0,"n_retained":15,"n_churned_cum":0,"cohort_size":15},{"pct":86.7,"n_retained":13,"n_churned_cum":2,"cohort_size":15},{"pct":73.3,"n_retained":11,"n_churned_cum":4,"cohort_size":15},{"pct":60.0,"n_retained":9,"n_churned_cum":6,"cohort_size":15},{"pct":53.3,"n_retained":8,"n_churned_cum":7,"cohort_size":15},{"pct":53.3,"n_retained":8,"n_churned_cum":7,"cohort_size":15},{"pct":53.3,"n_retained":8,"n_churned_cum":7,"cohort_size":15}],"2026-03":[{"pct":91.7,"n_retained":22,"n_churned_cum":2,"cohort_size":24},{"pct":83.3,"n_retained":20,"n_churned_cum":4,"cohort_size":24},{"pct":70.8,"n_retained":17,"n_churned_cum":7,"cohort_size":24},{"pct":58.3,"n_retained":14,"n_churned_cum":10,"cohort_size":24},{"pct":58.3,"n_retained":14,"n_churned_cum":10,"cohort_size":24},{"pct":58.3,"n_retained":14,"n_churned_cum":10,"cohort_size":24},null],"2026-04":[{"pct":98.3,"n_retained":58,"n_churned_cum":1,"cohort_size":59},{"pct":83.1,"n_retained":49,"n_churned_cum":10,"cohort_size":59},{"pct":69.5,"n_retained":41,"n_churned_cum":18,"cohort_size":59},{"pct":62.7,"n_retained":37,"n_churned_cum":22,"cohort_size":59},{"pct":55.9,"n_retained":33,"n_churned_cum":26,"cohort_size":59},null,null],"2026-05":[{"pct":100.0,"n_retained":66,"n_churned_cum":0,"cohort_size":66},{"pct":86.4,"n_retained":57,"n_churned_cum":9,"cohort_size":66},{"pct":77.3,"n_retained":51,"n_churned_cum":15,"cohort_size":66},{"pct":71.2,"n_retained":47,"n_churned_cum":19,"cohort_size":66},null,null,null],"2026-06":[{"pct":93.2,"n_retained":41,"n_churned_cum":3,"cohort_size":44},{"pct":81.8,"n_retained":36,"n_churned_cum":8,"cohort_size":44},{"pct":77.3,"n_retained":34,"n_churned_cum":10,"cohort_size":44},null,null,null,null],"2026-07":[{"pct":96.7,"n_retained":58,"n_churned_cum":2,"cohort_size":60},{"pct":91.7,"n_retained":55,"n_churned_cum":5,"cohort_size":60},null,null,null,null,null],"2026-08":[{"pct":98.6,"n_retained":68,"n_churned_cum":1,"cohort_size":69},null,null,null,null,null,null]};
+
+// One projected (running-month) point per cohort that isn't already mature through M6.
+// m = the relative month it lands on; pct/n_retained computed the same way as DATA,
+// just against whatever fully-elapsed weeks the still-open month already has.
+const PROJECTED = {
+  "2026-03":{"m":6,"pct":58.3,"n_retained":14,"cohort_size":24,"churned_this_month_so_far":0},
+  "2026-04":{"m":5,"pct":55.9,"n_retained":33,"cohort_size":59,"churned_this_month_so_far":0},
+  "2026-05":{"m":4,"pct":71.2,"n_retained":47,"cohort_size":66,"churned_this_month_so_far":0},
+  "2026-06":{"m":3,"pct":77.3,"n_retained":34,"cohort_size":44,"churned_this_month_so_far":0},
+  "2026-07":{"m":2,"pct":91.7,"n_retained":55,"cohort_size":60,"churned_this_month_so_far":0},
+  "2026-08":{"m":1,"pct":98.6,"n_retained":68,"cohort_size":69,"churned_this_month_so_far":0}
+};
+
+const MONTH_LABEL = {"2026-02":"Feb","2026-03":"Mar","2026-04":"Apr","2026-05":"May","2026-06":"Jun","2026-07":"Jul","2026-08":"Aug"};
+const SERIES_VARS = ["--s1","--s2","--s3","--s4","--s5","--s6","--s7"];
+const cohorts = Object.keys(DATA);
+
+// Revenue-team per-cohort retention: same 7 HIT months, a separate seller
+// population (tagged neither HITS team nor hit2 in hit_master_data), sourced
+// from Churn Cohort Matrix Revenue (question 14577). That query already
+// returns CUMULATIVE churn as a per-cohort percentage, so retention here is
+// simply 100 - churn%, read straight off the query for whichever months it
+// reports -- same maturity cutoff as the HITS lines (a calendar-months-since-
+// HIT fact, not a weighting choice) decides which points are solid vs. the
+// one projected/floor point past it.
+const REV_DATA = {"2026-02":[{"pct":96.4,"n_retained":107,"n_churned_cum":4,"cohort_size":111},{"pct":81.1,"n_retained":90,"n_churned_cum":21,"cohort_size":111},{"pct":69.4,"n_retained":77,"n_churned_cum":34,"cohort_size":111},{"pct":59.5,"n_retained":66,"n_churned_cum":45,"cohort_size":111},{"pct":52.2,"n_retained":58,"n_churned_cum":53,"cohort_size":111},{"pct":46.9,"n_retained":52,"n_churned_cum":59,"cohort_size":111},{"pct":42.3,"n_retained":47,"n_churned_cum":64,"cohort_size":111}],"2026-03":[{"pct":93.9,"n_retained":93,"n_churned_cum":6,"cohort_size":99},{"pct":90.9,"n_retained":90,"n_churned_cum":9,"cohort_size":99},{"pct":79.8,"n_retained":79,"n_churned_cum":20,"cohort_size":99},{"pct":67.7,"n_retained":67,"n_churned_cum":32,"cohort_size":99},{"pct":58.6,"n_retained":58,"n_churned_cum":41,"cohort_size":99},{"pct":51.5,"n_retained":51,"n_churned_cum":48,"cohort_size":99},null],"2026-04":[{"pct":100,"n_retained":51,"n_churned_cum":0,"cohort_size":51},{"pct":90.2,"n_retained":46,"n_churned_cum":5,"cohort_size":51},{"pct":68.6,"n_retained":35,"n_churned_cum":16,"cohort_size":51},{"pct":52.9,"n_retained":27,"n_churned_cum":24,"cohort_size":51},{"pct":45.1,"n_retained":23,"n_churned_cum":28,"cohort_size":51},null,null],"2026-05":[{"pct":97.7,"n_retained":43,"n_churned_cum":1,"cohort_size":44},{"pct":81.8,"n_retained":36,"n_churned_cum":8,"cohort_size":44},{"pct":70.5,"n_retained":31,"n_churned_cum":13,"cohort_size":44},{"pct":65.9,"n_retained":29,"n_churned_cum":15,"cohort_size":44},null,null,null],"2026-06":[{"pct":93.9,"n_retained":93,"n_churned_cum":6,"cohort_size":99},{"pct":81.8,"n_retained":81,"n_churned_cum":18,"cohort_size":99},{"pct":76.8,"n_retained":76,"n_churned_cum":23,"cohort_size":99},null,null,null,null],"2026-07":[{"pct":96.3,"n_retained":129,"n_churned_cum":5,"cohort_size":134},{"pct":89.5,"n_retained":120,"n_churned_cum":14,"cohort_size":134},null,null,null,null,null],"2026-08":[{"pct":98.3,"n_retained":119,"n_churned_cum":2,"cohort_size":121},null,null,null,null,null,null]};
+const REV_PROJECTED = {
+  "2026-03":{"m":6,"pct":51.5,"n_retained":51,"cohort_size":99,"churned_this_month_so_far":0},
+  "2026-04":{"m":5,"pct":45.1,"n_retained":23,"cohort_size":51,"churned_this_month_so_far":0},
+  "2026-05":{"m":4,"pct":65.9,"n_retained":29,"cohort_size":44,"churned_this_month_so_far":0},
+  "2026-06":{"m":3,"pct":76.8,"n_retained":76,"cohort_size":99,"churned_this_month_so_far":0},
+  "2026-07":{"m":2,"pct":89.5,"n_retained":120,"cohort_size":134,"churned_this_month_so_far":0},
+  "2026-08":{"m":1,"pct":97.5,"n_retained":118,"cohort_size":121,"churned_this_month_so_far":0}
+};
+const revCohorts = Object.keys(REV_DATA).map(k => 'R' + k);
+
+// Overall retention across ALL cohorts of each team -- reached-only base.
+// Each point's denominator is only the sellers whose cohort is actually old
+// enough to have reached that relative month (an immature-cohort filter
+// applied per point, not a fixed pool held constant across the whole line).
+// M0: all 7 cohorts have an M0, so base = every tracked seller. M6: only the
+// oldest (Feb '26) cohort has lived 6 months, so base = just that cohort.
+// retained[i] is the summed retained-seller count across whichever cohorts
+// contribute at that month; base[i] is their summed cohort size -- both
+// derived directly from the same per-cohort DATA/REV_DATA above. Unlike the
+// old fixed-337/659-denominator version, the base here shrinks at every
+// point instead of staying flat, so the line keeps moving through M4-M6
+// rather than flattening out on thinning data.
+const ALL_META = {
+  ALL_HITS: {
+    label: 'HITS · Overall', color: '--accent', total: 337,
+    base:     [337, 268, 208, 164, 98, 39, 15],
+    retained: [328, 230, 154, 107, 55, 22, 8],
+    cohortsReach: [7,6,5,4,3,2,1]
+  },
+  ALL_REV: {
+    label: 'Revenue · Overall', color: '--rev', total: 659,
+    base:     [659, 538, 404, 305, 261, 210, 111],
+    retained: [635, 463, 298, 189, 139, 103, 47],
+    cohortsReach: [7,6,5,4,3,2,1]
+  }
+};
+const allKeys = Object.keys(ALL_META);
+function isAll(key){ return Object.hasOwn(ALL_META, key); }
+function allSeriesFor(key){
+  const meta = ALL_META[key];
+  return meta.base.map((b,i) => {
+    const n_retained = meta.retained[i];
+    return {
+      pct: Math.round(n_retained/b*1000)/10,
+      n_retained, cohort_size: b, n_churned_cum: b - n_retained,
+      cohorts_reach: meta.cohortsReach[i]
+    };
+  });
+}
+
+const seriesKeys = [...allKeys, ...cohorts, ...revCohorts];
+const visible = new Set(allKeys); // start on the overall comparison; click a chip to add cohort detail
+
+function isRev(key){ return key.charAt(0) === 'R'; }
+function monthOf(key){ return isRev(key) ? key.slice(1) : key; }
+function dataFor(key){ if (isAll(key)) return allSeriesFor(key); return isRev(key) ? REV_DATA[monthOf(key)] : DATA[monthOf(key)]; }
+function projFor(key){ if (isAll(key)) return null; return isRev(key) ? REV_PROJECTED[monthOf(key)] : PROJECTED[monthOf(key)]; }
+
+function cssVar(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function colorFor(key){
+  if (isAll(key)) return cssVar(ALL_META[key].color);
+  return cssVar(SERIES_VARS[cohorts.indexOf(monthOf(key))]);
+}
+function labelFor(key){
+  if (isAll(key)) return ALL_META[key].label;
+  return MONTH_LABEL[monthOf(key)] + " '26" + (isRev(key) ? ' · Rev' : '');
+}
+function nFor(key){
+  if (isAll(key)) return ALL_META[key].total;
+  return dataFor(key)[0].cohort_size;
+}
+
+const W = 1040, H = 440;
+const M = {top: 18, right: 56, bottom: 40, left: 40};
+const plotW = W - M.left - M.right;
+const plotH = H - M.top - M.bottom;
+const months = 7;
+function xOf(m){ return M.left + (plotW * m) / (months - 1); }
+function yOf(pct){ return M.top + plotH * (1 - pct/100); }
+
+const svg = document.getElementById('chart');
+const ns = 'http://www.w3.org/2000/svg';
+function el(tag, attrs){
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+
+// Catmull-Rom -> cubic Bezier, whole path and per-segment (used for cohort
+// lines so the final projected segment can be styled dashed while the rest
+// stays solid).
+function catmullRomPath(pts){
+  if (pts.length < 2) return '';
+  let d = 'M ' + pts[0].x + ' ' + pts[0].y;
+  for (let i = 0; i < pts.length - 1; i++){
+    const p0 = pts[i-1] || pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i+1];
+    const p3 = pts[i+2] || p2;
+    const cp1x = p1.x + (p2.x - p0.x)/6, cp1y = p1.y + (p2.y - p0.y)/6;
+    const cp2x = p2.x - (p3.x - p1.x)/6, cp2y = p2.y - (p3.y - p1.y)/6;
+    d += ' C ' + cp1x + ' ' + cp1y + ' ' + cp2x + ' ' + cp2y + ' ' + p2.x + ' ' + p2.y;
+  }
+  return d;
+}
+function catmullSegmentPath(pts, i){
+  const p0 = pts[i-1] || pts[i];
+  const p1 = pts[i];
+  const p2 = pts[i+1];
+  const p3 = pts[i+2] || p2;
+  const cp1x = p1.x + (p2.x - p0.x)/6, cp1y = p1.y + (p2.y - p0.y)/6;
+  const cp2x = p2.x - (p3.x - p1.x)/6, cp2y = p2.y - (p3.y - p1.y)/6;
+  return `M ${p1.x} ${p1.y} C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2.x} ${p2.y}`;
+}
+
+function renderFilters(){
+  const row = document.getElementById('filterRow');
+  row.innerHTML = '';
+
+  const makeChip = (key, variant) => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-chip' + (variant ? ' ' + variant + '-chip' : '');
+    btn.type = 'button';
+    btn.setAttribute('aria-pressed', String(visible.has(key)));
+    btn.dataset.key = key;
+    const sw = document.createElement('span');
+    sw.className = 'sw';
+    sw.style.background = colorFor(key);
+    const lab = document.createElement('span');
+    lab.textContent = labelFor(key);
+    const n = document.createElement('span');
+    n.className = 'n';
+    n.textContent = 'n=' + nFor(key);
+    btn.appendChild(sw); btn.appendChild(lab); btn.appendChild(n);
+    btn.addEventListener('click', () => {
+      if (visible.has(key)) visible.delete(key); else visible.add(key);
+      btn.setAttribute('aria-pressed', String(visible.has(key)));
+      render();
+    });
+    return btn;
+  };
+
+  const allLabel = document.createElement('span');
+  allLabel.className = 'grouplabel';
+  allLabel.textContent = 'Overall:';
+  row.appendChild(allLabel);
+
+  allKeys.forEach(ak => row.appendChild(makeChip(ak, 'all')));
+
+  const sep0 = document.createElement('span');
+  sep0.className = 'filtersep';
+  row.appendChild(sep0);
+
+  cohorts.forEach(cm => row.appendChild(makeChip(cm, null)));
+
+  const sep = document.createElement('span');
+  sep.className = 'filtersep';
+  row.appendChild(sep);
+
+  const revLabel = document.createElement('span');
+  revLabel.className = 'grouplabel';
+  revLabel.textContent = 'Revenue:';
+  row.appendChild(revLabel);
+
+  revCohorts.forEach(rk => row.appendChild(makeChip(rk, 'rev')));
+
+  const showAll = document.createElement('button');
+  showAll.className = 'filterlink';
+  showAll.type = 'button';
+  showAll.textContent = 'Show all';
+  showAll.addEventListener('click', () => {
+    seriesKeys.forEach(k => visible.add(k));
+    row.querySelectorAll('.filter-chip').forEach(b => b.setAttribute('aria-pressed','true'));
+    render();
+  });
+  row.appendChild(showAll);
+
+  const hideAll = document.createElement('button');
+  hideAll.className = 'filterlink';
+  hideAll.type = 'button';
+  hideAll.textContent = 'Remove all';
+  hideAll.addEventListener('click', () => {
+    visible.clear();
+    row.querySelectorAll('.filter-chip').forEach(b => b.setAttribute('aria-pressed','false'));
+    render();
+  });
+  row.appendChild(hideAll);
+}
+
+function render(){
+  svg.innerHTML = '';
+
+  for (let p = 0; p <= 100; p += 20){
+    const y = yOf(p);
+    svg.appendChild(el('line', {x1:M.left, x2:W-M.right, y1:y, y2:y, class:'gridline'}));
+    const t = el('text', {x:M.left-10, y:y+4, class:'axis-label', 'text-anchor':'end'});
+    t.textContent = p + '%';
+    svg.appendChild(t);
+  }
+  for (let m = 0; m < months; m++){
+    const x = xOf(m);
+    const t = el('text', {x:x, y:H-M.bottom+22, class:'axis-label', 'text-anchor':'middle'});
+    t.textContent = 'M'+m;
+    svg.appendChild(t);
+  }
+  const axisTitle = el('text', {x:M.left, y:H-6, class:'axis-title'});
+  axisTitle.textContent = 'Calendar months since HIT (M0 = HIT month itself) →';
+  svg.appendChild(axisTitle);
+
+  // cohort lines -- HITS first, then Revenue on top (dotted) so an overlaid
+  // pair is never hidden behind its HITS counterpart of the same colour.
+  function drawLine(key){
+    if (!visible.has(key)) return;
+    const rev = isRev(key);
+    const all = isAll(key);
+    const color = colorFor(key);
+    const series = dataFor(key);
+    const g = el('g', {color: color});
+    svg.appendChild(g);
+
+    const pts = [];
+    for (let m = 0; m < series.length; m++){
+      const d = series[m];
+      if (!d) break;
+      pts.push({x:xOf(m), y:yOf(d.pct), m, prov:false});
+    }
+    const proj = projFor(key);
+    if (proj) pts.push({x:xOf(proj.m), y:yOf(proj.pct), m:proj.m, prov:true});
+
+    for (let i2 = 0; i2 < pts.length - 1; i2++){
+      const segProv = pts[i2+1].prov;
+      const attrs = {
+        d: catmullSegmentPath(pts, i2),
+        class: segProv ? 'line-prov' : 'line',
+        stroke: color
+      };
+      if (rev) attrs.style = 'stroke-dasharray:2 3; opacity:1;';
+      if (all) attrs.style = 'stroke-width:4.5;';
+      const path = el('path', attrs);
+      g.appendChild(path);
+    }
+
+    pts.forEach(p => {
+      const r = el('circle', {cx:p.x, cy:p.y, r: all ? 5.5 : 4.5, class: p.prov ? 'mark-prov' : 'mark', color: color});
+      g.appendChild(r);
+      const hit = el('circle', {cx:p.x, cy:p.y, r:11, fill:'transparent', 'data-key':key, 'data-m':p.m, style:'cursor:pointer'});
+      hit.addEventListener('mousemove', (e)=>showTip(e, p.m));
+      hit.addEventListener('mouseleave', hideTip);
+      svg.appendChild(hit);
+    });
+
+    if (pts.length){
+      const last = pts[pts.length-1];
+      const label = el('text', {x: last.x+13, y: last.y+4, class:'endlabel', fill:color});
+      label.style.fontWeight = all ? '700' : '';
+      label.textContent = all ? (key === 'ALL_HITS' ? 'HITS' : 'Rev') : MONTH_LABEL[monthOf(key)] + (rev ? ' R' : '');
+      svg.appendChild(label);
+    }
+  }
+
+  // draw order: HITS cohorts, then Revenue cohorts (dotted, so an overlaid
+  // pair is never hidden behind its HITS counterpart of the same colour),
+  // then the two bold Overall lines last so they always sit on top.
+  cohorts.forEach(drawLine);
+  revCohorts.forEach(drawLine);
+  allKeys.forEach(drawLine);
+}
+
+function showTip(e, m){
+  const tip = document.getElementById('tooltip');
+  let html = '<div class="tt-month">Month ' + m + '</div>';
+
+  seriesKeys.forEach(key => {
+    if (!visible.has(key)) return;
+    const series = dataFor(key);
+    const d = series[m];
+    const proj = projFor(key);
+    const point = d || (proj && proj.m === m ? proj : null);
+    if (!point) return;
+    const isProv = !d;
+    const cls = isProv ? ' class="tt-prov"' : '';
+    html += '<div class="tt-row"><span style="color:'+colorFor(key)+'">'+labelFor(key)+'</span><span'+cls+'>' + point.pct.toFixed(1) + '% (' + point.n_retained + '/' + point.cohort_size + (isProv?' so far':'') + ')</span></div>';
+    if (isAll(key)) {
+      html += '<div class="tt-row tt-dim"><span>&nbsp;&nbsp;cohorts old enough to reach this month</span><span>' + point.cohorts_reach + ' of 7</span></div>';
+    }
+  });
+
+  tip.innerHTML = html;
+  tip.style.opacity = 1;
+  const rect = svg.getBoundingClientRect();
+  const scale = rect.width / W;
+  tip.style.left = (rect.left + window.scrollX + xOf(m)*scale + 14) + 'px';
+  tip.style.top = (rect.top + window.scrollY + 20) + 'px';
+}
+function hideTip(){
+  document.getElementById('tooltip').style.opacity = 0;
+}
+
+function renderTable(){
+  const table = document.getElementById('dataTable');
+  let head = '<thead><tr><th>Cohort</th>';
+  for (let m=0; m<months; m++) head += '<th>M'+m+'</th>';
+  head += '</tr></thead>';
+
+  let body = '<tbody>';
+
+  body += '<tr><td colspan="' + (months+1) + '" class="tablegroup">Overall (all cohorts combined)</td></tr>';
+  allKeys.forEach(ak => {
+    const series = dataFor(ak);
+    body += '<tr class="all-row"><td>' + labelFor(ak) + ' (n=' + nFor(ak) + ')</td>';
+    for (let m=0; m<months; m++){
+      body += '<td>' + series[m].pct.toFixed(1) + '%</td>';
+    }
+    body += '</tr>';
+  });
+
+  cohorts.forEach(cm => {
+    body += '<tr><td>' + MONTH_LABEL[cm] + " '26 (n=" + DATA[cm][0].cohort_size + ')</td>';
+    for (let m=0; m<months; m++){
+      const d = DATA[cm][m];
+      const proj = PROJECTED[cm];
+      if (d){ body += '<td>' + d.pct.toFixed(1) + '%</td>'; continue; }
+      if (proj && proj.m === m){ body += '<td class="prov">' + proj.pct.toFixed(1) + '%</td>'; continue; }
+      body += '<td>&ndash;</td>';
+    }
+    body += '</tr>';
+  });
+
+  body += '<tr><td colspan="' + (months+1) + '" class="tablegroup">Revenue (non-HITS)</td></tr>';
+  revCohorts.forEach(rk => {
+    const series = dataFor(rk);
+    const proj = projFor(rk);
+    body += '<tr><td>' + labelFor(rk) + ' (n=' + series[0].cohort_size + ')</td>';
+    for (let m=0; m<months; m++){
+      const d = series[m];
+      if (d){ body += '<td>' + d.pct.toFixed(1) + '%</td>'; continue; }
+      if (proj && proj.m === m){ body += '<td class="prov">' + proj.pct.toFixed(1) + '%</td>'; continue; }
+      body += '<td>&ndash;</td>';
+    }
+    body += '</tr>';
+  });
+  body += '</tbody>';
+  table.innerHTML = head + body;
+}
+
+function renderOverallTable(key){
+  const series = allSeriesFor(key);
+  const table = document.getElementById('overallTable');
+  let head = '<thead><tr><th>Month</th><th>Cohorts reached</th><th>Sellers reached</th><th>Retained</th><th>Retention %</th></tr></thead>';
+  let body = '<tbody>';
+  series.forEach((p, m) => {
+    body += '<tr><td>M' + m + '</td><td>' + p.cohorts_reach + ' of 7</td><td>' + p.cohort_size + '</td><td>' + p.n_retained + '</td><td>' + p.pct.toFixed(1) + '%</td></tr>';
+  });
+  body += '</tbody>';
+  table.innerHTML = head + body;
+}
+
+document.getElementById('overallToggle').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-team]');
+  if (!btn) return;
+  document.querySelectorAll('#overallToggle button').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+  renderOverallTable(btn.dataset.team);
+});
+
+renderFilters();
+render();
+renderTable();
+renderOverallTable('ALL_HITS');
+window.addEventListener('resize', render);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
+
+document.getElementById('viewToggle').addEventListener('click', (e) => {
+  const chart = document.getElementById('chartView');
+  const tableEl = document.getElementById('tableView');
+  const showingTable = !tableEl.hidden;
+  tableEl.hidden = showingTable;
+  chart.hidden = !showingTable;
+  e.target.textContent = showingTable ? 'Table view' : 'Chart view';
+  e.target.setAttribute('aria-pressed', String(!showingTable));
+});
+
+</script>
+
+</body>
+</html>

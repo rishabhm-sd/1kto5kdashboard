@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>HITS Churn Timing Diagnostic</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root{
+  --bg-canvas:#f4f6f4;
+  --surface:#ffffff;
+  --surface-2:#eef1ef;
+  --border:#dde3e0;
+  --ink-1:#161b19;
+  --ink-2:#4c5854;
+  --ink-3:#828e8a;
+  --accent:#0f6d5c;
+  --accent-ink:#ffffff;
+  --rev:#c0392b;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg-canvas:#0e1210;
+    --surface:#171c1a;
+    --surface-2:#1e2422;
+    --border:#2b322f;
+    --ink-1:#f2f5f3;
+    --ink-2:#bcc7c2;
+    --ink-3:#7d8985;
+    --accent:#3fb69a;
+    --accent-ink:#08110d;
+    --rev:#e0685a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg-canvas:#0e1210;
+  --surface:#171c1a;
+  --surface-2:#1e2422;
+  --border:#2b322f;
+  --ink-1:#f2f5f3;
+  --ink-2:#bcc7c2;
+  --ink-3:#7d8985;
+  --accent:#3fb69a;
+  --accent-ink:#08110d;
+  --rev:#e0685a;
+}
+
+*{box-sizing:border-box;}
+body{background:var(--bg-canvas); color:var(--ink-1); font-family:'IBM Plex Sans',system-ui,sans-serif;}
+.wrap{max-width:1080px; margin:0 auto; padding:40px 24px 72px;}
+
+h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.5rem,2.4vw,2.05rem); letter-spacing:-0.01em; margin:0 0 6px; text-wrap:balance;}
+.subtitle{color:var(--ink-2); font-size:0.98rem; max-width:68ch; line-height:1.5; margin:0 0 22px;}
+
+.defrow{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:32px;}
+.chip{background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-size:0.82rem; color:var(--ink-2); display:flex; flex-direction:column; gap:2px; min-width:160px;}
+.chip b{font-family:'IBM Plex Mono',monospace; color:var(--ink-1); font-size:0.88rem; font-weight:500;}
+
+.panel{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:28px 28px 20px; margin-bottom:20px;}
+.panel-head{display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:16px; flex-wrap:wrap;}
+.panel-title{font-family:'Sora',system-ui,sans-serif; font-weight:600; font-size:1.05rem;}
+.toggle{background:var(--surface-2); border:1px solid var(--border); color:var(--ink-1); font-family:'IBM Plex Sans',sans-serif; font-size:0.82rem; font-weight:500; padding:6px 12px; border-radius:7px; cursor:pointer; transition:background .15s;}
+.toggle:hover{background:var(--border);}
+.toggle:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+.panel-controls{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+.modeToggle{display:flex; gap:6px; background:var(--surface-2); border:1px solid var(--border); border-radius:9px; padding:3px;}
+.mode-btn{background:transparent; border:none; color:var(--ink-2); font-family:'IBM Plex Sans',sans-serif; font-size:0.8rem; font-weight:500; padding:5px 11px; border-radius:6px; cursor:pointer; transition:background .15s,color .15s;}
+.mode-btn:hover{color:var(--ink-1);}
+.mode-btn[data-team="HITS"][aria-pressed="true"]{background:var(--accent); color:var(--accent-ink);}
+.mode-btn[data-team="REV"][aria-pressed="true"]{background:var(--rev); color:#fff;}
+.mode-btn[data-team="ALL"][aria-pressed="true"]{background:var(--ink-1); color:var(--bg-canvas);}
+.mode-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+.chart-scroll{overflow-x:auto;}
+svg{display:block; width:100%; height:auto; font-family:'IBM Plex Mono',monospace;}
+.gridline{stroke:var(--border); stroke-width:1;}
+.axis-label{fill:var(--ink-3); font-size:11px;}
+.axis-label2{fill:var(--ink-3); font-size:9.5px;}
+.axis-title{fill:var(--ink-2); font-size:11.5px; font-family:'IBM Plex Sans',sans-serif;}
+.mark{fill:currentColor;}
+.line{fill:none; stroke:currentColor; stroke-width:2.75; stroke-linecap:round; stroke-linejoin:round;}
+.fillarea{fill:currentColor; opacity:.08;}
+.ptlabel{font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; fill:currentColor;}
+
+#tooltip{position:absolute; pointer-events:none; background:var(--ink-1); color:var(--bg-canvas); border-radius:9px; padding:10px 13px; font-size:0.78rem; line-height:1.5; opacity:0; transition:opacity .1s; box-shadow:0 8px 24px rgba(0,0,0,.22); z-index:5; min-width:190px;}
+#tooltip .tt-row{display:flex; justify-content:space-between; gap:14px; font-family:'IBM Plex Mono',monospace;}
+#tooltip .tt-month{font-family:'IBM Plex Sans',sans-serif; font-weight:600; margin-bottom:5px; color:var(--bg-canvas);}
+#tooltip .tt-dim{color:#9aa39f;}
+
+table{width:100%; border-collapse:collapse; font-size:0.82rem;}
+thead th{text-align:right; font-weight:500; color:var(--ink-2); padding:8px 10px; border-bottom:1px solid var(--border); font-family:'IBM Plex Mono',monospace; white-space:nowrap;}
+thead th:first-child, tbody td:first-child{text-align:left; font-family:'IBM Plex Sans',sans-serif; font-weight:500; color:var(--ink-1);}
+tbody td{text-align:right; padding:7px 10px; font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; border-bottom:1px solid var(--border);}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr.hl td{font-weight:600; background:var(--surface-2);}
+.table-scroll{overflow-x:auto;}
+.table-block + .table-block{margin-top:22px;}
+.table-heading{font-family:'Sora',system-ui,sans-serif; font-weight:600; font-size:0.88rem; color:var(--ink-1); margin:0 0 8px;}
+
+.panel-note{color:var(--ink-2); font-size:0.83rem; line-height:1.5; margin:0 0 16px; max-width:74ch;}
+tbody td.dash{color:var(--ink-3);}
+tbody td.churned-total{font-weight:600; color:var(--ink-1); background:var(--surface-2);}
+thead th.churned-total{color:var(--ink-1);}
+
+footer{color:var(--ink-3); font-size:0.76rem; margin-top:28px; line-height:1.6;}
+</style>
+
+<div class="wrap">
+  <h1>HITS Churn Timing Diagnostic</h1>
+  <p class="subtitle">Of the sellers who have churned so far, how many months into their own HIT lifecycle did it happen? Switch between HITS and Revenue, or show both together &mdash; each point is the share of <em>that team's</em> churns to date that landed in each relative month. A timing distribution, not a retention curve.</p>
+
+  <div class="defrow">
+    <div class="chip">Churn means<b>3+ straight weeks &lt;&#8377;1,000/wk, never resumed</b></div>
+    <div class="chip">Churned so far<b id="churnedChip">78 of 337 sellers</b></div>
+    <div class="chip">Cohorts<b>Feb&ndash;Aug 2026 HIT months</b></div>
+    <div class="chip">M<sub>t</sub> share<b>churns at M<sub>t</sub> &divide; total churned</b></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title" id="chartTitle">Share of HITS churns by month since HIT</div>
+      <div class="panel-controls">
+        <div class="modeToggle" id="teamToggle" role="group" aria-label="Team">
+          <button class="mode-btn" type="button" data-team="HITS" aria-pressed="true">HITS</button>
+          <button class="mode-btn" type="button" data-team="REV" aria-pressed="false">Revenue</button>
+          <button class="mode-btn" type="button" data-team="ALL" aria-pressed="false">Show all</button>
+        </div>
+        <button class="toggle" id="viewToggle" aria-pressed="false">Table view</button>
+      </div>
+    </div>
+
+    <div class="chart-scroll" id="chartView">
+      <svg id="chart" viewBox="0 0 1040 420" role="img" aria-label="Line chart of churn by relative month since HIT, M0 through M6"></svg>
+    </div>
+
+    <div class="table-scroll" id="tableView" hidden></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">Churn by cohort &times; relative month</div>
+      <div class="panel-controls">
+        <div class="modeToggle" id="cohortTeamToggle" role="group" aria-label="Team">
+          <button class="mode-btn" type="button" data-team="HITS" aria-pressed="true">HITS</button>
+          <button class="mode-btn" type="button" data-team="REV" aria-pressed="false">Revenue</button>
+        </div>
+      </div>
+    </div>
+    <p class="panel-note">Each row is one HIT-month cohort. M<sub>t</sub> cells are new churns confirmed <em>in that specific relative month</em> (not cumulative) &mdash; e.g. Feb&ndash;26's row reads total sellers, then how many of them churned at M0, how many more at M1, and so on. A dash means that cohort hasn't lived long enough yet for that month to be observable.</p>
+    <div class="table-scroll" id="cohortTableView"></div>
+  </div>
+
+  <footer>Source: <code>csv_upload.hit_master_data</code> (team = HITS or hit2 = 1, excluding flagged good sellers) joined to weekly ad spend from <code>nushop.gc_view_3</code> via Metabase &mdash; HITSChurn-GCView3, card 14636, for HITS; <code>eligible_sellers</code> (team is null and hit2 is null) via Churn Cohort Matrix Revenue, question 14577, for Revenue &mdash; both on dashboard 928 (Asia/Kolkata calendar), same churn rule and the same relative-month churn counts underlying the companion retention curve's Overall lines. M<sub>t</sub> share = churns whose 3-week slump started in relative month t, summed across every cohort, &divide; total churns observed anywhere in that team's matrix (78 of 337 for HITS, 194 of 659 for Revenue) &mdash; so each team's seven points add up to 100%, and the denominator is churned sellers, not the whole tracked population. Only cohorts old enough to have lived through month t contribute to that point; hover any point for how many cohorts and sellers back it.</footer>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+const M_LABELS = ['M0','M1','M2','M3','M4','M5','M6'];
+
+const TEAMS = {
+  HITS: {
+    label: 'HITS', color: '--accent',
+    sumChurns: [9,30,21,13,5,0,0], totalChurned: 78, totalTracked: 337,
+    cohortsReach: [7,6,5,4,3,2,1], sellersReach: [337,268,208,164,98,39,15]
+  },
+  REV: {
+    label: 'Revenue', color: '--rev',
+    sumChurns: [24,53,45,33,21,13,5], totalChurned: 194, totalTracked: 659,
+    cohortsReach: [7,6,5,4,3,2,1], sellersReach: [659,538,404,305,261,210,111]
+  }
+};
+const COHORT_LABELS_AT = [
+  'all 7: Feb–Aug',
+  '6: Feb–Jul',
+  '5: Feb–Jun',
+  '4: Feb–May',
+  '3: Feb–Apr',
+  '2: Feb–Mar',
+  '1: Feb only'
+];
+function shareFor(t){
+  const spec = TEAMS[t];
+  return spec.sumChurns.map(v => Math.round(v/spec.totalChurned*1000)/10);
+}
+let team = 'HITS';
+
+// Per-cohort x relative-month churn matrix, oldest cohort first.
+// Each row's m[] holds new (incremental) churns confirmed at that relative month;
+// "reached" is how many of the 7 M-columns that cohort has lived long enough to observe.
+const COHORT_MATRIX = {
+  HITS: [
+    { label: 'Feb-26', total: 15, m: [0,2,2,2,1,0,0], reached: 7 },
+    { label: 'Mar-26', total: 24, m: [2,2,3,3,0,0,0], reached: 6 },
+    { label: 'Apr-26', total: 59, m: [1,9,8,4,4,0,0], reached: 5 },
+    { label: 'May-26', total: 66, m: [0,9,6,4,0,0,0], reached: 4 },
+    { label: 'Jun-26', total: 44, m: [3,5,2,0,0,0,0], reached: 3 },
+    { label: 'Jul-26', total: 60, m: [2,3,0,0,0,0,0], reached: 2 },
+    { label: 'Aug-26', total: 69, m: [1,0,0,0,0,0,0], reached: 1 }
+  ],
+  REV: [
+    { label: 'Feb-26', total: 111, m: [4,17,13,11,8,6,5], reached: 7 },
+    { label: 'Mar-26', total: 99,  m: [6,3,11,12,9,7,0], reached: 6 },
+    { label: 'Apr-26', total: 51,  m: [0,5,11,8,4,0,0],  reached: 5 },
+    { label: 'May-26', total: 44,  m: [1,7,5,2,0,0,0],   reached: 4 },
+    { label: 'Jun-26', total: 99,  m: [6,12,5,0,0,0,0],  reached: 3 },
+    { label: 'Jul-26', total: 134, m: [5,9,0,0,0,0,0],   reached: 2 },
+    { label: 'Aug-26', total: 121, m: [2,0,0,0,0,0,0],   reached: 1 }
+  ]
+};
+let cohortTeam = 'HITS';
+
+const W = 1040, H = 420;
+const M = {top: 24, right: 40, bottom: 56, left: 46};
+const plotW = W - M.left - M.right;
+const plotH = H - M.top - M.bottom;
+const months = 7;
+const yMax = 45, gridStep = 10;
+function xOf(m){ return M.left + (plotW * m) / (months - 1); }
+function yOf(v){ return M.top + plotH * (1 - v/yMax); }
+
+const svg = document.getElementById('chart');
+const ns = 'http://www.w3.org/2000/svg';
+function el(tag, attrs){
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+function render(){
+  svg.innerHTML = '';
+  const isAll = team === 'ALL';
+  const activeTeams = isAll ? ['HITS', 'REV'] : [team];
+  const refSpec = TEAMS[isAll ? 'HITS' : team];
+
+  svg.setAttribute('aria-label', isAll
+    ? 'Line chart comparing the share of HITS and Revenue churns at each relative month since HIT, M0 through M6'
+    : 'Line chart of the share of ' + refSpec.label + ' churns that occurred at each relative month since HIT, M0 through M6');
+
+  for (let p = 0; p <= yMax; p += gridStep){
+    const y = yOf(p);
+    svg.appendChild(el('line', {x1:M.left, x2:W-M.right, y1:y, y2:y, class:'gridline'}));
+    const t = el('text', {x:M.left-10, y:y+4, class:'axis-label', 'text-anchor':'end'});
+    t.textContent = p + '%';
+    svg.appendChild(t);
+  }
+  for (let m = 0; m < months; m++){
+    const x = xOf(m);
+    const t = el('text', {x:x, y:H-M.bottom+22, class:'axis-label', 'text-anchor':'middle'});
+    t.textContent = M_LABELS[m];
+    svg.appendChild(t);
+    const t2 = el('text', {x:x, y:H-M.bottom+36, class:'axis-label2', 'text-anchor':'middle'});
+    t2.textContent = 'n=' + refSpec.cohortsReach[m] + ' cohorts';
+    svg.appendChild(t2);
+  }
+  const axisTitle = el('text', {x:M.left, y:H-8, class:'axis-title'});
+  axisTitle.textContent = 'Calendar months since HIT (M0 = HIT month itself) →';
+  svg.appendChild(axisTitle);
+
+  activeTeams.forEach(teamKey => {
+    const spec = TEAMS[teamKey];
+    const share = shareFor(teamKey);
+    const color = cssVar(spec.color);
+    const pts = share.map((v,m) => ({x:xOf(m), y:yOf(v), m, v}));
+
+    if (!isAll){
+      // shaded area under the curve -- single-team view only
+      let areaD = 'M ' + pts[0].x + ' ' + yOf(0);
+      pts.forEach(p => { areaD += ' L ' + p.x + ' ' + p.y; });
+      areaD += ' L ' + pts[pts.length-1].x + ' ' + yOf(0) + ' Z';
+      svg.appendChild(el('path', {d: areaD, class:'fillarea', style:'color:' + color}));
+    }
+
+    // straight-segment line (no smoothing -- this is a distribution, not a trend)
+    let lineD = 'M ' + pts[0].x + ' ' + pts[0].y;
+    for (let i=1;i<pts.length;i++){ lineD += ' L ' + pts[i].x + ' ' + pts[i].y; }
+    svg.appendChild(el('path', {d: lineD, class:'line', style:'color:' + color}));
+
+    pts.forEach(p => {
+      svg.appendChild(el('circle', {cx:p.x, cy:p.y, r:5.5, class:'mark', style:'color:' + color}));
+      if (!isAll){
+        const label = el('text', {x:p.x, y:p.y-14, class:'ptlabel', 'text-anchor':'middle', style:'color:' + color});
+        label.textContent = p.v.toFixed(1) + '%';
+        svg.appendChild(label);
+      }
+      const hit = el('circle', {cx:p.x, cy:p.y, r:14, fill:'transparent', style:'cursor:pointer'});
+      hit.addEventListener('mousemove', (e)=>showTip(e, p.m, teamKey));
+      hit.addEventListener('mouseleave', hideTip);
+      svg.appendChild(hit);
+    });
+  });
+
+  if (isAll){
+    const legendY = M.top + 8;
+    const lx = W - M.right - 138;
+    ['HITS', 'REV'].forEach((teamKey, i) => {
+      const spec = TEAMS[teamKey];
+      const color = cssVar(spec.color);
+      const gx = lx + i * 76;
+      svg.appendChild(el('rect', {x:gx, y:legendY-8, width:10, height:10, rx:2, fill:color}));
+      const t = el('text', {x:gx+15, y:legendY+1, class:'axis-label', 'text-anchor':'start'});
+      t.textContent = spec.label;
+      svg.appendChild(t);
+    });
+  }
+}
+
+function showTip(e, m, teamKeyArg){
+  const teamKey = teamKeyArg || team;
+  const spec = TEAMS[teamKey];
+  const share = shareFor(teamKey);
+  const tip = document.getElementById('tooltip');
+  let html = '<div class="tt-month">' + M_LABELS[m] + ' &middot; ' + spec.label + '</div>';
+  html += '<div class="tt-row"><span>Share of all churns</span><span>' + share[m].toFixed(1) + '%</span></div>';
+  html += '<div class="tt-row"><span>Churns at this month</span><span>' + spec.sumChurns[m] + ' of ' + spec.totalChurned + '</span></div>';
+  html += '<div class="tt-row tt-dim"><span>Cohorts old enough</span><span>' + COHORT_LABELS_AT[m] + '</span></div>';
+  html += '<div class="tt-row tt-dim"><span>Sellers those cohorts cover</span><span>' + spec.sellersReach[m] + '</span></div>';
+  tip.innerHTML = html;
+  tip.style.opacity = 1;
+  const rect = svg.getBoundingClientRect();
+  const scale = rect.width / W;
+  tip.style.left = (rect.left + window.scrollX + xOf(m)*scale + 14) + 'px';
+  tip.style.top = (rect.top + window.scrollY + 20) + 'px';
+}
+function hideTip(){
+  document.getElementById('tooltip').style.opacity = 0;
+}
+
+function tableHtmlFor(teamKey, withHeading){
+  const spec = TEAMS[teamKey];
+  const share = shareFor(teamKey);
+  let head = '<thead><tr><th>Metric</th>';
+  M_LABELS.forEach(l => head += '<th>' + l + '</th>');
+  head += '</tr></thead>';
+
+  let body = '<tbody>';
+  body += '<tr class="hl"><td>Share of all churns</td>';
+  share.forEach(v => body += '<td>' + v.toFixed(1) + '%</td>');
+  body += '</tr>';
+  body += '<tr><td>Churns at this month</td>';
+  spec.sumChurns.forEach(v => body += '<td>' + v + '</td>');
+  body += '</tr>';
+  body += '<tr><td>Cohorts old enough to reach it</td>';
+  spec.cohortsReach.forEach(v => body += '<td>' + v + '</td>');
+  body += '</tr>';
+  body += '<tr><td>Sellers those cohorts cover</td>';
+  spec.sellersReach.forEach(v => body += '<td>' + v + '</td>');
+  body += '</tr>';
+  body += '</tbody>';
+
+  const heading = withHeading ? '<div class="table-heading">' + spec.label + '</div>' : '';
+  return '<div class="table-block">' + heading + '<table>' + head + body + '</table></div>';
+}
+
+function renderTable(){
+  const tableView = document.getElementById('tableView');
+  if (team === 'ALL'){
+    tableView.innerHTML = tableHtmlFor('HITS', true) + tableHtmlFor('REV', true);
+  } else {
+    tableView.innerHTML = tableHtmlFor(team, false);
+  }
+}
+
+function renderCohortTable(){
+  const rows = COHORT_MATRIX[cohortTeam];
+  const container = document.getElementById('cohortTableView');
+  let head = '<thead><tr><th>Cohort</th><th>Total</th>';
+  M_LABELS.forEach(l => head += '<th>' + l + '</th>');
+  head += '<th class="churned-total">Churned so far</th></tr></thead>';
+
+  let body = '<tbody>';
+  rows.forEach(row => {
+    const churnedSoFar = row.m.reduce((a,b) => a+b, 0);
+    body += '<tr><td>' + row.label + '</td><td>' + row.total + '</td>';
+    row.m.forEach((v, i) => {
+      if (i < row.reached){
+        body += '<td>' + v + '</td>';
+      } else {
+        body += '<td class="dash">&ndash;</td>';
+      }
+    });
+    body += '<td class="churned-total">' + churnedSoFar + '</td>';
+    body += '</tr>';
+  });
+  body += '</tbody>';
+  container.innerHTML = '<table>' + head + body + '</table>';
+}
+
+document.getElementById('cohortTeamToggle').addEventListener('click', (e) => {
+  const btn = e.target.closest('.mode-btn');
+  if (!btn) return;
+  cohortTeam = btn.dataset.team;
+  document.querySelectorAll('#cohortTeamToggle .mode-btn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.team === cohortTeam)));
+  renderCohortTable();
+});
+renderCohortTable();
+
+function setTeam(newTeam){
+  team = newTeam;
+  if (team === 'ALL'){
+    document.getElementById('chartTitle').textContent = 'Share of churns by month since HIT — HITS vs Revenue';
+    document.getElementById('churnedChip').textContent = '78 of 337 (HITS) · 194 of 659 (Revenue)';
+  } else {
+    const spec = TEAMS[team];
+    document.getElementById('chartTitle').textContent = 'Share of ' + spec.label + ' churns by month since HIT';
+    document.getElementById('churnedChip').textContent = spec.totalChurned + ' of ' + spec.totalTracked + ' sellers';
+  }
+  document.querySelectorAll('#teamToggle .mode-btn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.team === team)));
+  render();
+  renderTable();
+}
+
+document.getElementById('teamToggle').addEventListener('click', (e) => {
+  const btn = e.target.closest('.mode-btn');
+  if (!btn) return;
+  setTeam(btn.dataset.team);
+});
+
+render();
+renderTable();
+window.addEventListener('resize', render);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
+
+document.getElementById('viewToggle').addEventListener('click', (e) => {
+  const chart = document.getElementById('chartView');
+  const tableEl = document.getElementById('tableView');
+  const showingTable = !tableEl.hidden;
+  tableEl.hidden = showingTable;
+  chart.hidden = !showingTable;
+  e.target.textContent = showingTable ? 'Table view' : 'Chart view';
+  e.target.setAttribute('aria-pressed', String(!showingTable));
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HITS Retention Dashboards</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root{
+  --bg-canvas:#f4f6f4;
+  --surface:#ffffff;
+  --surface-2:#eef1ef;
+  --border:#dde3e0;
+  --ink-1:#161b19;
+  --ink-2:#4c5854;
+  --ink-3:#828e8a;
+  --accent:#0f6d5c;
+  --accent-ink:#ffffff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg-canvas:#0e1210;
+    --surface:#171c1a;
+    --surface-2:#1e2422;
+    --border:#2b322f;
+    --ink-1:#f2f5f3;
+    --ink-2:#bcc7c2;
+    --ink-3:#7d8985;
+    --accent:#3fb69a;
+    --accent-ink:#08110d;
+  }
+}
+:root[data-theme="dark"]{
+  --bg-canvas:#0e1210;
+  --surface:#171c1a;
+  --surface-2:#1e2422;
+  --border:#2b322f;
+  --ink-1:#f2f5f3;
+  --ink-2:#bcc7c2;
+  --ink-3:#7d8985;
+  --accent:#3fb69a;
+  --accent-ink:#08110d;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0; padding:0;}
+body{background:var(--bg-canvas); color:var(--ink-1); font-family:'IBM Plex Sans',system-ui,sans-serif;}
+
+header{max-width:1200px; margin:0 auto; padding:32px 24px 0;}
+h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.4rem,2.2vw,1.9rem); letter-spacing:-0.01em; margin:0 0 4px;}
+.subtitle{color:var(--ink-2); font-size:0.92rem; margin:0 0 20px; max-width:70ch; line-height:1.5;}
+
+.tabbar{display:flex; gap:6px; border-bottom:1px solid var(--border); padding:0 0 0;}
+.tabbar button{
+  appearance:none; background:transparent; border:none; cursor:pointer;
+  font-family:'IBM Plex Sans',sans-serif; font-size:0.88rem; font-weight:500;
+  color:var(--ink-2); padding:10px 16px 12px; border-bottom:2.5px solid transparent;
+  margin-bottom:-1px; transition:color .15s, border-color .15s;
+}
+.tabbar button:hover{color:var(--ink-1);}
+.tabbar button[aria-selected="true"]{color:var(--accent); border-bottom-color:var(--accent); font-weight:600;}
+.tabbar button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+main{max-width:1200px; margin:0 auto; padding:0 24px 48px;}
+.frame-wrap{position:relative;}
+iframe{
+  display:none; width:100%; border:0; background:var(--surface);
+  border-radius:0 0 14px 14px;
+}
+iframe.active{display:block;}
+.loading{color:var(--ink-3); font-size:0.85rem; padding:40px 0; text-align:center; font-family:'IBM Plex Mono',monospace;}
+
+footer{max-width:1200px; margin:0 auto; padding:8px 24px 40px; color:var(--ink-3); font-size:0.74rem; line-height:1.6;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>HITS Retention Dashboards</h1>
+  <p class="subtitle">Three live views of HIT-seller churn and retention &mdash; pick a tab. Each one keeps its own filters and toggle state while you switch away and back.</p>
+  <div class="tabbar" id="tabbar" role="tablist" aria-label="Dashboard">
+    <button type="button" role="tab" data-target="frame-retention" aria-selected="true">Churn-Cohort Retention</button>
+    <button type="button" role="tab" data-target="frame-3k" aria-selected="false">1-5K 3K Retention</button>
+    <button type="button" role="tab" data-target="frame-timing" aria-selected="false">Churn Timing Diagnostic</button>
+  </div>
+</header>
+
+<main>
+  <div class="frame-wrap">
+    <iframe id="frame-retention" class="active" src="retention.html" title="HITS Churn-Cohort Retention"></iframe>
+    <iframe id="frame-3k" src="retention-3k.html" title="1-5K 3K Retention"></iframe>
+    <iframe id="frame-timing" src="timing.html" title="HITS Churn Timing Diagnostic"></iframe>
+  </div>
+</main>
+
+<footer>Each tab loads its own page (retention.html, retention-3k.html, timing.html) inside this shell &mdash; open any of them directly if you just need one. Built for Blitzscale · ShopDeck HITS &amp; Revenue seller cohorts.</footer>
+
+<script>
+const tabbar = document.getElementById('tabbar');
+const buttons = Array.from(tabbar.querySelectorAll('button[role="tab"]'));
+const frames = Array.from(document.querySelectorAll('iframe'));
+
+function selectTab(targetId){
+  buttons.forEach(b => b.setAttribute('aria-selected', String(b.dataset.target === targetId)));
+  frames.forEach(f => f.classList.toggle('active', f.id === targetId));
+  const active = document.getElementById(targetId);
+  if (active) fitIframe(active);
+}
+
+tabbar.addEventListener('click', (e) => {
+  const btn = e.target.closest('button[role="tab"]');
+  if (!btn) return;
+  selectTab(btn.dataset.target);
+});
+
+// Same-origin iframes (served from the same domain) let us read the child
+// document's height directly and size the iframe to match, so each dashboard
+// renders without its own inner scrollbar and the shell page scrolls once.
+function fitIframe(iframe){
+  try {
+    const doc = iframe.contentDocument;
+    if (!doc || !doc.body) return;
+    const h = Math.max(doc.documentElement.scrollHeight, doc.body.scrollHeight);
+    if (h > 0) iframe.style.height = h + 'px';
+  } catch (err) {
+    // Cross-origin (e.g. opened via file:// in a browser that blocks it) --
+    // fall back to a generous fixed height so the page is still usable.
+    iframe.style.height = '1600px';
+  }
+}
+
+frames.forEach(iframe => {
+  iframe.addEventListener('load', () => {
+    try {
+      // Trim each dashboard's own top padding slightly so it sits closer
+      // under the shell's tab bar instead of stacking two page-paddings.
+      const doc = iframe.contentDocument;
+      const wrap = doc && doc.querySelector('.wrap');
+      if (wrap) wrap.style.paddingTop = '18px';
+    } catch (err) { /* cross-origin, ignore */ }
+    fitIframe(iframe);
+    try {
+      const doc = iframe.contentDocument;
+      if (doc && doc.body && 'ResizeObserver' in window){
+        const ro = new ResizeObserver(() => fitIframe(iframe));
+        ro.observe(doc.body);
+      }
+    } catch (err) { /* cross-origin, ignore */ }
+  });
+});
+
+window.addEventListener('resize', () => {
+  const activeFrame = frames.find(f => f.classList.contains('active'));
+  if (activeFrame) fitIframe(activeFrame);
+});
+</script>
+
+</body>
+</html>
