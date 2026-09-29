@@ -90,17 +90,61 @@ thead tr#filterRow th{
   background:var(--surface); padding:4px 6px; cursor:default;
   border-bottom:1px solid var(--border);
 }
-thead tr#filterRow input{
-  width:100%; min-width:80px; box-sizing:border-box; background:var(--surface-2); border:1px solid var(--border);
-  border-radius:6px; padding:4px 7px; font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--ink-1);
+.colfilter-btn{
+  width:100%; min-width:90px; box-sizing:border-box; background:var(--surface-2); border:1px solid var(--border);
+  border-radius:6px; padding:4px 8px; font-family:'IBM Plex Sans',sans-serif; font-size:0.72rem; color:var(--ink-2);
+  cursor:pointer; text-align:left; display:flex; align-items:center; justify-content:space-between; gap:4px;
 }
-thead tr#filterRow input:focus-visible{outline:2px solid var(--accent); outline-offset:1px;}
+.colfilter-btn:hover{background:var(--border); color:var(--ink-1);}
+.colfilter-btn.active{border-color:var(--accent); color:var(--ink-1); font-weight:600;}
+.colfilter-btn .caret{font-size:0.6rem; color:var(--ink-3); flex:0 0 auto;}
 tbody td{padding:9px 12px; border-bottom:1px solid var(--border); color:var(--ink-2); font-family:'IBM Plex Mono',monospace; font-size:0.8rem;}
 tbody tr:last-child td{border-bottom:none;}
-tbody tr:hover{background:var(--surface-2);}
+tbody tr:hover{background:var(--surface-2); cursor:pointer;}
 
 .emptystate{padding:48px 24px; text-align:center; color:var(--ink-2);}
 .emptystate p{margin:0 auto 4px; max-width:56ch; line-height:1.6; font-size:0.92rem;}
+
+/* ---- column-filter popover (Google-Sheets-style multi-select) ---- */
+.popover{
+  position:fixed; z-index:50; background:var(--surface); border:1px solid var(--border); border-radius:10px;
+  box-shadow:0 12px 32px rgba(0,0,0,.18); padding:8px; min-width:200px; max-width:280px;
+}
+.popover-actions{display:flex; gap:10px; padding:2px 6px 8px; border-bottom:1px solid var(--border); margin-bottom:6px;}
+.popover-action{background:none; border:none; color:var(--accent); font-family:'IBM Plex Sans',sans-serif; font-size:0.76rem; font-weight:600; cursor:pointer; padding:0;}
+.popover-action:hover{text-decoration:underline;}
+.popover-list{max-height:260px; overflow-y:auto; display:flex; flex-direction:column; gap:1px;}
+.popover-item{
+  display:flex; align-items:center; gap:7px; padding:5px 6px; border-radius:6px; cursor:pointer;
+  font-family:'IBM Plex Sans',sans-serif; font-size:0.78rem; color:var(--ink-1);
+}
+.popover-item:hover{background:var(--surface-2);}
+.popover-item input{flex:0 0 auto; cursor:pointer;}
+.popover-item span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+
+/* ---- seller detail modal ---- */
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(10,14,12,.45); z-index:60;
+  display:flex; align-items:center; justify-content:center; padding:20px;
+}
+.modal{
+  background:var(--surface); border-radius:14px; border:1px solid var(--border); box-shadow:0 24px 60px rgba(0,0,0,.28);
+  width:100%; max-width:440px; max-height:86vh; overflow:auto;
+}
+.modal-head{
+  display:flex; align-items:baseline; justify-content:space-between; gap:12px; padding:18px 20px 12px;
+  border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--surface);
+}
+.modal-title{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:1.05rem; color:var(--ink-1);}
+.modal-close{
+  background:none; border:none; color:var(--ink-3); font-size:1.4rem; line-height:1; cursor:pointer; padding:0 2px;
+}
+.modal-close:hover{color:var(--ink-1);}
+.modal-body{padding:6px 20px 20px;}
+.modal-row{display:flex; justify-content:space-between; gap:16px; padding:11px 0; border-bottom:1px solid var(--border);}
+.modal-row:last-child{border-bottom:none;}
+.modal-label{color:var(--ink-3); font-family:'IBM Plex Sans',sans-serif; font-size:0.82rem; flex:0 0 auto;}
+.modal-value{color:var(--ink-1); font-family:'IBM Plex Mono',monospace; font-size:0.85rem; text-align:right; word-break:break-word;}
 </style>
 <div class="wrap">
   <h1>1K-5K Hypercare &mdash; All sellers</h1>
@@ -131,6 +175,23 @@ tbody tr:hover{background:var(--surface-2);}
       <p><b>No seller data loaded yet.</b> The 28 columns below are wired up and ready &mdash; once seller-level rows are provided (Metabase export, CSV, or pasted data), this table will populate, and search + click-to-sort on every column will work immediately.</p>
     </div>
   </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTitle"></div>
+      <button type="button" class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+<div id="filterPopover" class="popover" hidden>
+  <div class="popover-actions">
+    <button type="button" class="popover-action" id="popoverSelectAll">Select all</button>
+    <button type="button" class="popover-action" id="popoverClear">Clear</button>
+  </div>
+  <div class="popover-list" id="popoverList"></div>
 </div>
 <script>
 // ---- column schema (confirmed) ----
@@ -281,12 +342,35 @@ const clearFiltersBtn = document.getElementById('clearFilters');
 const rowcountEl = document.getElementById('rowcount');
 const emptyState = document.getElementById('emptyState');
 const tableEl = document.getElementById('dataTable');
+const modalOverlay = document.getElementById('modalOverlay');
+const modalTitle = document.getElementById('modalTitle');
+const modalBody = document.getElementById('modalBody');
+const modalClose = document.getElementById('modalClose');
+const popoverEl = document.getElementById('filterPopover');
+const popoverListEl = document.getElementById('popoverList');
+const popoverSelectAllBtn = document.getElementById('popoverSelectAll');
+const popoverClearBtn = document.getElementById('popoverClear');
 
 let sortKey = null;
 let sortDir = 1;
 
-// Per-column free-text filters (key -> lowercase substring to match).
-const colFilters = {};
+// Per-column multi-select filters (key -> Set of allowed value-strings).
+// A key with no entry means "no filter" (everything shown) for that column.
+const colFilterValues = {};
+
+// Columns that only show up in the seller-detail modal (opened by clicking a
+// row) -- removed from the main table entirely.
+const DETAIL_KEYS = ['l1_category', 'date_of_handover', 'date_of_hc_handover', 'lifetime_spend', 'lifetime_pq', 'ad_account_no'];
+const DETAIL_LABELS = {};
+COLUMNS.forEach(c => { if (DETAIL_KEYS.includes(c.key)) DETAIL_LABELS[c.key] = c.label; });
+
+// Columns hidden from the main table while at least one GL chip is active
+// (redundant once you've filtered down to specific GL(s)).
+const GL_HIDE_KEYS = ['gl_name', 'gm_name'];
+
+function visibleColumns(){
+  return COLUMNS.filter(c => !DETAIL_KEYS.includes(c.key) && !(activeGL.size && GL_HIDE_KEYS.includes(c.key)));
+}
 
 // GL toggle chips: empty set = show every GL; one or more active = only
 // those GLs' sellers. Built from whatever gl_name values actually appear in
@@ -305,15 +389,104 @@ function buildGLChips(){
     btn.addEventListener('click', () => {
       if (activeGL.has(name)) activeGL.delete(name); else activeGL.add(name);
       btn.setAttribute('aria-pressed', String(activeGL.has(name)));
+      closePopover();
+      buildHead(); // gl_name/gm_name columns appear or disappear with the toggle
       render();
     });
     glChipsEl.appendChild(btn);
   });
 }
 
+function valueToFilterString(v){
+  return (v === null || v === undefined || v === '') ? '__BLANK__' : String(v);
+}
+
+function distinctValuesFor(key){
+  const vals = new Set(DATA.map(r => valueToFilterString(r[key])));
+  const arr = [...vals];
+  arr.sort((a, b) => {
+    if (a === '__BLANK__') return 1;
+    if (b === '__BLANK__') return -1;
+    return a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'});
+  });
+  return arr;
+}
+
+let popoverKey = null;
+let currentFilterBtn = null;
+
+function updateFilterBtnState(){
+  if (currentFilterBtn) currentFilterBtn.classList.toggle('active', !!colFilterValues[popoverKey]);
+}
+
+function openPopoverFor(key, btn){
+  popoverKey = key;
+  currentFilterBtn = btn;
+  const all = distinctValuesFor(key);
+  const selected = colFilterValues[key] ? colFilterValues[key] : new Set(all);
+  popoverListEl.innerHTML = '';
+  all.forEach(v => {
+    const item = document.createElement('label');
+    item.className = 'popover-item';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = selected.has(v);
+    cb.addEventListener('change', () => {
+      if (!colFilterValues[key]) colFilterValues[key] = new Set(all);
+      if (cb.checked) colFilterValues[key].add(v); else colFilterValues[key].delete(v);
+      if (colFilterValues[key].size === all.length) delete colFilterValues[key];
+      updateFilterBtnState();
+      render();
+    });
+    const span = document.createElement('span');
+    span.textContent = v === '__BLANK__' ? '(Blanks)' : v;
+    item.appendChild(cb);
+    item.appendChild(span);
+    popoverListEl.appendChild(item);
+  });
+  const rect = btn.getBoundingClientRect();
+  popoverEl.hidden = false;
+  const top = Math.min(rect.bottom + 4, window.innerHeight - 60);
+  const left = Math.min(rect.left, window.innerWidth - 292);
+  popoverEl.style.top = top + 'px';
+  popoverEl.style.left = Math.max(8, left) + 'px';
+}
+
+function closePopover(){
+  popoverKey = null;
+  currentFilterBtn = null;
+  popoverEl.hidden = true;
+}
+
+popoverSelectAllBtn.addEventListener('click', () => {
+  if (!popoverKey) return;
+  delete colFilterValues[popoverKey];
+  const key = popoverKey, btn = currentFilterBtn;
+  openPopoverFor(key, btn);
+  updateFilterBtnState();
+  render();
+});
+popoverClearBtn.addEventListener('click', () => {
+  if (!popoverKey) return;
+  colFilterValues[popoverKey] = new Set();
+  const key = popoverKey, btn = currentFilterBtn;
+  openPopoverFor(key, btn);
+  updateFilterBtnState();
+  render();
+});
+popoverEl.addEventListener('click', (e) => e.stopPropagation());
+document.addEventListener('click', (e) => {
+  if (popoverEl.hidden) return;
+  if (e.target.closest && e.target.closest('.colfilter-btn')) return;
+  closePopover();
+});
+window.addEventListener('scroll', () => closePopover(), true);
+
 function buildHead(){
+  const cols = visibleColumns();
+
   headRow.innerHTML = '';
-  COLUMNS.forEach(col => {
+  cols.forEach(col => {
     const th = document.createElement('th');
     th.textContent = col.label + ' ';
     const arrow = document.createElement('span');
@@ -328,30 +501,63 @@ function buildHead(){
   });
 
   filterRow.innerHTML = '';
-  COLUMNS.forEach(col => {
+  cols.forEach(col => {
     const th = document.createElement('th');
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.placeholder = 'Filter…';
-    input.setAttribute('aria-label', 'Filter ' + col.label);
-    input.value = colFilters[col.key] || '';
-    input.addEventListener('click', (e) => e.stopPropagation());
-    input.addEventListener('input', () => {
-      const v = input.value.trim().toLowerCase();
-      if (v) colFilters[col.key] = v; else delete colFilters[col.key];
-      render();
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'colfilter-btn' + (colFilterValues[col.key] ? ' active' : '');
+    const label = document.createElement('span');
+    label.textContent = 'Filter';
+    const caret = document.createElement('span');
+    caret.className = 'caret';
+    caret.textContent = '▾';
+    btn.appendChild(label);
+    btn.appendChild(caret);
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (popoverKey === col.key && !popoverEl.hidden){ closePopover(); return; }
+      openPopoverFor(col.key, btn);
     });
-    th.appendChild(input);
+    th.appendChild(btn);
     filterRow.appendChild(th);
   });
 }
 
+function openSellerModal(r){
+  modalTitle.textContent = r.seller_name || r.seller_id;
+  modalBody.innerHTML = '';
+  DETAIL_KEYS.forEach(key => {
+    const row = document.createElement('div');
+    row.className = 'modal-row';
+    const label = document.createElement('div');
+    label.className = 'modal-label';
+    label.textContent = DETAIL_LABELS[key] || key;
+    const value = document.createElement('div');
+    value.className = 'modal-value';
+    const v = r[key];
+    value.textContent = (v === null || v === undefined || v === '') ? '—' : v;
+    row.appendChild(label);
+    row.appendChild(value);
+    modalBody.appendChild(row);
+  });
+  modalOverlay.hidden = false;
+}
+
+function closeModal(){ modalOverlay.hidden = true; }
+modalClose.addEventListener('click', closeModal);
+modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape'){ closeModal(); closePopover(); }
+});
+
 function render(){
   let rows = DATA.filter(r => {
     if (activeGL.size && !activeGL.has(r.gl_name)) return false;
-    return Object.keys(colFilters).every(key =>
-      String(r[key] ?? '').toLowerCase().includes(colFilters[key])
-    );
+    return Object.keys(colFilterValues).every(key => {
+      const set = colFilterValues[key];
+      if (!set) return true;
+      return set.has(valueToFilterString(r[key]));
+    });
   });
   if (sortKey){
     rows = rows.slice().sort((a,b) => {
@@ -366,14 +572,16 @@ function render(){
       return cmp * sortDir;
     });
   }
+  const cols = visibleColumns();
   bodyRows.innerHTML = '';
   rows.forEach(r => {
     const tr = document.createElement('tr');
-    COLUMNS.forEach(c => {
+    cols.forEach(c => {
       const td = document.createElement('td');
       td.textContent = r[c.key] ?? '';
       tr.appendChild(td);
     });
+    tr.addEventListener('click', () => openSellerModal(r));
     bodyRows.appendChild(tr);
   });
   rowcountEl.textContent = rows.length + (rows.length === 1 ? ' seller' : ' sellers') +
@@ -384,8 +592,9 @@ function render(){
 }
 
 clearFiltersBtn.addEventListener('click', () => {
-  Object.keys(colFilters).forEach(k => delete colFilters[k]);
-  filterRow.querySelectorAll('input').forEach(inp => inp.value = '');
+  Object.keys(colFilterValues).forEach(k => delete colFilterValues[k]);
+  closePopover();
+  buildHead();
   render();
 });
 
