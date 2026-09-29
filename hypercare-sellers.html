@@ -111,7 +111,7 @@ tbody tr:hover{background:var(--surface-2);}
       </table>
     </div>
     <div class="emptystate" id="emptyState">
-      <p><b>No seller data loaded yet.</b> The 25 columns below are wired up and ready &mdash; once seller-level rows are provided (Metabase export, CSV, or pasted data), this table will populate, and search + click-to-sort on every column will work immediately.</p>
+      <p><b>No seller data loaded yet.</b> The 28 columns below are wired up and ready &mdash; once seller-level rows are provided (Metabase export, CSV, or pasted data), this table will populate, and search + click-to-sort on every column will work immediately.</p>
     </div>
   </div>
 </div>
@@ -144,6 +144,8 @@ const COLUMNS = [
   {key:'ad_account_no', label:'Ad account No.'},
   {key:'last_call_date', label:'Last Call date'},
   {key:'last_call_context', label:'Last Call Context'},
+  {key:'revival_status', label:'Revival Status'},
+  {key:'blocker', label:'Blocker'},
 ];
 
 // ---- data (empty until seller rows are supplied) ----
