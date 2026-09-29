@@ -101,20 +101,20 @@ body{background:var(--bg-canvas); color:var(--ink-1); font-family:'IBM Plex Sans
 .sidebar.collapsed + .content{margin-left:0;}
 
 .topbar{
-  width:100%; margin:0; padding:16px 28px 0;
+  width:100%; margin:0; padding:6px 28px 0;
   display:flex; align-items:flex-start; justify-content:flex-end; gap:16px; flex-wrap:wrap;
 }
 
 .clockblock{text-align:right; flex:0 0 auto; padding-top:2px;}
 .clock{
-  font-family:'IBM Plex Mono',monospace; font-size:1.2rem; font-weight:500; color:var(--ink-1);
+  font-family:'IBM Plex Mono',monospace; font-size:0.3rem; font-weight:500; color:var(--ink-1);
   font-variant-numeric:tabular-nums; letter-spacing:0.02em;
 }
 .updated{font-family:'IBM Plex Sans',sans-serif; font-size:0.74rem; color:var(--ink-3); margin-top:2px;}
 .updated a{color:var(--ink-2); text-decoration:underline; text-underline-offset:2px;}
 .updated a:hover{color:var(--accent);}
 
-main{width:100%; margin:0; padding:12px 28px 48px; flex:1 1 auto;}
+main{width:100%; margin:0; padding:0 28px 48px; flex:1 1 auto;}
 .frame-wrap{position:relative;}
 iframe{
   display:none; width:100%; border:0; background:var(--surface);
@@ -323,7 +323,7 @@ frames.forEach(iframe => {
       // under the shell's header instead of stacking two page-paddings.
       const doc = iframe.contentDocument;
       const wrap = doc && doc.querySelector('.wrap');
-      if (wrap) wrap.style.paddingTop = '18px';
+      if (wrap) wrap.style.paddingTop = '6px';
     } catch (err) { /* cross-origin, ignore */ }
     fitIframe(iframe);
     try {
