@@ -1,10 +1,4 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>1-5K 3K Retention</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
@@ -21,7 +15,7 @@
   --accent-ink:#ffffff;
 
   --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100;
-  --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7;
+  --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7; --s8:#00acc1;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -36,7 +30,7 @@
     --accent-ink:#08110d;
 
     --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
-    --s5:#d55181; --s6:#008300; --s7:#9085e9;
+    --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#26c6da;
   }
 }
 :root[data-theme="dark"]{
@@ -51,7 +45,7 @@
   --accent-ink:#08110d;
 
   --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
-  --s5:#d55181; --s6:#008300; --s7:#9085e9;
+  --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#26c6da;
 }
 
 *{box-sizing:border-box;}
@@ -119,12 +113,12 @@ footer{color:var(--ink-3); font-size:0.76rem; margin-top:28px; line-height:1.6;}
 
 <div class="wrap">
   <h1>1-5K 3K Retention</h1>
-  <p class="subtitle">Weekly spend retention for the same 337-seller HITS population used in the churn-cohort tab &mdash; but a different test: was this seller's marketing spend &#8377;3,000 or more in <em>that specific</em> ISO week (a point-in-time check, not a cumulative churn rule), tracked by relative week since the seller's own HIT month.</p>
+  <p class="subtitle">Weekly spend retention for the same 417-seller HITS population used in the churn-cohort tab &mdash; but a different test: was this seller's marketing spend &#8377;3,000 or more in <em>that specific</em> ISO week (a point-in-time check, not a cumulative churn rule), tracked by relative week since the seller's own HIT month.</p>
 
   <div class="defrow">
     <div class="chip">Retained means<b>&#8377;3,000+ marketing spend that week</b></div>
-    <div class="chip">Cohorts<b>Feb&ndash;Aug 2026 HIT months</b></div>
-    <div class="chip">Sellers tracked<b>337</b></div>
+    <div class="chip">Cohorts<b>Feb&ndash;Sep 2026 HIT months</b></div>
+    <div class="chip">Sellers tracked<b>417</b></div>
     <div class="chip">Week 0<b>the first ISO week of the seller's HIT month</b></div>
   </div>
 
@@ -149,78 +143,35 @@ footer{color:var(--ink-3); font-size:0.76rem; margin-top:28px; line-height:1.6;}
     <div class="panel-head">
       <div class="panel-title">Overall retention &mdash; week-by-week detail</div>
     </div>
-    <p class="subtitle" style="margin:0 0 12px;">The sellers and cohorts behind the bold "Overall" line above. Each week's base is only the sellers whose HIT-month cohort has actually reached that relative week &mdash; not a fixed 337 held constant the whole way, so the base shrinks as the line moves right and only the older cohorts are left contributing.</p>
+    <p class="subtitle" style="margin:0 0 12px;">The sellers and cohorts behind the bold "Overall" line above. Each week's base is only the sellers whose HIT-month cohort has actually reached that relative week &mdash; not a fixed 417 held constant the whole way, so the base shrinks as the line moves right and only the older cohorts are left contributing.</p>
     <div class="table-scroll">
       <table id="overallTable"></table>
     </div>
   </div>
 
-  <footer>Source: <code>csv_upload.hit_master_data</code> (team = HITS or hit2 = 1, excluding flagged good sellers &mdash; the same 337-seller population as the churn-cohort tab) joined to weekly marketing spend from <code>nushop.gc_view_3</code> via Metabase, database 23 (Asia/Kolkata calendar). Cohort = the seller's HIT month; week 0 is the first ISO week (Mon&ndash;Sun) starting on or after the 1st of that month, so every seller in a monthly cohort shares the same week-0 anchor. Retained = that week's marketing spend &#8377;3,000 or more, a point-in-time test &mdash; a seller can drop out one week and come back the next, unlike the 3-consecutive-week churn rule used elsewhere. Only fully-completed ISO weeks are included; the in-progress week is dropped to avoid a false reporting-lag dip. The bold "Overall" line recomputes its base at every point to just the sellers whose cohort has reached that relative week (337&rarr;15 from W0 to W30), rather than holding the denominator fixed. Click any chip above the chart to add or remove that line.</footer>
+  <footer>Source: <code>csv_upload.hit_master_data</code> (team = HITS or hit2 = 1, excluding flagged good sellers &mdash; the same 417-seller population as the churn-cohort tab) joined to weekly marketing spend from <code>nushop.gc_view_3</code> via Metabase, database 23 (Asia/Kolkata calendar). Cohort = the seller's HIT month; week 0 is the first ISO week (Mon&ndash;Sun) starting on or after the 1st of that month, so every seller in a monthly cohort shares the same week-0 anchor. Retained = that week's marketing spend &#8377;3,000 or more, a point-in-time test &mdash; a seller can drop out one week and come back the next, unlike the 3-consecutive-week churn rule used elsewhere. Only fully-completed ISO weeks are included; the in-progress week is dropped to avoid a false reporting-lag dip. The bold "Overall" line recomputes its base at every point to just the sellers whose cohort has reached that relative week (417&rarr;15 from W0 to W34), rather than holding the denominator fixed. Click any chip above the chart to add or remove that line.</footer>
 </div>
 
 <div id="tooltip"></div>
 
 <script>
-const DATA = {
-  "2026-02": [
-    {"pct":73.3,"n_retained":11,"cohort_size":15},{"pct":93.3,"n_retained":14,"cohort_size":15},{"pct":100,"n_retained":15,"cohort_size":15},{"pct":93.3,"n_retained":14,"cohort_size":15},{"pct":100,"n_retained":15,"cohort_size":15},
-    {"pct":80,"n_retained":12,"cohort_size":15},{"pct":86.7,"n_retained":13,"cohort_size":15},{"pct":73.3,"n_retained":11,"cohort_size":15},{"pct":73.3,"n_retained":11,"cohort_size":15},{"pct":73.3,"n_retained":11,"cohort_size":15},
-    {"pct":73.3,"n_retained":11,"cohort_size":15},{"pct":66.7,"n_retained":10,"cohort_size":15},{"pct":80,"n_retained":12,"cohort_size":15},{"pct":53.3,"n_retained":8,"cohort_size":15},{"pct":53.3,"n_retained":8,"cohort_size":15},
-    {"pct":60,"n_retained":9,"cohort_size":15},{"pct":46.7,"n_retained":7,"cohort_size":15},{"pct":40,"n_retained":6,"cohort_size":15},{"pct":46.7,"n_retained":7,"cohort_size":15},{"pct":46.7,"n_retained":7,"cohort_size":15},
-    {"pct":46.7,"n_retained":7,"cohort_size":15},{"pct":40,"n_retained":6,"cohort_size":15},{"pct":46.7,"n_retained":7,"cohort_size":15},{"pct":40,"n_retained":6,"cohort_size":15},{"pct":33.3,"n_retained":5,"cohort_size":15},
-    {"pct":33.3,"n_retained":5,"cohort_size":15},{"pct":40,"n_retained":6,"cohort_size":15},{"pct":40,"n_retained":6,"cohort_size":15},{"pct":40,"n_retained":6,"cohort_size":15},{"pct":40,"n_retained":6,"cohort_size":15},
-    {"pct":33.3,"n_retained":5,"cohort_size":15}
-  ],
-  "2026-03": [
-    {"pct":95.8,"n_retained":23,"cohort_size":24},{"pct":87.5,"n_retained":21,"cohort_size":24},{"pct":95.8,"n_retained":23,"cohort_size":24},{"pct":91.7,"n_retained":22,"cohort_size":24},{"pct":87.5,"n_retained":21,"cohort_size":24},
-    {"pct":83.3,"n_retained":20,"cohort_size":24},{"pct":70.8,"n_retained":17,"cohort_size":24},{"pct":75,"n_retained":18,"cohort_size":24},{"pct":75,"n_retained":18,"cohort_size":24},{"pct":66.7,"n_retained":16,"cohort_size":24},
-    {"pct":50,"n_retained":12,"cohort_size":24},{"pct":54.2,"n_retained":13,"cohort_size":24},{"pct":45.8,"n_retained":11,"cohort_size":24},{"pct":50,"n_retained":12,"cohort_size":24},{"pct":54.2,"n_retained":13,"cohort_size":24},
-    {"pct":45.8,"n_retained":11,"cohort_size":24},{"pct":50,"n_retained":12,"cohort_size":24},{"pct":45.8,"n_retained":11,"cohort_size":24},{"pct":50,"n_retained":12,"cohort_size":24},{"pct":58.3,"n_retained":14,"cohort_size":24},
-    {"pct":54.2,"n_retained":13,"cohort_size":24},{"pct":58.3,"n_retained":14,"cohort_size":24},{"pct":54.2,"n_retained":13,"cohort_size":24},{"pct":50,"n_retained":12,"cohort_size":24},{"pct":45.8,"n_retained":11,"cohort_size":24},
-    {"pct":45.8,"n_retained":11,"cohort_size":24},{"pct":41.7,"n_retained":10,"cohort_size":24}
-  ],
-  "2026-04": [
-    {"pct":81.4,"n_retained":48,"cohort_size":59},{"pct":88.1,"n_retained":52,"cohort_size":59},{"pct":88.1,"n_retained":52,"cohort_size":59},{"pct":84.7,"n_retained":50,"cohort_size":59},{"pct":86.4,"n_retained":51,"cohort_size":59},
-    {"pct":81.4,"n_retained":48,"cohort_size":59},{"pct":79.7,"n_retained":47,"cohort_size":59},{"pct":76.3,"n_retained":45,"cohort_size":59},{"pct":72.9,"n_retained":43,"cohort_size":59},{"pct":74.6,"n_retained":44,"cohort_size":59},
-    {"pct":67.8,"n_retained":40,"cohort_size":59},{"pct":64.4,"n_retained":38,"cohort_size":59},{"pct":62.7,"n_retained":37,"cohort_size":59},{"pct":64.4,"n_retained":38,"cohort_size":59},{"pct":62.7,"n_retained":37,"cohort_size":59},
-    {"pct":61,"n_retained":36,"cohort_size":59},{"pct":57.6,"n_retained":34,"cohort_size":59},{"pct":55.9,"n_retained":33,"cohort_size":59},{"pct":55.9,"n_retained":33,"cohort_size":59},{"pct":49.2,"n_retained":29,"cohort_size":59},
-    {"pct":50.8,"n_retained":30,"cohort_size":59},{"pct":52.5,"n_retained":31,"cohort_size":59}
-  ],
-  "2026-05": [
-    {"pct":78.8,"n_retained":52,"cohort_size":66},{"pct":84.8,"n_retained":56,"cohort_size":66},{"pct":92.4,"n_retained":61,"cohort_size":66},{"pct":97,"n_retained":64,"cohort_size":66},{"pct":97,"n_retained":64,"cohort_size":66},
-    {"pct":93.9,"n_retained":62,"cohort_size":66},{"pct":92.4,"n_retained":61,"cohort_size":66},{"pct":90.9,"n_retained":60,"cohort_size":66},{"pct":83.3,"n_retained":55,"cohort_size":66},{"pct":80.3,"n_retained":53,"cohort_size":66},
-    {"pct":78.8,"n_retained":52,"cohort_size":66},{"pct":75.8,"n_retained":50,"cohort_size":66},{"pct":69.7,"n_retained":46,"cohort_size":66},{"pct":66.7,"n_retained":44,"cohort_size":66},{"pct":66.7,"n_retained":44,"cohort_size":66},
-    {"pct":66.7,"n_retained":44,"cohort_size":66},{"pct":63.6,"n_retained":42,"cohort_size":66},{"pct":63.6,"n_retained":42,"cohort_size":66}
-  ],
-  "2026-06": [
-    {"pct":86.4,"n_retained":38,"cohort_size":44},{"pct":95.5,"n_retained":42,"cohort_size":44},{"pct":97.7,"n_retained":43,"cohort_size":44},{"pct":95.5,"n_retained":42,"cohort_size":44},{"pct":93.2,"n_retained":41,"cohort_size":44},
-    {"pct":88.6,"n_retained":39,"cohort_size":44},{"pct":86.4,"n_retained":38,"cohort_size":44},{"pct":81.8,"n_retained":36,"cohort_size":44},{"pct":79.5,"n_retained":35,"cohort_size":44},{"pct":77.3,"n_retained":34,"cohort_size":44},
-    {"pct":70.5,"n_retained":31,"cohort_size":44},{"pct":68.2,"n_retained":30,"cohort_size":44},{"pct":70.5,"n_retained":31,"cohort_size":44}
-  ],
-  "2026-07": [
-    {"pct":76.7,"n_retained":46,"cohort_size":60},{"pct":86.7,"n_retained":52,"cohort_size":60},{"pct":98.3,"n_retained":59,"cohort_size":60},{"pct":91.7,"n_retained":55,"cohort_size":60},{"pct":90,"n_retained":54,"cohort_size":60},
-    {"pct":90,"n_retained":54,"cohort_size":60},{"pct":86.7,"n_retained":52,"cohort_size":60},{"pct":86.7,"n_retained":52,"cohort_size":60},{"pct":75,"n_retained":45,"cohort_size":60}
-  ],
-  "2026-08": [
-    {"pct":84.1,"n_retained":58,"cohort_size":69},{"pct":100,"n_retained":69,"cohort_size":69},{"pct":94.2,"n_retained":65,"cohort_size":69},{"pct":88.4,"n_retained":61,"cohort_size":69},{"pct":89.9,"n_retained":62,"cohort_size":69}
-  ]
-};
+const DATA = {"2026-02":[{"pct":73.3,"n_retained":11,"cohort_size":15},{"pct":93.3,"n_retained":14,"cohort_size":15},{"pct":100.0,"n_retained":15,"cohort_size":15},{"pct":93.3,"n_retained":14,"cohort_size":15},{"pct":100.0,"n_retained":15,"cohort_size":15},{"pct":80.0,"n_retained":12,"cohort_size":15},{"pct":86.7,"n_retained":13,"cohort_size":15},{"pct":73.3,"n_retained":11,"cohort_size":15},{"pct":73.3,"n_retained":11,"cohort_size":15},{"pct":73.3,"n_retained":11,"cohort_size":15},{"pct":73.3,"n_retained":11,"cohort_size":15},{"pct":66.7,"n_retained":10,"cohort_size":15},{"pct":80.0,"n_retained":12,"cohort_size":15},{"pct":53.3,"n_retained":8,"cohort_size":15},{"pct":53.3,"n_retained":8,"cohort_size":15},{"pct":60.0,"n_retained":9,"cohort_size":15},{"pct":46.7,"n_retained":7,"cohort_size":15},{"pct":40.0,"n_retained":6,"cohort_size":15},{"pct":46.7,"n_retained":7,"cohort_size":15},{"pct":46.7,"n_retained":7,"cohort_size":15},{"pct":46.7,"n_retained":7,"cohort_size":15},{"pct":40.0,"n_retained":6,"cohort_size":15},{"pct":46.7,"n_retained":7,"cohort_size":15},{"pct":40.0,"n_retained":6,"cohort_size":15},{"pct":33.3,"n_retained":5,"cohort_size":15},{"pct":33.3,"n_retained":5,"cohort_size":15},{"pct":40.0,"n_retained":6,"cohort_size":15},{"pct":40.0,"n_retained":6,"cohort_size":15},{"pct":40.0,"n_retained":6,"cohort_size":15},{"pct":40.0,"n_retained":6,"cohort_size":15},{"pct":33.3,"n_retained":5,"cohort_size":15},{"pct":33.3,"n_retained":5,"cohort_size":15},{"pct":40.0,"n_retained":6,"cohort_size":15},{"pct":33.3,"n_retained":5,"cohort_size":15},{"pct":26.7,"n_retained":4,"cohort_size":15}],"2026-03":[{"pct":95.8,"n_retained":23,"cohort_size":24},{"pct":87.5,"n_retained":21,"cohort_size":24},{"pct":95.8,"n_retained":23,"cohort_size":24},{"pct":91.7,"n_retained":22,"cohort_size":24},{"pct":87.5,"n_retained":21,"cohort_size":24},{"pct":83.3,"n_retained":20,"cohort_size":24},{"pct":70.8,"n_retained":17,"cohort_size":24},{"pct":75.0,"n_retained":18,"cohort_size":24},{"pct":75.0,"n_retained":18,"cohort_size":24},{"pct":66.7,"n_retained":16,"cohort_size":24},{"pct":50.0,"n_retained":12,"cohort_size":24},{"pct":54.2,"n_retained":13,"cohort_size":24},{"pct":45.8,"n_retained":11,"cohort_size":24},{"pct":50.0,"n_retained":12,"cohort_size":24},{"pct":54.2,"n_retained":13,"cohort_size":24},{"pct":45.8,"n_retained":11,"cohort_size":24},{"pct":50.0,"n_retained":12,"cohort_size":24},{"pct":45.8,"n_retained":11,"cohort_size":24},{"pct":50.0,"n_retained":12,"cohort_size":24},{"pct":58.3,"n_retained":14,"cohort_size":24},{"pct":54.2,"n_retained":13,"cohort_size":24},{"pct":58.3,"n_retained":14,"cohort_size":24},{"pct":54.2,"n_retained":13,"cohort_size":24},{"pct":50.0,"n_retained":12,"cohort_size":24},{"pct":45.8,"n_retained":11,"cohort_size":24},{"pct":45.8,"n_retained":11,"cohort_size":24},{"pct":41.7,"n_retained":10,"cohort_size":24},{"pct":45.8,"n_retained":11,"cohort_size":24},{"pct":41.7,"n_retained":10,"cohort_size":24},{"pct":33.3,"n_retained":8,"cohort_size":24},{"pct":37.5,"n_retained":9,"cohort_size":24}],"2026-04":[{"pct":81.4,"n_retained":48,"cohort_size":59},{"pct":88.1,"n_retained":52,"cohort_size":59},{"pct":88.1,"n_retained":52,"cohort_size":59},{"pct":84.7,"n_retained":50,"cohort_size":59},{"pct":86.4,"n_retained":51,"cohort_size":59},{"pct":81.4,"n_retained":48,"cohort_size":59},{"pct":79.7,"n_retained":47,"cohort_size":59},{"pct":76.3,"n_retained":45,"cohort_size":59},{"pct":72.9,"n_retained":43,"cohort_size":59},{"pct":74.6,"n_retained":44,"cohort_size":59},{"pct":67.8,"n_retained":40,"cohort_size":59},{"pct":64.4,"n_retained":38,"cohort_size":59},{"pct":62.7,"n_retained":37,"cohort_size":59},{"pct":64.4,"n_retained":38,"cohort_size":59},{"pct":62.7,"n_retained":37,"cohort_size":59},{"pct":61.0,"n_retained":36,"cohort_size":59},{"pct":57.6,"n_retained":34,"cohort_size":59},{"pct":55.9,"n_retained":33,"cohort_size":59},{"pct":55.9,"n_retained":33,"cohort_size":59},{"pct":49.2,"n_retained":29,"cohort_size":59},{"pct":50.8,"n_retained":30,"cohort_size":59},{"pct":52.5,"n_retained":31,"cohort_size":59},{"pct":47.5,"n_retained":28,"cohort_size":59},{"pct":47.5,"n_retained":28,"cohort_size":59},{"pct":47.5,"n_retained":28,"cohort_size":59},{"pct":42.4,"n_retained":25,"cohort_size":59}],"2026-05":[{"pct":78.8,"n_retained":52,"cohort_size":66},{"pct":84.8,"n_retained":56,"cohort_size":66},{"pct":92.4,"n_retained":61,"cohort_size":66},{"pct":97.0,"n_retained":64,"cohort_size":66},{"pct":97.0,"n_retained":64,"cohort_size":66},{"pct":93.9,"n_retained":62,"cohort_size":66},{"pct":92.4,"n_retained":61,"cohort_size":66},{"pct":90.9,"n_retained":60,"cohort_size":66},{"pct":83.3,"n_retained":55,"cohort_size":66},{"pct":80.3,"n_retained":53,"cohort_size":66},{"pct":78.8,"n_retained":52,"cohort_size":66},{"pct":75.8,"n_retained":50,"cohort_size":66},{"pct":69.7,"n_retained":46,"cohort_size":66},{"pct":66.7,"n_retained":44,"cohort_size":66},{"pct":66.7,"n_retained":44,"cohort_size":66},{"pct":66.7,"n_retained":44,"cohort_size":66},{"pct":63.6,"n_retained":42,"cohort_size":66},{"pct":63.6,"n_retained":42,"cohort_size":66},{"pct":57.6,"n_retained":38,"cohort_size":66},{"pct":62.1,"n_retained":41,"cohort_size":66},{"pct":63.6,"n_retained":42,"cohort_size":66},{"pct":59.1,"n_retained":39,"cohort_size":66}],"2026-06":[{"pct":86.4,"n_retained":38,"cohort_size":44},{"pct":95.5,"n_retained":42,"cohort_size":44},{"pct":97.7,"n_retained":43,"cohort_size":44},{"pct":95.5,"n_retained":42,"cohort_size":44},{"pct":93.2,"n_retained":41,"cohort_size":44},{"pct":88.6,"n_retained":39,"cohort_size":44},{"pct":86.4,"n_retained":38,"cohort_size":44},{"pct":81.8,"n_retained":36,"cohort_size":44},{"pct":79.5,"n_retained":35,"cohort_size":44},{"pct":77.3,"n_retained":34,"cohort_size":44},{"pct":70.5,"n_retained":31,"cohort_size":44},{"pct":68.2,"n_retained":30,"cohort_size":44},{"pct":70.5,"n_retained":31,"cohort_size":44},{"pct":63.6,"n_retained":28,"cohort_size":44},{"pct":65.9,"n_retained":29,"cohort_size":44},{"pct":59.1,"n_retained":26,"cohort_size":44},{"pct":61.4,"n_retained":27,"cohort_size":44}],"2026-07":[{"pct":76.7,"n_retained":46,"cohort_size":60},{"pct":86.7,"n_retained":52,"cohort_size":60},{"pct":98.3,"n_retained":59,"cohort_size":60},{"pct":91.7,"n_retained":55,"cohort_size":60},{"pct":90.0,"n_retained":54,"cohort_size":60},{"pct":90.0,"n_retained":54,"cohort_size":60},{"pct":88.3,"n_retained":53,"cohort_size":60},{"pct":88.3,"n_retained":53,"cohort_size":60},{"pct":76.7,"n_retained":46,"cohort_size":60},{"pct":75.0,"n_retained":45,"cohort_size":60},{"pct":78.3,"n_retained":47,"cohort_size":60},{"pct":73.3,"n_retained":44,"cohort_size":60},{"pct":70.0,"n_retained":42,"cohort_size":60}],"2026-08":[{"pct":84.0,"n_retained":63,"cohort_size":75},{"pct":98.7,"n_retained":74,"cohort_size":75},{"pct":89.3,"n_retained":67,"cohort_size":75},{"pct":89.3,"n_retained":67,"cohort_size":75},{"pct":90.7,"n_retained":68,"cohort_size":75},{"pct":92.0,"n_retained":69,"cohort_size":75},{"pct":82.7,"n_retained":62,"cohort_size":75},{"pct":74.7,"n_retained":56,"cohort_size":75},{"pct":65.3,"n_retained":49,"cohort_size":75}],"2026-09":[{"pct":83.8,"n_retained":62,"cohort_size":74},{"pct":91.9,"n_retained":68,"cohort_size":74},{"pct":90.5,"n_retained":67,"cohort_size":74},{"pct":87.8,"n_retained":65,"cohort_size":74}]};
 
-const MONTH_LABEL = {"2026-02":"Feb","2026-03":"Mar","2026-04":"Apr","2026-05":"May","2026-06":"Jun","2026-07":"Jul","2026-08":"Aug"};
-const SERIES_VARS = ["--s1","--s2","--s3","--s4","--s5","--s6","--s7"];
+const MONTH_LABEL = {"2026-02":"Feb","2026-03":"Mar","2026-04":"Apr","2026-05":"May","2026-06":"Jun","2026-07":"Jul","2026-08":"Aug","2026-09":"Sep"};
+const SERIES_VARS = ["--s1","--s2","--s3","--s4","--s5","--s6","--s7","--s8"];
 const cohorts = Object.keys(DATA);
 
 // Overall retention across ALL cohorts -- reached-only base, same logic as the
 // churn-cohort tab's Overall line. Each week's denominator is only the
 // sellers whose HIT-month cohort is actually old enough to have reached that
 // relative week (an immature-cohort filter applied per point), not a fixed
-// 337 held constant. base[i]/retained[i] are the summed cohort_size/n_retained
+// 417 held constant. base[i]/retained[i] are the summed cohort_size/n_retained
 // across whichever cohorts contribute at week i, read straight off DATA above.
 const OVERALL_META = {
-  label: 'Overall · 1-5K', color: '--accent', total: 337,
-  base:     [337,337,337,337,337, 268,268,268,268, 208,208,208,208, 164,164,164,164,164, 98,98,98,98, 39,39,39,39,39, 15,15,15,15],
-  retained: [276,306,318,308,308, 235,228,222,207, 158,146,141,137, 102,102,100,95,92, 52,50,50,51, 20,18,16,16,16, 6,6,6,5],
-  cohortsReach: [7,7,7,7,7, 6,6,6,6, 5,5,5,5, 4,4,4,4,4, 3,3,3,3, 2,2,2,2,2, 1,1,1,1]
+  label: 'Overall · 1-5K', color: '--accent', total: 417,
+  base:     [417,417,417,417, 343,343,343,343,343, 268,268,268,268, 208,208,208,208, 164,164,164,164,164, 98,98,98,98, 39,39,39,39,39, 15,15,15,15],
+  retained: [343,379,387,379, 314,304,291,279,257, 203,193,185,179, 130,131,126,122, 92,90,91,92,90, 48,46,44,41, 16,17,16,14,14, 5,6,5,4],
+  cohortsReach: [8,8,8,8, 7,7,7,7,7, 6,6,6,6, 5,5,5,5, 4,4,4,4,4, 3,3,3,3, 2,2,2,2,2, 1,1,1,1]
 };
 function overallSeries(){
   return OVERALL_META.base.map((b,i) => {
@@ -429,7 +380,7 @@ function showTip(e, w){
     if (!d) return;
     html += '<div class="tt-row"><span style="color:'+colorFor(key)+'">'+labelFor(key)+'</span><span>' + d.pct.toFixed(1) + '% (' + d.n_retained + '/' + d.cohort_size + ')</span></div>';
     if (isOverall(key)) {
-      html += '<div class="tt-row tt-dim"><span>&nbsp;&nbsp;cohorts old enough to reach this week</span><span>' + d.cohorts_reach + ' of 7</span></div>';
+      html += '<div class="tt-row tt-dim"><span>&nbsp;&nbsp;cohorts old enough to reach this week</span><span>' + d.cohorts_reach + ' of 8</span></div>';
     }
   });
 
@@ -480,7 +431,7 @@ function renderOverallTable(){
   let head = '<thead><tr><th>Week</th><th>Cohorts reached</th><th>Sellers reached</th><th>Retained</th><th>Retention %</th></tr></thead>';
   let body = '<tbody>';
   series.forEach((p, w) => {
-    body += '<tr><td>W' + w + '</td><td>' + p.cohorts_reach + ' of 7</td><td>' + p.cohort_size + '</td><td>' + p.n_retained + '</td><td>' + p.pct.toFixed(1) + '%</td></tr>';
+    body += '<tr><td>W' + w + '</td><td>' + p.cohorts_reach + ' of 8</td><td>' + p.cohort_size + '</td><td>' + p.n_retained + '</td><td>' + p.pct.toFixed(1) + '%</td></tr>';
   });
   body += '</tbody>';
   table.innerHTML = head + body;
@@ -504,5 +455,4 @@ document.getElementById('viewToggle').addEventListener('click', (e) => {
 });
 </script>
 
-</body>
-</html>
+</body></html>
