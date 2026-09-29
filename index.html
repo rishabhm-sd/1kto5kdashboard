@@ -71,7 +71,6 @@ body{background:var(--bg-canvas); color:var(--ink-1); font-family:'IBM Plex Sans
 .icon-btn:focus-visible{outline:2px solid var(--accent); outline-offset:1px;}
 .icon-btn.active{color:var(--accent); border-color:var(--accent);}
 .icon-btn svg{display:block;}
-.sidebar.collapsed ~ .reopen-btn{display:flex;}
 
 .navlist{padding:10px 8px; overflow-y:auto; flex:1 1 auto;}
 .navitem{
@@ -102,11 +101,9 @@ body{background:var(--bg-canvas); color:var(--ink-1); font-family:'IBM Plex Sans
 .sidebar.collapsed + .content{margin-left:0;}
 
 .topbar{
-  max-width:1200px; width:100%; margin:0 auto; padding:28px 24px 0;
-  display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  width:100%; margin:0; padding:16px 28px 0;
+  display:flex; align-items:flex-start; justify-content:flex-end; gap:16px; flex-wrap:wrap;
 }
-h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.4rem,2.2vw,1.9rem); letter-spacing:-0.01em; margin:0 0 4px;}
-.subtitle{color:var(--ink-2); font-size:0.92rem; margin:0; max-width:64ch; line-height:1.5;}
 
 .clockblock{text-align:right; flex:0 0 auto; padding-top:2px;}
 .clock{
@@ -117,7 +114,7 @@ h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.4
 .updated a{color:var(--ink-2); text-decoration:underline; text-underline-offset:2px;}
 .updated a:hover{color:var(--accent);}
 
-main{max-width:1200px; width:100%; margin:0 auto; padding:16px 24px 48px; flex:1 1 auto;}
+main{width:100%; margin:0; padding:12px 28px 48px; flex:1 1 auto;}
 .frame-wrap{position:relative;}
 iframe{
   display:none; width:100%; border:0; background:var(--surface);
@@ -125,14 +122,12 @@ iframe{
 }
 iframe.active{display:block;}
 
-footer{max-width:1200px; width:100%; margin:0 auto; padding:8px 24px 40px; color:var(--ink-3); font-size:0.74rem; line-height:1.6;}
+footer{width:100%; margin:0; padding:8px 28px 40px; color:var(--ink-3); font-size:0.74rem; line-height:1.6;}
 
 @media (max-width: 760px){
   .sidebar{ transform:translateX(-100%); box-shadow:0 0 24px rgba(0,0,0,.18); }
   .sidebar:not(.collapsed){ transform:translateX(0); }
   .content{margin-left:0;}
-  .reopen-btn{display:flex;}
-  .sidebar.collapsed ~ .reopen-btn, .sidebar:not(.collapsed) ~ .reopen-btn{display:flex;}
 }
 </style>
 </head>
@@ -168,10 +163,6 @@ footer{max-width:1200px; width:100%; margin:0 auto; padding:8px 24px 40px; color
 
 <div class="content">
   <header class="topbar">
-    <div class="titleblock">
-      <h1>HITS Retention Dashboards</h1>
-      <p class="subtitle">Live views of HIT-seller churn and retention &mdash; pick a view from the sidebar. Each one keeps its own filters and toggle state while you switch away and back.</p>
-    </div>
     <div class="clockblock">
       <div class="clock" id="clock">--:--:-- IST</div>
       <div class="updated" id="updated">checking last update&hellip;</div>
@@ -258,6 +249,7 @@ function applyCollapsed(collapsed){
   collapseBtn.setAttribute('aria-pressed', String(collapsed));
   const svg = collapseBtn.querySelector('svg');
   if (svg) svg.style.transform = collapsed ? 'rotate(180deg)' : 'rotate(0deg)';
+  reopenBtn.style.display = collapsed ? 'flex' : 'none';
 }
 
 let collapsed = false;
