@@ -1,0 +1,72 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>1K-5K Hypercare - Overall Metrics</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root{
+  --bg-canvas:#f4f6f4;
+  --surface:#ffffff;
+  --surface-2:#eef1ef;
+  --border:#dde3e0;
+  --ink-1:#161b19;
+  --ink-2:#4c5854;
+  --ink-3:#828e8a;
+  --accent:#0f6d5c;
+  --accent-ink:#ffffff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg-canvas:#0e1210;
+    --surface:#171c1a;
+    --surface-2:#1e2422;
+    --border:#2b322f;
+    --ink-1:#f2f5f3;
+    --ink-2:#bcc7c2;
+    --ink-3:#7d8985;
+    --accent:#3fb69a;
+    --accent-ink:#08110d;
+  }
+}
+:root[data-theme="dark"]{
+  --bg-canvas:#0e1210;
+  --surface:#171c1a;
+  --surface-2:#1e2422;
+  --border:#2b322f;
+  --ink-1:#f2f5f3;
+  --ink-2:#bcc7c2;
+  --ink-3:#7d8985;
+  --accent:#3fb69a;
+  --accent-ink:#08110d;
+}
+
+*{box-sizing:border-box;}
+body{background:var(--bg-canvas); color:var(--ink-1); font-family:'IBM Plex Sans',system-ui,sans-serif;}
+.wrap{max-width:1080px; margin:0 auto; padding:40px 24px 72px;}
+
+h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.5rem,2.4vw,2.05rem); letter-spacing:-0.01em; margin:0 0 6px; text-wrap:balance;}
+.subtitle{color:var(--ink-2); font-size:0.98rem; max-width:66ch; line-height:1.5; margin:0 0 22px;}
+
+.panel{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:36px 28px; margin-bottom:20px; text-align:center;}
+.panel-title{font-family:'Sora',system-ui,sans-serif; font-weight:600; font-size:1.05rem; margin-bottom:8px;}
+.pending-badge{
+  display:inline-flex; align-items:center; gap:6px; background:var(--surface-2); border:1px solid var(--border);
+  color:var(--ink-2); font-size:0.78rem; font-weight:600; letter-spacing:0.02em; text-transform:uppercase;
+  padding:6px 14px; border-radius:999px; margin-bottom:16px;
+}
+.pending-badge svg{display:block;}
+.panel p{color:var(--ink-2); font-size:0.94rem; line-height:1.6; max-width:56ch; margin:0 auto;}
+</style>
+<div class="wrap">
+  <h1>1K-5K Hypercare &mdash; Overall Metrics</h1>
+  <p class="subtitle">Part of the 1K-5K Hypercare view, alongside <a href="hypercare-sellers.html">All sellers</a>.</p>
+
+  <div class="panel">
+    <div class="pending-badge">
+      <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.8v3.6l2.4 1.4"/></svg>
+      Awaiting content
+    </div>
+    <div class="panel-title">This subtab is not yet built out</div>
+    <p>The metrics and layout for Overall Metrics haven&rsquo;t been specified yet. This placeholder will be replaced once the content and data for this view are provided.</p>
+  </div>
+</div>
+</body></html>

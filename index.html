@@ -17,6 +17,7 @@
   --ink-3:#828e8a;
   --accent:#0f6d5c;
   --accent-ink:#ffffff;
+  --sidebar-w:240px;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -44,61 +45,253 @@
 }
 
 *{box-sizing:border-box;}
-html,body{margin:0; padding:0;}
+html,body{margin:0; padding:0; height:100%;}
 body{background:var(--bg-canvas); color:var(--ink-1); font-family:'IBM Plex Sans',system-ui,sans-serif;}
 
-header{max-width:1200px; margin:0 auto; padding:32px 24px 0;}
-h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.4rem,2.2vw,1.9rem); letter-spacing:-0.01em; margin:0 0 4px;}
-.subtitle{color:var(--ink-2); font-size:0.92rem; margin:0 0 20px; max-width:70ch; line-height:1.5;}
-
-.tabbar{display:flex; gap:6px; border-bottom:1px solid var(--border); padding:0 0 0;}
-.tabbar button{
-  appearance:none; background:transparent; border:none; cursor:pointer;
-  font-family:'IBM Plex Sans',sans-serif; font-size:0.88rem; font-weight:500;
-  color:var(--ink-2); padding:10px 16px 12px; border-bottom:2.5px solid transparent;
-  margin-bottom:-1px; transition:color .15s, border-color .15s;
+/* ---------- sidebar ---------- */
+.sidebar{
+  position:fixed; top:0; left:0; bottom:0; width:var(--sidebar-w);
+  background:var(--surface); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; z-index:20;
+  transition:transform .18s ease, width .18s ease;
 }
-.tabbar button:hover{color:var(--ink-1);}
-.tabbar button[aria-selected="true"]{color:var(--accent); border-bottom-color:var(--accent); font-weight:600;}
-.tabbar button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+.sidebar.collapsed{ transform:translateX(-100%); }
 
-main{max-width:1200px; margin:0 auto; padding:0 24px 48px;}
+.sidebar-head{
+  display:flex; align-items:center; justify-content:space-between; gap:6px;
+  padding:14px 12px; border-bottom:1px solid var(--border); flex:0 0 auto;
+}
+.sidebar-title{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:0.92rem; letter-spacing:-0.01em;}
+.icon-btn{
+  appearance:none; background:transparent; border:1px solid transparent; border-radius:7px;
+  color:var(--ink-2); cursor:pointer; padding:6px; display:flex; align-items:center; justify-content:center;
+  transition:background .15s, color .15s, border-color .15s;
+}
+.icon-btn:hover{background:var(--surface-2); color:var(--ink-1);}
+.icon-btn:focus-visible{outline:2px solid var(--accent); outline-offset:1px;}
+.icon-btn.active{color:var(--accent); border-color:var(--accent);}
+.icon-btn svg{display:block;}
+.sidebar.collapsed ~ .reopen-btn{display:flex;}
+
+.navlist{padding:10px 8px; overflow-y:auto; flex:1 1 auto;}
+.navitem{
+  display:block; width:100%; text-align:left; appearance:none; background:transparent; border:none;
+  cursor:pointer; font-family:'IBM Plex Sans',sans-serif; font-size:0.86rem; font-weight:500;
+  color:var(--ink-2); padding:9px 12px; border-radius:8px; margin-bottom:2px;
+  transition:background .15s, color .15s;
+}
+.navitem:hover{background:var(--surface-2); color:var(--ink-1);}
+.navitem[aria-selected="true"]{background:var(--accent); color:var(--accent-ink); font-weight:600;}
+.navitem:focus-visible{outline:2px solid var(--accent); outline-offset:1px;}
+
+.navgroup-label{
+  font-family:'IBM Plex Sans',sans-serif; font-size:0.7rem; font-weight:600; color:var(--ink-3);
+  text-transform:uppercase; letter-spacing:0.04em; padding:14px 12px 4px;
+}
+.navgroup .navitem{padding-left:22px; font-size:0.83rem;}
+
+.reopen-btn{
+  display:none; position:fixed; top:14px; left:14px; z-index:21;
+  background:var(--surface); border:1px solid var(--border); border-radius:8px;
+  padding:8px; cursor:pointer; color:var(--ink-2); box-shadow:0 2px 10px rgba(0,0,0,.12);
+}
+.reopen-btn:hover{color:var(--ink-1);}
+
+/* ---------- content area ---------- */
+.content{margin-left:var(--sidebar-w); transition:margin-left .18s ease; min-height:100vh; display:flex; flex-direction:column;}
+.sidebar.collapsed + .content{margin-left:0;}
+
+.topbar{
+  max-width:1200px; width:100%; margin:0 auto; padding:28px 24px 0;
+  display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;
+}
+h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.4rem,2.2vw,1.9rem); letter-spacing:-0.01em; margin:0 0 4px;}
+.subtitle{color:var(--ink-2); font-size:0.92rem; margin:0; max-width:64ch; line-height:1.5;}
+
+.clockblock{text-align:right; flex:0 0 auto; padding-top:2px;}
+.clock{
+  font-family:'IBM Plex Mono',monospace; font-size:1.2rem; font-weight:500; color:var(--ink-1);
+  font-variant-numeric:tabular-nums; letter-spacing:0.02em;
+}
+.updated{font-family:'IBM Plex Sans',sans-serif; font-size:0.74rem; color:var(--ink-3); margin-top:2px;}
+.updated a{color:var(--ink-2); text-decoration:underline; text-underline-offset:2px;}
+.updated a:hover{color:var(--accent);}
+
+main{max-width:1200px; width:100%; margin:0 auto; padding:16px 24px 48px; flex:1 1 auto;}
 .frame-wrap{position:relative;}
 iframe{
   display:none; width:100%; border:0; background:var(--surface);
-  border-radius:0 0 14px 14px;
+  border-radius:14px;
 }
 iframe.active{display:block;}
-.loading{color:var(--ink-3); font-size:0.85rem; padding:40px 0; text-align:center; font-family:'IBM Plex Mono',monospace;}
 
-footer{max-width:1200px; margin:0 auto; padding:8px 24px 40px; color:var(--ink-3); font-size:0.74rem; line-height:1.6;}
+footer{max-width:1200px; width:100%; margin:0 auto; padding:8px 24px 40px; color:var(--ink-3); font-size:0.74rem; line-height:1.6;}
+
+@media (max-width: 760px){
+  .sidebar{ transform:translateX(-100%); box-shadow:0 0 24px rgba(0,0,0,.18); }
+  .sidebar:not(.collapsed){ transform:translateX(0); }
+  .content{margin-left:0;}
+  .reopen-btn{display:flex;}
+  .sidebar.collapsed ~ .reopen-btn, .sidebar:not(.collapsed) ~ .reopen-btn{display:flex;}
+}
 </style>
 </head>
 <body>
 
-<header>
-  <h1>HITS Retention Dashboards</h1>
-  <p class="subtitle">Three live views of HIT-seller churn and retention &mdash; pick a tab. Each one keeps its own filters and toggle state while you switch away and back.</p>
-  <div class="tabbar" id="tabbar" role="tablist" aria-label="Dashboard">
-    <button type="button" role="tab" data-target="frame-retention" aria-selected="true">Churn-Cohort Retention</button>
-    <button type="button" role="tab" data-target="frame-3k" aria-selected="false">1-5K 3K Retention</button>
-    <button type="button" role="tab" data-target="frame-timing" aria-selected="false">Churn Timing Diagnostic</button>
-  </div>
-</header>
+<button type="button" class="reopen-btn" id="reopenBtn" aria-label="Show sidebar">
+  <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="2" y1="4" x2="14" y2="4"/><line x1="2" y1="8" x2="14" y2="8"/><line x1="2" y1="12" x2="14" y2="12"/></svg>
+</button>
 
-<main>
-  <div class="frame-wrap">
-    <iframe id="frame-retention" class="active" src="retention.html" title="HITS Churn-Cohort Retention"></iframe>
-    <iframe id="frame-3k" src="retention-3k.html" title="1-5K 3K Retention"></iframe>
-    <iframe id="frame-timing" src="timing.html" title="HITS Churn Timing Diagnostic"></iframe>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-head">
+    <span class="sidebar-title">Dashboards</span>
+    <div style="display:flex; gap:4px;">
+      <button type="button" class="icon-btn" id="pinBtn" aria-label="Pin sidebar state" aria-pressed="false" title="Pin: remember open/closed across visits">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><line x1="8" y1="8" x2="8" y2="14"/></svg>
+      </button>
+      <button type="button" class="icon-btn" id="collapseBtn" aria-label="Hide sidebar" aria-pressed="false" title="Hide sidebar">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="10,3 5,8 10,13"/></svg>
+      </button>
+    </div>
   </div>
-</main>
+  <nav class="navlist" id="navlist" role="tablist" aria-label="Dashboard">
+    <button type="button" class="navitem" role="tab" data-target="frame-retention" aria-selected="true">Churn-Cohort Retention</button>
+    <button type="button" class="navitem" role="tab" data-target="frame-3k" aria-selected="false">1-5K 3K Retention</button>
+    <button type="button" class="navitem" role="tab" data-target="frame-timing" aria-selected="false">Churn Timing Diagnostic</button>
+    <div class="navgroup-label">1K-5K Hypercare</div>
+    <div class="navgroup">
+      <button type="button" class="navitem" role="tab" data-target="frame-hy-overall" aria-selected="false">Overall Metrics</button>
+      <button type="button" class="navitem" role="tab" data-target="frame-hy-sellers" aria-selected="false">All sellers</button>
+    </div>
+  </nav>
+</aside>
 
-<footer>Each tab loads its own page (retention.html, retention-3k.html, timing.html) inside this shell &mdash; open any of them directly if you just need one. Built for Blitzscale · ShopDeck HITS &amp; Revenue seller cohorts.</footer>
+<div class="content">
+  <header class="topbar">
+    <div class="titleblock">
+      <h1>HITS Retention Dashboards</h1>
+      <p class="subtitle">Live views of HIT-seller churn and retention &mdash; pick a view from the sidebar. Each one keeps its own filters and toggle state while you switch away and back.</p>
+    </div>
+    <div class="clockblock">
+      <div class="clock" id="clock">--:--:-- IST</div>
+      <div class="updated" id="updated">checking last update&hellip;</div>
+    </div>
+  </header>
+
+  <main>
+    <div class="frame-wrap">
+      <iframe id="frame-retention" class="active" src="retention.html" title="HITS Churn-Cohort Retention"></iframe>
+      <iframe id="frame-3k" src="retention-3k.html" title="1-5K 3K Retention"></iframe>
+      <iframe id="frame-timing" src="timing.html" title="HITS Churn Timing Diagnostic"></iframe>
+      <iframe id="frame-hy-overall" src="hypercare-overall.html" title="1K-5K Hypercare - Overall Metrics"></iframe>
+      <iframe id="frame-hy-sellers" src="hypercare-sellers.html" title="1K-5K Hypercare - All sellers"></iframe>
+    </div>
+  </main>
+
+  <footer>Each view loads its own page (retention.html, retention-3k.html, timing.html, hypercare-overall.html, hypercare-sellers.html) inside this shell &mdash; open any of them directly if you just need one. Built for Blitzscale &middot; ShopDeck HITS &amp; Revenue seller cohorts.</footer>
+</div>
 
 <script>
-const tabbar = document.getElementById('tabbar');
-const buttons = Array.from(tabbar.querySelectorAll('button[role="tab"]'));
+const REPO = 'rishabhm-sd/1kto5kdashboard';
+const DATA_FILES = ['retention.html','timing.html','retention-3k.html','hypercare-overall.html','hypercare-sellers.html'];
+
+/* ---------- live clock (IST, 24hr) ---------- */
+const clockEl = document.getElementById('clock');
+const clockFmt = new Intl.DateTimeFormat('en-GB', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false, timeZone:'Asia/Kolkata'});
+function tickClock(){
+  clockEl.textContent = clockFmt.format(new Date()) + ' IST';
+}
+tickClock();
+setInterval(tickClock, 1000);
+
+/* ---------- last-updated, derived from real commit history ---------- */
+const updatedEl = document.getElementById('updated');
+const updFmt = new Intl.DateTimeFormat('en-GB', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:false, timeZone:'Asia/Kolkata'});
+
+async function findLastUpdated(){
+  const settled = await Promise.allSettled(DATA_FILES.map(f =>
+    fetch(`https://api.github.com/repos/${REPO}/commits?path=${encodeURIComponent(f)}&per_page=1`)
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+  ));
+  let best = null;
+  settled.forEach(r => {
+    if (r.status === 'fulfilled' && Array.isArray(r.value) && r.value[0]){
+      const c = r.value[0];
+      const date = new Date(c.commit.author.date);
+      if (!best || date > best.date) best = { date, url: c.html_url };
+    }
+  });
+  return best;
+}
+
+findLastUpdated().then(best => {
+  if (!best){
+    updatedEl.textContent = '(last updated: unavailable)';
+    return;
+  }
+  const a = document.createElement('a');
+  a.href = best.url;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  a.textContent = updFmt.format(best.date) + ' IST';
+  updatedEl.textContent = '(last updated ';
+  updatedEl.appendChild(a);
+  updatedEl.appendChild(document.createTextNode(')'));
+}).catch(() => {
+  updatedEl.textContent = '(last updated: unavailable)';
+});
+
+/* ---------- sidebar: hide / pin ---------- */
+const sidebar = document.getElementById('sidebar');
+const collapseBtn = document.getElementById('collapseBtn');
+const pinBtn = document.getElementById('pinBtn');
+const reopenBtn = document.getElementById('reopenBtn');
+
+function safeGet(key){ try { return localStorage.getItem(key); } catch(e){ return null; } }
+function safeSet(key, val){ try { localStorage.setItem(key, val); } catch(e){} }
+function safeRemove(key){ try { localStorage.removeItem(key); } catch(e){} }
+
+function isPinned(){ return safeGet('hc_sidebar_pinned') === '1'; }
+
+function applyCollapsed(collapsed){
+  sidebar.classList.toggle('collapsed', collapsed);
+  collapseBtn.setAttribute('aria-pressed', String(collapsed));
+  const svg = collapseBtn.querySelector('svg');
+  if (svg) svg.style.transform = collapsed ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+
+let collapsed = false;
+if (isPinned()){
+  collapsed = safeGet('hc_sidebar_collapsed') === '1';
+}
+applyCollapsed(collapsed);
+pinBtn.classList.toggle('active', isPinned());
+pinBtn.setAttribute('aria-pressed', String(isPinned()));
+
+function setCollapsed(next){
+  collapsed = next;
+  applyCollapsed(collapsed);
+  if (isPinned()) safeSet('hc_sidebar_collapsed', collapsed ? '1' : '0');
+}
+
+collapseBtn.addEventListener('click', () => setCollapsed(!collapsed));
+reopenBtn.addEventListener('click', () => setCollapsed(false));
+pinBtn.addEventListener('click', () => {
+  const next = !isPinned();
+  if (next){
+    safeSet('hc_sidebar_pinned', '1');
+    safeSet('hc_sidebar_collapsed', collapsed ? '1' : '0');
+  } else {
+    safeRemove('hc_sidebar_pinned');
+    safeRemove('hc_sidebar_collapsed');
+  }
+  pinBtn.classList.toggle('active', next);
+  pinBtn.setAttribute('aria-pressed', String(next));
+});
+
+/* ---------- tab switching (same iframe-preserving approach as before) ---------- */
+const navlist = document.getElementById('navlist');
+const buttons = Array.from(navlist.querySelectorAll('button[role="tab"]'));
 const frames = Array.from(document.querySelectorAll('iframe'));
 
 function selectTab(targetId){
@@ -106,9 +299,10 @@ function selectTab(targetId){
   frames.forEach(f => f.classList.toggle('active', f.id === targetId));
   const active = document.getElementById(targetId);
   if (active) fitIframe(active);
+  if (window.innerWidth <= 760) setCollapsed(true);
 }
 
-tabbar.addEventListener('click', (e) => {
+navlist.addEventListener('click', (e) => {
   const btn = e.target.closest('button[role="tab"]');
   if (!btn) return;
   selectTab(btn.dataset.target);
@@ -134,7 +328,7 @@ frames.forEach(iframe => {
   iframe.addEventListener('load', () => {
     try {
       // Trim each dashboard's own top padding slightly so it sits closer
-      // under the shell's tab bar instead of stacking two page-paddings.
+      // under the shell's header instead of stacking two page-paddings.
       const doc = iframe.contentDocument;
       const wrap = doc && doc.querySelector('.wrap');
       if (wrap) wrap.style.paddingTop = '18px';
