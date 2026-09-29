@@ -1,10 +1,4 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>HITS Churn-Cohort Retention</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
@@ -24,7 +18,7 @@
   --churn-ink:#a8402f;
 
   --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100;
-  --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7;
+  --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7; --s8:#00acc1;
   --rev:#c0392b;
 }
 @media (prefers-color-scheme: dark){
@@ -43,7 +37,7 @@
     --churn-ink:#e58c7a;
 
     --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
-    --s5:#d55181; --s6:#008300; --s7:#9085e9;
+    --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#26c6da;
     --rev:#e0685a;
   }
 }
@@ -62,7 +56,7 @@
   --churn-ink:#e58c7a;
 
   --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
-  --s5:#d55181; --s6:#008300; --s7:#9085e9;
+  --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#26c6da;
   --rev:#e0685a;
 }
 
@@ -159,8 +153,8 @@ footer{color:var(--ink-3); font-size:0.76rem; margin-top:28px; line-height:1.6;}
 
   <div class="defrow">
     <div class="chip">Churn means<b>3+ straight weeks &lt;&#8377;1,000/wk, never resumed</b></div>
-    <div class="chip">Cohorts<b>Feb&ndash;Aug 2026 HIT months</b></div>
-    <div class="chip">Sellers tracked<b>337</b></div>
+    <div class="chip">Cohorts<b>Feb&ndash;Sep 2026 HIT months</b></div>
+    <div class="chip">Sellers tracked<b>417</b></div>
     <div class="chip">Month 0<b>the seller's own HIT month</b></div>
   </div>
 
@@ -173,7 +167,7 @@ footer{color:var(--ink-3); font-size:0.76rem; margin-top:28px; line-height:1.6;}
     <div id="filterRow" class="filterrow"></div>
 
     <div class="chart-scroll" id="chartView">
-      <svg id="chart" viewBox="0 0 1040 440" role="img" aria-label="Line chart of seller retention percentage by month since HIT, one line per monthly HIT cohort"></svg>
+      <svg id="chart" viewBox="0 0 1360 440" role="img" aria-label="Line chart of seller retention percentage by month since HIT, one line per monthly HIT cohort"></svg>
     </div>
 
     <div class="table-scroll" id="tableView" hidden>
@@ -195,31 +189,33 @@ footer{color:var(--ink-3); font-size:0.76rem; margin-top:28px; line-height:1.6;}
     </div>
   </div>
 
-  <footer>HITS source: <code>csv_upload.hit_master_data</code> (team = HITS or hit2 = 1, excluding flagged good sellers) joined to weekly ad spend from <code>nushop.gc_view_3</code> via Metabase &mdash; HITSChurn-GCView3, card 14636 on dashboard 928 (Asia/Kolkata calendar). Revenue source: <code>eligible_sellers</code> (team is null and hit2 is null), same churn rule, via Metabase &mdash; Churn Cohort Matrix Revenue, question 14577; its per-cohort cumulative churn % is converted here as retention % = 100 &minus; cumulative churn %. Retention % = 1 &minus; (cumulative sellers whose terminal 3-week slump has started by that month &divide; cohort size); the projected point for the running month uses the same rule against only the fully-elapsed weeks posted so far. The two bold "Overall" lines recompute their base at every point to just the sellers whose cohort is old enough to have reached that relative month (337&rarr;15 for HITS M0&rarr;M6, 659&rarr;111 for Revenue), rather than holding the denominator fixed at the full tracked population &mdash; so a point's "n" shrinks as the line moves right, and the percentage reflects only cohorts that have actually lived that long. Click any chip above the chart to add or remove that line. † in the table marks a projected (still-open-month) cell.</footer>
+  <footer>HITS source: <code>csv_upload.hit_master_data</code> (team = HITS or hit2 = 1, excluding flagged good sellers) joined to weekly ad spend from <code>nushop.gc_view_3</code> via Metabase &mdash; HITSChurn-GCView3, card 14636 on dashboard 928 (Asia/Kolkata calendar). Revenue source: <code>eligible_sellers</code> (team is null and hit2 is null), same churn rule, via Metabase &mdash; Churn Cohort Matrix Revenue, question 14577; its per-cohort cumulative churn % is converted here as retention % = 100 &minus; cumulative churn %. Retention % = 1 &minus; (cumulative sellers whose terminal 3-week slump has started by that month &divide; cohort size); the projected point for the running month uses the same rule against only the fully-elapsed weeks posted so far. The two bold "Overall" lines recompute their base at every point to just the sellers whose cohort is old enough to have reached that relative month (343&rarr;15 for HITS M0&rarr;M6, 635&rarr;110 for Revenue, currently), rather than holding the denominator fixed at the full tracked population &mdash; so a point's "n" shrinks as the line moves right, and the percentage reflects only cohorts that have actually lived that long. The axis now runs through M12; months beyond M6 are blank until a cohort actually ages into them. Click any chip above the chart to add or remove that line. † in the table marks a projected (still-open-month) cell.</footer>
 </div>
 
 <div id="tooltip"></div>
 
 <script>
-const DATA = {"2026-02":[{"pct":100.0,"n_retained":15,"n_churned_cum":0,"cohort_size":15},{"pct":86.7,"n_retained":13,"n_churned_cum":2,"cohort_size":15},{"pct":73.3,"n_retained":11,"n_churned_cum":4,"cohort_size":15},{"pct":60.0,"n_retained":9,"n_churned_cum":6,"cohort_size":15},{"pct":53.3,"n_retained":8,"n_churned_cum":7,"cohort_size":15},{"pct":53.3,"n_retained":8,"n_churned_cum":7,"cohort_size":15},{"pct":53.3,"n_retained":8,"n_churned_cum":7,"cohort_size":15}],"2026-03":[{"pct":91.7,"n_retained":22,"n_churned_cum":2,"cohort_size":24},{"pct":83.3,"n_retained":20,"n_churned_cum":4,"cohort_size":24},{"pct":70.8,"n_retained":17,"n_churned_cum":7,"cohort_size":24},{"pct":58.3,"n_retained":14,"n_churned_cum":10,"cohort_size":24},{"pct":58.3,"n_retained":14,"n_churned_cum":10,"cohort_size":24},{"pct":58.3,"n_retained":14,"n_churned_cum":10,"cohort_size":24},null],"2026-04":[{"pct":98.3,"n_retained":58,"n_churned_cum":1,"cohort_size":59},{"pct":83.1,"n_retained":49,"n_churned_cum":10,"cohort_size":59},{"pct":69.5,"n_retained":41,"n_churned_cum":18,"cohort_size":59},{"pct":62.7,"n_retained":37,"n_churned_cum":22,"cohort_size":59},{"pct":55.9,"n_retained":33,"n_churned_cum":26,"cohort_size":59},null,null],"2026-05":[{"pct":100.0,"n_retained":66,"n_churned_cum":0,"cohort_size":66},{"pct":86.4,"n_retained":57,"n_churned_cum":9,"cohort_size":66},{"pct":77.3,"n_retained":51,"n_churned_cum":15,"cohort_size":66},{"pct":71.2,"n_retained":47,"n_churned_cum":19,"cohort_size":66},null,null,null],"2026-06":[{"pct":93.2,"n_retained":41,"n_churned_cum":3,"cohort_size":44},{"pct":81.8,"n_retained":36,"n_churned_cum":8,"cohort_size":44},{"pct":77.3,"n_retained":34,"n_churned_cum":10,"cohort_size":44},null,null,null,null],"2026-07":[{"pct":96.7,"n_retained":58,"n_churned_cum":2,"cohort_size":60},{"pct":91.7,"n_retained":55,"n_churned_cum":5,"cohort_size":60},null,null,null,null,null],"2026-08":[{"pct":98.6,"n_retained":68,"n_churned_cum":1,"cohort_size":69},null,null,null,null,null,null]};
+const DATA = {"2026-02":[{"pct":100.0,"n_retained":15,"n_churned_cum":0,"cohort_size":15},{"pct":86.7,"n_retained":13,"n_churned_cum":2,"cohort_size":15},{"pct":73.3,"n_retained":11,"n_churned_cum":4,"cohort_size":15},{"pct":60.0,"n_retained":9,"n_churned_cum":6,"cohort_size":15},{"pct":53.3,"n_retained":8,"n_churned_cum":7,"cohort_size":15},{"pct":53.3,"n_retained":8,"n_churned_cum":7,"cohort_size":15},{"pct":40.0,"n_retained":6,"n_churned_cum":9,"cohort_size":15},null,null,null,null,null,null],"2026-03":[{"pct":91.7,"n_retained":22,"n_churned_cum":2,"cohort_size":24},{"pct":83.3,"n_retained":20,"n_churned_cum":4,"cohort_size":24},{"pct":70.8,"n_retained":17,"n_churned_cum":7,"cohort_size":24},{"pct":58.3,"n_retained":14,"n_churned_cum":10,"cohort_size":24},{"pct":58.3,"n_retained":14,"n_churned_cum":10,"cohort_size":24},{"pct":45.8,"n_retained":11,"n_churned_cum":13,"cohort_size":24},null,null,null,null,null,null,null],"2026-04":[{"pct":98.3,"n_retained":58,"n_churned_cum":1,"cohort_size":59},{"pct":83.1,"n_retained":49,"n_churned_cum":10,"cohort_size":59},{"pct":71.2,"n_retained":42,"n_churned_cum":17,"cohort_size":59},{"pct":64.4,"n_retained":38,"n_churned_cum":21,"cohort_size":59},{"pct":55.9,"n_retained":33,"n_churned_cum":26,"cohort_size":59},null,null,null,null,null,null,null,null],"2026-05":[{"pct":100.0,"n_retained":66,"n_churned_cum":0,"cohort_size":66},{"pct":89.4,"n_retained":59,"n_churned_cum":7,"cohort_size":66},{"pct":80.3,"n_retained":53,"n_churned_cum":13,"cohort_size":66},{"pct":66.7,"n_retained":44,"n_churned_cum":22,"cohort_size":66},null,null,null,null,null,null,null,null,null],"2026-06":[{"pct":93.2,"n_retained":41,"n_churned_cum":3,"cohort_size":44},{"pct":81.8,"n_retained":36,"n_churned_cum":8,"cohort_size":44},{"pct":70.5,"n_retained":31,"n_churned_cum":13,"cohort_size":44},null,null,null,null,null,null,null,null,null,null],"2026-07":[{"pct":96.7,"n_retained":58,"n_churned_cum":2,"cohort_size":60},{"pct":86.7,"n_retained":52,"n_churned_cum":8,"cohort_size":60},null,null,null,null,null,null,null,null,null,null],"2026-08":[{"pct":93.3,"n_retained":70,"n_churned_cum":5,"cohort_size":75},null,null,null,null,null,null,null,null,null,null,null],"2026-09":[null,null,null,null,null,null,null,null,null,null,null,null,null]};
 
 // One projected (running-month) point per cohort that isn't already mature through M6.
 // m = the relative month it lands on; pct/n_retained computed the same way as DATA,
 // just against whatever fully-elapsed weeks the still-open month already has.
 const PROJECTED = {
-  "2026-03":{"m":6,"pct":58.3,"n_retained":14,"cohort_size":24,"churned_this_month_so_far":0},
-  "2026-04":{"m":5,"pct":55.9,"n_retained":33,"cohort_size":59,"churned_this_month_so_far":0},
-  "2026-05":{"m":4,"pct":71.2,"n_retained":47,"cohort_size":66,"churned_this_month_so_far":0},
-  "2026-06":{"m":3,"pct":77.3,"n_retained":34,"cohort_size":44,"churned_this_month_so_far":0},
-  "2026-07":{"m":2,"pct":91.7,"n_retained":55,"cohort_size":60,"churned_this_month_so_far":0},
-  "2026-08":{"m":1,"pct":98.6,"n_retained":68,"cohort_size":69,"churned_this_month_so_far":0}
+  "2026-02":{"m":7,"pct":40.0,"n_retained":6,"cohort_size":15,"churned_this_month_so_far":0},
+  "2026-03":{"m":6,"pct":45.8,"n_retained":11,"cohort_size":24,"churned_this_month_so_far":0},
+  "2026-04":{"m":5,"pct":52.5,"n_retained":31,"cohort_size":59,"churned_this_month_so_far":2},
+  "2026-05":{"m":4,"pct":66.7,"n_retained":44,"cohort_size":66,"churned_this_month_so_far":0},
+  "2026-06":{"m":3,"pct":68.2,"n_retained":30,"cohort_size":44,"churned_this_month_so_far":1},
+  "2026-07":{"m":2,"pct":85.0,"n_retained":51,"cohort_size":60,"churned_this_month_so_far":1},
+  "2026-08":{"m":1,"pct":90.7,"n_retained":68,"cohort_size":75,"churned_this_month_so_far":2},
+  "2026-09":{"m":0,"pct":98.6,"n_retained":73,"cohort_size":74,"churned_this_month_so_far":1}
 };
 
-const MONTH_LABEL = {"2026-02":"Feb","2026-03":"Mar","2026-04":"Apr","2026-05":"May","2026-06":"Jun","2026-07":"Jul","2026-08":"Aug"};
-const SERIES_VARS = ["--s1","--s2","--s3","--s4","--s5","--s6","--s7"];
+const MONTH_LABEL = {"2026-02":"Feb","2026-03":"Mar","2026-04":"Apr","2026-05":"May","2026-06":"Jun","2026-07":"Jul","2026-08":"Aug","2026-09":"Sep"};
+const SERIES_VARS = ["--s1","--s2","--s3","--s4","--s5","--s6","--s7","--s8"];
 const cohorts = Object.keys(DATA);
 
-// Revenue-team per-cohort retention: same 7 HIT months, a separate seller
+// Revenue-team per-cohort retention: same HIT months, a separate seller
 // population (tagged neither HITS team nor hit2 in hit_master_data), sourced
 // from Churn Cohort Matrix Revenue (question 14577). That query already
 // returns CUMULATIVE churn as a per-cohort percentage, so retention here is
@@ -227,14 +223,16 @@ const cohorts = Object.keys(DATA);
 // reports -- same maturity cutoff as the HITS lines (a calendar-months-since-
 // HIT fact, not a weighting choice) decides which points are solid vs. the
 // one projected/floor point past it.
-const REV_DATA = {"2026-02":[{"pct":96.4,"n_retained":107,"n_churned_cum":4,"cohort_size":111},{"pct":81.1,"n_retained":90,"n_churned_cum":21,"cohort_size":111},{"pct":69.4,"n_retained":77,"n_churned_cum":34,"cohort_size":111},{"pct":59.5,"n_retained":66,"n_churned_cum":45,"cohort_size":111},{"pct":52.2,"n_retained":58,"n_churned_cum":53,"cohort_size":111},{"pct":46.9,"n_retained":52,"n_churned_cum":59,"cohort_size":111},{"pct":42.3,"n_retained":47,"n_churned_cum":64,"cohort_size":111}],"2026-03":[{"pct":93.9,"n_retained":93,"n_churned_cum":6,"cohort_size":99},{"pct":90.9,"n_retained":90,"n_churned_cum":9,"cohort_size":99},{"pct":79.8,"n_retained":79,"n_churned_cum":20,"cohort_size":99},{"pct":67.7,"n_retained":67,"n_churned_cum":32,"cohort_size":99},{"pct":58.6,"n_retained":58,"n_churned_cum":41,"cohort_size":99},{"pct":51.5,"n_retained":51,"n_churned_cum":48,"cohort_size":99},null],"2026-04":[{"pct":100,"n_retained":51,"n_churned_cum":0,"cohort_size":51},{"pct":90.2,"n_retained":46,"n_churned_cum":5,"cohort_size":51},{"pct":68.6,"n_retained":35,"n_churned_cum":16,"cohort_size":51},{"pct":52.9,"n_retained":27,"n_churned_cum":24,"cohort_size":51},{"pct":45.1,"n_retained":23,"n_churned_cum":28,"cohort_size":51},null,null],"2026-05":[{"pct":97.7,"n_retained":43,"n_churned_cum":1,"cohort_size":44},{"pct":81.8,"n_retained":36,"n_churned_cum":8,"cohort_size":44},{"pct":70.5,"n_retained":31,"n_churned_cum":13,"cohort_size":44},{"pct":65.9,"n_retained":29,"n_churned_cum":15,"cohort_size":44},null,null,null],"2026-06":[{"pct":93.9,"n_retained":93,"n_churned_cum":6,"cohort_size":99},{"pct":81.8,"n_retained":81,"n_churned_cum":18,"cohort_size":99},{"pct":76.8,"n_retained":76,"n_churned_cum":23,"cohort_size":99},null,null,null,null],"2026-07":[{"pct":96.3,"n_retained":129,"n_churned_cum":5,"cohort_size":134},{"pct":89.5,"n_retained":120,"n_churned_cum":14,"cohort_size":134},null,null,null,null,null],"2026-08":[{"pct":98.3,"n_retained":119,"n_churned_cum":2,"cohort_size":121},null,null,null,null,null,null]};
+const REV_DATA = {"2026-02":[{"pct":96.4,"n_retained":106,"n_churned_cum":4,"cohort_size":110},{"pct":80.9,"n_retained":89,"n_churned_cum":21,"cohort_size":110},{"pct":68.2,"n_retained":75,"n_churned_cum":35,"cohort_size":110},{"pct":57.3,"n_retained":63,"n_churned_cum":47,"cohort_size":110},{"pct":50.9,"n_retained":56,"n_churned_cum":54,"cohort_size":110},{"pct":46.4,"n_retained":51,"n_churned_cum":59,"cohort_size":110},{"pct":40.9,"n_retained":45,"n_churned_cum":65,"cohort_size":110},null,null,null,null,null,null],"2026-03":[{"pct":94.9,"n_retained":94,"n_churned_cum":5,"cohort_size":99},{"pct":90.9,"n_retained":90,"n_churned_cum":9,"cohort_size":99},{"pct":79.8,"n_retained":79,"n_churned_cum":20,"cohort_size":99},{"pct":67.7,"n_retained":67,"n_churned_cum":32,"cohort_size":99},{"pct":58.6,"n_retained":58,"n_churned_cum":41,"cohort_size":99},{"pct":48.5,"n_retained":48,"n_churned_cum":51,"cohort_size":99},null,null,null,null,null,null,null],"2026-04":[{"pct":100.0,"n_retained":51,"n_churned_cum":0,"cohort_size":51},{"pct":94.1,"n_retained":48,"n_churned_cum":3,"cohort_size":51},{"pct":68.6,"n_retained":35,"n_churned_cum":16,"cohort_size":51},{"pct":54.9,"n_retained":28,"n_churned_cum":23,"cohort_size":51},{"pct":41.2,"n_retained":21,"n_churned_cum":30,"cohort_size":51},null,null,null,null,null,null,null,null],"2026-05":[{"pct":97.7,"n_retained":43,"n_churned_cum":1,"cohort_size":44},{"pct":81.8,"n_retained":36,"n_churned_cum":8,"cohort_size":44},{"pct":70.5,"n_retained":31,"n_churned_cum":13,"cohort_size":44},{"pct":50.0,"n_retained":22,"n_churned_cum":22,"cohort_size":44},null,null,null,null,null,null,null,null,null],"2026-06":[{"pct":93.9,"n_retained":93,"n_churned_cum":6,"cohort_size":99},{"pct":82.8,"n_retained":82,"n_churned_cum":17,"cohort_size":99},{"pct":72.7,"n_retained":72,"n_churned_cum":27,"cohort_size":99},null,null,null,null,null,null,null,null,null,null],"2026-07":[{"pct":96.3,"n_retained":129,"n_churned_cum":5,"cohort_size":134},{"pct":83.6,"n_retained":112,"n_churned_cum":22,"cohort_size":134},null,null,null,null,null,null,null,null,null,null],"2026-08":[{"pct":88.8,"n_retained":87,"n_churned_cum":11,"cohort_size":98},null,null,null,null,null,null,null,null,null,null,null],"2026-09":[null,null,null,null,null,null,null,null,null,null,null,null,null]};
 const REV_PROJECTED = {
-  "2026-03":{"m":6,"pct":51.5,"n_retained":51,"cohort_size":99,"churned_this_month_so_far":0},
-  "2026-04":{"m":5,"pct":45.1,"n_retained":23,"cohort_size":51,"churned_this_month_so_far":0},
-  "2026-05":{"m":4,"pct":65.9,"n_retained":29,"cohort_size":44,"churned_this_month_so_far":0},
-  "2026-06":{"m":3,"pct":76.8,"n_retained":76,"cohort_size":99,"churned_this_month_so_far":0},
-  "2026-07":{"m":2,"pct":89.5,"n_retained":120,"cohort_size":134,"churned_this_month_so_far":0},
-  "2026-08":{"m":1,"pct":97.5,"n_retained":118,"cohort_size":121,"churned_this_month_so_far":0}
+  "2026-02":{"m":7,"pct":38.2,"n_retained":42,"cohort_size":110,"churned_this_month_so_far":3},
+  "2026-03":{"m":6,"pct":47.5,"n_retained":47,"cohort_size":99,"churned_this_month_so_far":1},
+  "2026-04":{"m":5,"pct":37.3,"n_retained":19,"cohort_size":51,"churned_this_month_so_far":2},
+  "2026-05":{"m":4,"pct":45.5,"n_retained":20,"cohort_size":44,"churned_this_month_so_far":2},
+  "2026-06":{"m":3,"pct":67.7,"n_retained":67,"cohort_size":99,"churned_this_month_so_far":5},
+  "2026-07":{"m":2,"pct":82.1,"n_retained":110,"cohort_size":134,"churned_this_month_so_far":2},
+  "2026-08":{"m":1,"pct":82.7,"n_retained":81,"cohort_size":98,"churned_this_month_so_far":6},
+  "2026-09":{"m":0,"pct":98.8,"n_retained":81,"cohort_size":82,"churned_this_month_so_far":1}
 };
 const revCohorts = Object.keys(REV_DATA).map(k => 'R' + k);
 
@@ -242,33 +240,38 @@ const revCohorts = Object.keys(REV_DATA).map(k => 'R' + k);
 // Each point's denominator is only the sellers whose cohort is actually old
 // enough to have reached that relative month (an immature-cohort filter
 // applied per point, not a fixed pool held constant across the whole line).
-// M0: all 7 cohorts have an M0, so base = every tracked seller. M6: only the
-// oldest (Feb '26) cohort has lived 6 months, so base = just that cohort.
-// retained[i] is the summed retained-seller count across whichever cohorts
-// contribute at that month; base[i] is their summed cohort size -- both
-// derived directly from the same per-cohort DATA/REV_DATA above. Unlike the
-// old fixed-337/659-denominator version, the base here shrinks at every
-// point instead of staying flat, so the line keeps moving through M4-M6
-// rather than flattening out on thinning data.
+// M0: only cohorts that have already lived at least one whole month
+// contribute (a brand-new cohort in its own HIT month has no M0 yet under
+// this rule); M6: only the oldest (Feb '26) cohort has lived 6 months, so
+// base = just that cohort. retained[i] is the summed retained-seller count
+// across whichever cohorts contribute at that month; base[i] is their summed
+// cohort size -- both derived directly from the same per-cohort
+// DATA/REV_DATA above. The base shrinks at every point instead of staying
+// flat, so the line keeps moving through M4-M6 rather than flattening out on
+// thinning data.
 const ALL_META = {
   ALL_HITS: {
-    label: 'HITS · Overall', color: '--accent', total: 337,
-    base:     [337, 268, 208, 164, 98, 39, 15],
-    retained: [328, 230, 154, 107, 55, 22, 8],
-    cohortsReach: [7,6,5,4,3,2,1]
+    label: 'HITS · Overall', color: '--accent', total: 417,
+    base:     [343, 268, 208, 164, 98, 39, 15, 0, 0, 0, 0, 0, 0],
+    retained: [330, 229, 154, 105, 55, 19, 6, 0, 0, 0, 0, 0, 0],
+    cohortsReach: [7,6,5,4,3,2,1,0,0,0,0,0,0]
   },
   ALL_REV: {
-    label: 'Revenue · Overall', color: '--rev', total: 659,
-    base:     [659, 538, 404, 305, 261, 210, 111],
-    retained: [635, 463, 298, 189, 139, 103, 47],
-    cohortsReach: [7,6,5,4,3,2,1]
+    label: 'Revenue · Overall', color: '--rev', total: 717,
+    base:     [635, 537, 403, 304, 260, 209, 110, 0, 0, 0, 0, 0, 0],
+    retained: [603, 457, 292, 180, 135, 99, 45, 0, 0, 0, 0, 0, 0],
+    cohortsReach: [7,6,5,4,3,2,1,0,0,0,0,0,0]
   }
 };
 const allKeys = Object.keys(ALL_META);
 function isAll(key){ return Object.hasOwn(ALL_META, key); }
+// base[i] === 0 means no cohort has aged into month i yet -- return null so
+// the line-drawing/table code treats it exactly like an unreached per-cohort
+// month (stop the line, show a dash) instead of computing 0/0.
 function allSeriesFor(key){
   const meta = ALL_META[key];
   return meta.base.map((b,i) => {
+    if (b === 0) return null;
     const n_retained = meta.retained[i];
     return {
       pct: Math.round(n_retained/b*1000)/10,
@@ -302,11 +305,11 @@ function nFor(key){
   return dataFor(key)[0].cohort_size;
 }
 
-const W = 1040, H = 440;
+const W = 1360, H = 440;
 const M = {top: 18, right: 56, bottom: 40, left: 40};
 const plotW = W - M.left - M.right;
 const plotH = H - M.top - M.bottom;
-const months = 7;
+const months = 13;
 function xOf(m){ return M.left + (plotW * m) / (months - 1); }
 function yOf(pct){ return M.top + plotH * (1 - pct/100); }
 
@@ -513,7 +516,7 @@ function showTip(e, m){
     const cls = isProv ? ' class="tt-prov"' : '';
     html += '<div class="tt-row"><span style="color:'+colorFor(key)+'">'+labelFor(key)+'</span><span'+cls+'>' + point.pct.toFixed(1) + '% (' + point.n_retained + '/' + point.cohort_size + (isProv?' so far':'') + ')</span></div>';
     if (isAll(key)) {
-      html += '<div class="tt-row tt-dim"><span>&nbsp;&nbsp;cohorts old enough to reach this month</span><span>' + point.cohorts_reach + ' of 7</span></div>';
+      html += '<div class="tt-row tt-dim"><span>&nbsp;&nbsp;cohorts old enough to reach this month</span><span>' + point.cohorts_reach + ' of 8</span></div>';
     }
   });
 
@@ -541,7 +544,7 @@ function renderTable(){
     const series = dataFor(ak);
     body += '<tr class="all-row"><td>' + labelFor(ak) + ' (n=' + nFor(ak) + ')</td>';
     for (let m=0; m<months; m++){
-      body += '<td>' + series[m].pct.toFixed(1) + '%</td>';
+      body += '<td>' + (series[m] ? series[m].pct.toFixed(1) + '%' : '&ndash;') + '</td>';
     }
     body += '</tr>';
   });
@@ -581,7 +584,8 @@ function renderOverallTable(key){
   let head = '<thead><tr><th>Month</th><th>Cohorts reached</th><th>Sellers reached</th><th>Retained</th><th>Retention %</th></tr></thead>';
   let body = '<tbody>';
   series.forEach((p, m) => {
-    body += '<tr><td>M' + m + '</td><td>' + p.cohorts_reach + ' of 7</td><td>' + p.cohort_size + '</td><td>' + p.n_retained + '</td><td>' + p.pct.toFixed(1) + '%</td></tr>';
+    if (!p){ body += '<tr><td>M' + m + '</td><td>0 of 8</td><td>&ndash;</td><td>&ndash;</td><td>&ndash;</td></tr>'; return; }
+    body += '<tr><td>M' + m + '</td><td>' + p.cohorts_reach + ' of 8</td><td>' + p.cohort_size + '</td><td>' + p.n_retained + '</td><td>' + p.pct.toFixed(1) + '%</td></tr>';
   });
   body += '</tbody>';
   table.innerHTML = head + body;
@@ -613,5 +617,4 @@ document.getElementById('viewToggle').addEventListener('click', (e) => {
 
 </script>
 
-</body>
-</html>
+</body></html>
