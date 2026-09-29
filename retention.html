@@ -62,7 +62,7 @@
 
 *{box-sizing:border-box;}
 body{background:var(--bg-canvas); color:var(--ink-1); font-family:'IBM Plex Sans',system-ui,sans-serif;}
-.wrap{max-width:1440px; margin:0 auto; padding:40px 24px 72px;}
+.wrap{max-width:1440px; margin:0 auto; padding:6px 24px 72px;}
 
 h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.5rem,2.4vw,2.05rem); letter-spacing:-0.01em; margin:0 0 6px; text-wrap:balance;}
 .subtitle{color:var(--ink-2); font-size:0.98rem; max-width:66ch; line-height:1.5; margin:0 0 22px;}
@@ -130,7 +130,7 @@ tbody td{text-align:right; padding:7px 10px; font-family:'IBM Plex Mono',monospa
 tbody tr:last-child td{border-bottom:none;}
 tbody tr.all-row td{font-weight:600; background:var(--surface-2);}
 td.prov{color:var(--churn-ink); position:relative;}
-td.prov::after{content:"\2020"; font-size:0.7em; margin-left:2px;}
+td.prov::after{content:"†"; font-size:0.7em; margin-left:2px;}
 td.tablegroup{text-align:left; font-family:'IBM Plex Sans',sans-serif; font-size:0.78rem; font-weight:500; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.03em; padding-top:14px; border-bottom:1px solid var(--border);}
 .table-scroll{overflow-x:auto;}
 
@@ -302,7 +302,15 @@ function labelFor(key){
 }
 function nFor(key){
   if (isAll(key)) return ALL_META[key].total;
-  return dataFor(key)[0].cohort_size;
+  // A brand-new cohort (this calendar month's own HIT month) has no closed
+  // month yet -- every DATA/REV_DATA entry for it is null until M0 closes --
+  // so fall back to the in-progress PROJECTED point, which always carries
+  // cohort_size, instead of assuming index 0 is populated.
+  const series = dataFor(key);
+  const firstClosed = series.find(d => d);
+  if (firstClosed) return firstClosed.cohort_size;
+  const proj = projFor(key);
+  return proj ? proj.cohort_size : 0;
 }
 
 const W = 1360, H = 440;
@@ -553,7 +561,7 @@ function renderTable(){
   });
 
   cohorts.forEach(cm => {
-    body += '<tr><td>' + MONTH_LABEL[cm] + " '26 (n=" + DATA[cm][0].cohort_size + ')</td>';
+    body += '<tr><td>' + MONTH_LABEL[cm] + " '26 (n=" + nFor(cm) + ')</td>';
     for (let m=0; m<months; m++){
       const d = DATA[cm][m];
       const proj = PROJECTED[cm];
@@ -568,7 +576,7 @@ function renderTable(){
   revCohorts.forEach(rk => {
     const series = dataFor(rk);
     const proj = projFor(rk);
-    body += '<tr><td>' + labelFor(rk) + ' (n=' + series[0].cohort_size + ')</td>';
+    body += '<tr><td>' + labelFor(rk) + ' (n=' + nFor(rk) + ')</td>';
     for (let m=0; m<months; m++){
       const d = series[m];
       if (d){ body += '<td>' + d.pct.toFixed(1) + '%</td>'; continue; }
