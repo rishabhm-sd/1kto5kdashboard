@@ -1,10 +1,4 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>HITS Churn Timing Diagnostic</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
@@ -114,8 +108,8 @@ footer{color:var(--ink-3); font-size:0.76rem; margin-top:28px; line-height:1.6;}
 
   <div class="defrow">
     <div class="chip">Churn means<b>3+ straight weeks &lt;&#8377;1,000/wk, never resumed</b></div>
-    <div class="chip">Churned so far<b id="churnedChip">78 of 337 sellers</b></div>
-    <div class="chip">Cohorts<b>Feb&ndash;Aug 2026 HIT months</b></div>
+    <div class="chip">Churned so far<b id="churnedChip">96 of 417 sellers</b></div>
+    <div class="chip">Cohorts<b>Feb&ndash;Sep 2026 HIT months</b></div>
     <div class="chip">M<sub>t</sub> share<b>churns at M<sub>t</sub> &divide; total churned</b></div>
   </div>
 
@@ -133,7 +127,7 @@ footer{color:var(--ink-3); font-size:0.76rem; margin-top:28px; line-height:1.6;}
     </div>
 
     <div class="chart-scroll" id="chartView">
-      <svg id="chart" viewBox="0 0 1040 420" role="img" aria-label="Line chart of churn by relative month since HIT, M0 through M6"></svg>
+      <svg id="chart" viewBox="0 0 1360 420" role="img" aria-label="Line chart of churn by relative month since HIT, M0 through M12"></svg>
     </div>
 
     <div class="table-scroll" id="tableView" hidden></div>
@@ -153,26 +147,30 @@ footer{color:var(--ink-3); font-size:0.76rem; margin-top:28px; line-height:1.6;}
     <div class="table-scroll" id="cohortTableView"></div>
   </div>
 
-  <footer>Source: <code>csv_upload.hit_master_data</code> (team = HITS or hit2 = 1, excluding flagged good sellers) joined to weekly ad spend from <code>nushop.gc_view_3</code> via Metabase &mdash; HITSChurn-GCView3, card 14636, for HITS; <code>eligible_sellers</code> (team is null and hit2 is null) via Churn Cohort Matrix Revenue, question 14577, for Revenue &mdash; both on dashboard 928 (Asia/Kolkata calendar), same churn rule and the same relative-month churn counts underlying the companion retention curve's Overall lines. M<sub>t</sub> share = churns whose 3-week slump started in relative month t, summed across every cohort, &divide; total churns observed anywhere in that team's matrix (78 of 337 for HITS, 194 of 659 for Revenue) &mdash; so each team's seven points add up to 100%, and the denominator is churned sellers, not the whole tracked population. Only cohorts old enough to have lived through month t contribute to that point; hover any point for how many cohorts and sellers back it.</footer>
+  <footer>Source: <code>csv_upload.hit_master_data</code> (team = HITS or hit2 = 1, excluding flagged good sellers) joined to weekly ad spend from <code>nushop.gc_view_3</code> via Metabase &mdash; HITSChurn-GCView3, card 14636, for HITS; <code>eligible_sellers</code> (team is null and hit2 is null) via Churn Cohort Matrix Revenue, question 14577, for Revenue &mdash; both on dashboard 928 (Asia/Kolkata calendar), same churn rule and the same relative-month churn counts underlying the companion retention curve's Overall lines. M<sub>t</sub> share = churns whose 3-week slump started in relative month t, summed across every cohort, &divide; total churns observed anywhere in that team's matrix (96 of 417 for HITS, 228 of 717 for Revenue) &mdash; so each team's seven points add up to 100%, and the denominator is churned sellers, not the whole tracked population. Only cohorts old enough to have lived through month t contribute to that point; hover any point for how many cohorts and sellers back it.</footer>
 </div>
 
 <div id="tooltip"></div>
 
 <script>
-const M_LABELS = ['M0','M1','M2','M3','M4','M5','M6'];
+const M_LABELS = ['M0','M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'];
 
 const TEAMS = {
   HITS: {
     label: 'HITS', color: '--accent',
-    sumChurns: [9,30,21,13,5,0,0], totalChurned: 78, totalTracked: 337,
-    cohortsReach: [7,6,5,4,3,2,1], sellersReach: [337,268,208,164,98,39,15]
+    sumChurns: [13,31,23,18,6,3,2,0,0,0,0,0,0], totalChurned: 96, totalTracked: 417,
+    cohortsReach: [7,6,5,4,3,2,1,0,0,0,0,0,0], sellersReach: [343,268,208,164,98,39,15,0,0,0,0,0,0]
   },
   REV: {
     label: 'Revenue', color: '--rev',
-    sumChurns: [24,53,45,33,21,13,5], totalChurned: 194, totalTracked: 659,
-    cohortsReach: [7,6,5,4,3,2,1], sellersReach: [659,538,404,305,261,210,111]
+    sumChurns: [32,59,53,40,23,15,6,0,0,0,0,0,0], totalChurned: 228, totalTracked: 717,
+    cohortsReach: [7,6,5,4,3,2,1,0,0,0,0,0,0], sellersReach: [635,537,403,304,260,209,110,0,0,0,0,0,0]
   }
 };
+// Text for the tooltip's "cohorts old enough" row. Indices 7-12 read "0: none
+// yet" today because no cohort has aged past M7 -- once one does (the Feb-26
+// cohort will be first, in October), update this the same week that cohort's
+// reached value crosses 7 elsewhere in this file.
 const COHORT_LABELS_AT = [
   'all 7: Feb–Aug',
   '6: Feb–Jul',
@@ -180,7 +178,13 @@ const COHORT_LABELS_AT = [
   '4: Feb–May',
   '3: Feb–Apr',
   '2: Feb–Mar',
-  '1: Feb only'
+  '1: Feb only',
+  '0: none yet',
+  '0: none yet',
+  '0: none yet',
+  '0: none yet',
+  '0: none yet',
+  '0: none yet'
 ];
 function shareFor(t){
   const spec = TEAMS[t];
@@ -191,33 +195,38 @@ let team = 'HITS';
 // Per-cohort x relative-month churn matrix, oldest cohort first.
 // Each row's m[] holds new (incremental) churns confirmed at that relative month;
 // "reached" is how many of the 7 M-columns that cohort has lived long enough to observe.
+// A brand-new cohort in its own HIT month (reached: 0) hasn't lived long enough to
+// post an M0 figure yet, so it never contributes to the M-column sums above until
+// next week's refresh.
 const COHORT_MATRIX = {
   HITS: [
-    { label: 'Feb-26', total: 15, m: [0,2,2,2,1,0,0], reached: 7 },
-    { label: 'Mar-26', total: 24, m: [2,2,3,3,0,0,0], reached: 6 },
-    { label: 'Apr-26', total: 59, m: [1,9,8,4,4,0,0], reached: 5 },
-    { label: 'May-26', total: 66, m: [0,9,6,4,0,0,0], reached: 4 },
-    { label: 'Jun-26', total: 44, m: [3,5,2,0,0,0,0], reached: 3 },
-    { label: 'Jul-26', total: 60, m: [2,3,0,0,0,0,0], reached: 2 },
-    { label: 'Aug-26', total: 69, m: [1,0,0,0,0,0,0], reached: 1 }
+    { label: 'Feb-26', total: 15, m: [0,2,2,2,1,0,2,0,0,0,0,0,0], reached: 7 },
+    { label: 'Mar-26', total: 24, m: [2,2,3,3,0,3,0,0,0,0,0,0,0], reached: 6 },
+    { label: 'Apr-26', total: 59, m: [1,9,7,4,5,2,0,0,0,0,0,0,0], reached: 5 },
+    { label: 'May-26', total: 66, m: [0,7,6,9,0,0,0,0,0,0,0,0,0], reached: 4 },
+    { label: 'Jun-26', total: 44, m: [3,5,5,1,0,0,0,0,0,0,0,0,0], reached: 3 },
+    { label: 'Jul-26', total: 60, m: [2,6,1,0,0,0,0,0,0,0,0,0,0], reached: 2 },
+    { label: 'Aug-26', total: 75, m: [5,2,0,0,0,0,0,0,0,0,0,0,0], reached: 1 },
+    { label: 'Sep-26', total: 74, m: [1,0,0,0,0,0,0,0,0,0,0,0,0], reached: 0 }
   ],
   REV: [
-    { label: 'Feb-26', total: 111, m: [4,17,13,11,8,6,5], reached: 7 },
-    { label: 'Mar-26', total: 99,  m: [6,3,11,12,9,7,0], reached: 6 },
-    { label: 'Apr-26', total: 51,  m: [0,5,11,8,4,0,0],  reached: 5 },
-    { label: 'May-26', total: 44,  m: [1,7,5,2,0,0,0],   reached: 4 },
-    { label: 'Jun-26', total: 99,  m: [6,12,5,0,0,0,0],  reached: 3 },
-    { label: 'Jul-26', total: 134, m: [5,9,0,0,0,0,0],   reached: 2 },
-    { label: 'Aug-26', total: 121, m: [2,0,0,0,0,0,0],   reached: 1 }
+    { label: 'Feb-26', total: 110, m: [4,17,14,12,7,5,6,3,0,0,0,0,0], reached: 7 },
+    { label: 'Mar-26', total: 99,  m: [5,4,11,12,9,10,1,0,0,0,0,0,0], reached: 6 },
+    { label: 'Apr-26', total: 51,  m: [0,3,13,7,7,2,0,0,0,0,0,0,0],  reached: 5 },
+    { label: 'May-26', total: 44,  m: [1,7,5,9,2,0,0,0,0,0,0,0,0],   reached: 4 },
+    { label: 'Jun-26', total: 99,  m: [6,11,10,5,0,0,0,0,0,0,0,0,0],  reached: 3 },
+    { label: 'Jul-26', total: 134, m: [5,17,2,0,0,0,0,0,0,0,0,0,0],  reached: 2 },
+    { label: 'Aug-26', total: 98,  m: [11,6,0,0,0,0,0,0,0,0,0,0,0],  reached: 1 },
+    { label: 'Sep-26', total: 82,  m: [1,0,0,0,0,0,0,0,0,0,0,0,0],   reached: 0 }
   ]
 };
 let cohortTeam = 'HITS';
 
-const W = 1040, H = 420;
+const W = 1360, H = 420;
 const M = {top: 24, right: 40, bottom: 56, left: 46};
 const plotW = W - M.left - M.right;
 const plotH = H - M.top - M.bottom;
-const months = 7;
+const months = 13;
 const yMax = 45, gridStep = 10;
 function xOf(m){ return M.left + (plotW * m) / (months - 1); }
 function yOf(v){ return M.top + plotH * (1 - v/yMax); }
@@ -238,8 +247,8 @@ function render(){
   const refSpec = TEAMS[isAll ? 'HITS' : team];
 
   svg.setAttribute('aria-label', isAll
-    ? 'Line chart comparing the share of HITS and Revenue churns at each relative month since HIT, M0 through M6'
-    : 'Line chart of the share of ' + refSpec.label + ' churns that occurred at each relative month since HIT, M0 through M6');
+    ? 'Line chart comparing the share of HITS and Revenue churns at each relative month since HIT, M0 through M12'
+    : 'Line chart of the share of ' + refSpec.label + ' churns that occurred at each relative month since HIT, M0 through M12');
 
   for (let p = 0; p <= yMax; p += gridStep){
     const y = yOf(p);
@@ -403,7 +412,7 @@ function setTeam(newTeam){
   team = newTeam;
   if (team === 'ALL'){
     document.getElementById('chartTitle').textContent = 'Share of churns by month since HIT — HITS vs Revenue';
-    document.getElementById('churnedChip').textContent = '78 of 337 (HITS) · 194 of 659 (Revenue)';
+    document.getElementById('churnedChip').textContent = '96 of 417 (HITS) · 228 of 717 (Revenue)';
   } else {
     const spec = TEAMS[team];
     document.getElementById('chartTitle').textContent = 'Share of ' + spec.label + ' churns by month since HIT';
@@ -436,5 +445,4 @@ document.getElementById('viewToggle').addEventListener('click', (e) => {
 });
 </script>
 
-</body>
-</html>
+</body></html>
