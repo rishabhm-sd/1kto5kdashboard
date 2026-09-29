@@ -62,13 +62,19 @@ h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.5
 }
 .pending-badge svg{display:block;}
 
-.toolrow{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:14px;}
-.search{
-  flex:1 1 260px; max-width:340px; background:var(--surface); border:1px solid var(--border); border-radius:8px;
-  padding:8px 12px; font-family:'IBM Plex Sans',sans-serif; font-size:0.86rem; color:var(--ink-1);
+.toolrow{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:14px;}
+.grouplabel{color:var(--ink-3); font-size:0.7rem; font-weight:500; padding:0 1px;}
+.glchips{display:flex; flex-wrap:wrap; gap:6px;}
+.gl-chip{
+  background:var(--surface-2); border:1px solid var(--border); border-radius:14px; padding:5px 12px;
+  font-family:'IBM Plex Sans',sans-serif; font-size:0.76rem; font-weight:500; color:var(--ink-2);
+  cursor:pointer; transition:background .15s, color .15s, border-color .15s;
 }
-.search:focus-visible{outline:2px solid var(--accent); outline-offset:1px;}
-.rowcount{color:var(--ink-3); font-size:0.78rem; font-family:'IBM Plex Mono',monospace;}
+.gl-chip:hover{background:var(--border);}
+.gl-chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-weight:600;}
+.filterlink{background:none; border:none; color:var(--ink-3); font-family:'IBM Plex Sans',sans-serif; font-size:0.74rem; text-decoration:underline; text-underline-offset:2px; cursor:pointer; padding:3px 2px;}
+.filterlink:hover{color:var(--ink-1);}
+.rowcount{color:var(--ink-3); font-size:0.78rem; font-family:'IBM Plex Mono',monospace; margin-left:auto;}
 
 .tablepanel{background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden;}
 .tablescroll{overflow:auto; max-width:100%;}
@@ -80,6 +86,15 @@ thead th{
 }
 thead th:hover{background:var(--border);}
 thead th .arrow{display:inline-block; width:0.9em; color:var(--accent); font-size:0.72rem;}
+thead tr#filterRow th{
+  background:var(--surface); padding:4px 6px; cursor:default;
+  border-bottom:1px solid var(--border);
+}
+thead tr#filterRow input{
+  width:100%; min-width:80px; box-sizing:border-box; background:var(--surface-2); border:1px solid var(--border);
+  border-radius:6px; padding:4px 7px; font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--ink-1);
+}
+thead tr#filterRow input:focus-visible{outline:2px solid var(--accent); outline-offset:1px;}
 tbody td{padding:9px 12px; border-bottom:1px solid var(--border); color:var(--ink-2); font-family:'IBM Plex Mono',monospace; font-size:0.8rem;}
 tbody tr:last-child td{border-bottom:none;}
 tbody tr:hover{background:var(--surface-2);}
@@ -89,7 +104,6 @@ tbody tr:hover{background:var(--surface-2);}
 </style>
 <div class="wrap">
   <h1>1K-5K Hypercare &mdash; All sellers</h1>
-  <p class="subtitle">Part of the 1K-5K Hypercare view, alongside <a href="hypercare-overall.html">Overall Metrics</a>. One row per seller with handover, spend, PNL and call-tracking fields.</p>
 
   <div class="pending-badge">
     <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.8v3.6l2.4 1.4"/></svg>
@@ -97,7 +111,9 @@ tbody tr:hover{background:var(--surface-2);}
   </div>
 
   <div class="toolrow">
-    <input type="text" class="search" id="searchBox" placeholder="Search all columns&hellip;" disabled>
+    <span class="grouplabel">GL:</span>
+    <div id="glChips" class="glchips"></div>
+    <button type="button" class="filterlink" id="clearFilters">Clear column filters</button>
     <span class="rowcount" id="rowcount">0 sellers</span>
   </div>
 
@@ -106,6 +122,7 @@ tbody tr:hover{background:var(--surface-2);}
       <table id="dataTable">
         <thead>
           <tr id="headRow"></tr>
+          <tr id="filterRow"></tr>
         </thead>
         <tbody id="bodyRows"></tbody>
       </table>
@@ -257,14 +274,42 @@ const DATA = [
 ];
 
 const headRow = document.getElementById('headRow');
+const filterRow = document.getElementById('filterRow');
 const bodyRows = document.getElementById('bodyRows');
-const searchBox = document.getElementById('searchBox');
+const glChipsEl = document.getElementById('glChips');
+const clearFiltersBtn = document.getElementById('clearFilters');
 const rowcountEl = document.getElementById('rowcount');
 const emptyState = document.getElementById('emptyState');
 const tableEl = document.getElementById('dataTable');
 
 let sortKey = null;
 let sortDir = 1;
+
+// Per-column free-text filters (key -> lowercase substring to match).
+const colFilters = {};
+
+// GL toggle chips: empty set = show every GL; one or more active = only
+// those GLs' sellers. Built from whatever gl_name values actually appear in
+// DATA, so a new GL added later shows up automatically.
+const glNames = [...new Set(DATA.map(r => r.gl_name).filter(Boolean))].sort();
+const activeGL = new Set();
+
+function buildGLChips(){
+  glChipsEl.innerHTML = '';
+  glNames.forEach(name => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'gl-chip';
+    btn.textContent = name;
+    btn.setAttribute('aria-pressed', String(activeGL.has(name)));
+    btn.addEventListener('click', () => {
+      if (activeGL.has(name)) activeGL.delete(name); else activeGL.add(name);
+      btn.setAttribute('aria-pressed', String(activeGL.has(name)));
+      render();
+    });
+    glChipsEl.appendChild(btn);
+  });
+}
 
 function buildHead(){
   headRow.innerHTML = '';
@@ -281,13 +326,32 @@ function buildHead(){
     });
     headRow.appendChild(th);
   });
+
+  filterRow.innerHTML = '';
+  COLUMNS.forEach(col => {
+    const th = document.createElement('th');
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Filter…';
+    input.setAttribute('aria-label', 'Filter ' + col.label);
+    input.value = colFilters[col.key] || '';
+    input.addEventListener('click', (e) => e.stopPropagation());
+    input.addEventListener('input', () => {
+      const v = input.value.trim().toLowerCase();
+      if (v) colFilters[col.key] = v; else delete colFilters[col.key];
+      render();
+    });
+    th.appendChild(input);
+    filterRow.appendChild(th);
+  });
 }
 
 function render(){
-  const q = (searchBox.value || '').trim().toLowerCase();
   let rows = DATA.filter(r => {
-    if (!q) return true;
-    return COLUMNS.some(c => String(r[c.key] ?? '').toLowerCase().includes(q));
+    if (activeGL.size && !activeGL.has(r.gl_name)) return false;
+    return Object.keys(colFilters).every(key =>
+      String(r[key] ?? '').toLowerCase().includes(colFilters[key])
+    );
   });
   if (sortKey){
     rows = rows.slice().sort((a,b) => {
@@ -312,12 +376,20 @@ function render(){
     });
     bodyRows.appendChild(tr);
   });
-  rowcountEl.textContent = rows.length + (rows.length === 1 ? ' seller' : ' sellers') + (DATA.length ? '' : ' (no data loaded)');
+  rowcountEl.textContent = rows.length + (rows.length === 1 ? ' seller' : ' sellers') +
+    (rows.length === DATA.length ? '' : ' of ' + DATA.length) +
+    (DATA.length ? '' : ' (no data loaded)');
   tableEl.style.display = DATA.length ? 'table' : 'none';
   emptyState.style.display = DATA.length ? 'none' : 'block';
-  searchBox.disabled = DATA.length === 0;
 }
 
+clearFiltersBtn.addEventListener('click', () => {
+  Object.keys(colFilters).forEach(k => delete colFilters[k]);
+  filterRow.querySelectorAll('input').forEach(inp => inp.value = '');
+  render();
+});
+
+buildGLChips();
 buildHead();
 render();
 </script>
