@@ -1,0 +1,492 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>1K-5K Hypercare - Finance Issues</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root{
+  --bg-canvas:#f4f6f4;
+  --surface:#ffffff;
+  --surface-2:#eef1ef;
+  --border:#dde3e0;
+  --ink-1:#161b19;
+  --ink-2:#4c5854;
+  --ink-3:#828e8a;
+  --accent:#0f6d5c;
+  --accent-ink:#ffffff;
+  --churn-bg:#fdeeec;
+  --churn-border:#d8695a;
+  --churn-ink:#a8402f;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg-canvas:#0e1210;
+    --surface:#171c1a;
+    --surface-2:#1e2422;
+    --border:#2b322f;
+    --ink-1:#f2f5f3;
+    --ink-2:#bcc7c2;
+    --ink-3:#7d8985;
+    --accent:#3fb69a;
+    --accent-ink:#08110d;
+    --churn-bg:#2a1713;
+    --churn-border:#a8402f;
+    --churn-ink:#e58c7a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg-canvas:#0e1210;
+  --surface:#171c1a;
+  --surface-2:#1e2422;
+  --border:#2b322f;
+  --ink-1:#f2f5f3;
+  --ink-2:#bcc7c2;
+  --ink-3:#7d8985;
+  --accent:#3fb69a;
+  --accent-ink:#08110d;
+  --churn-bg:#2a1713;
+  --churn-border:#a8402f;
+  --churn-ink:#e58c7a;
+}
+
+*{box-sizing:border-box;}
+body{background:var(--bg-canvas); color:var(--ink-1); font-family:'IBM Plex Sans',system-ui,sans-serif;}
+.wrap{max-width:1600px; margin:0 auto; padding:6px 24px 72px;}
+
+h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.5rem,2.4vw,2.05rem); letter-spacing:-0.01em; margin:0 0 6px; text-wrap:balance;}
+
+.pending-badge{
+  display:inline-flex; align-items:center; gap:6px; background:var(--surface-2); border:1px solid var(--border);
+  color:var(--ink-2); font-size:0.72rem; font-weight:600; letter-spacing:0.02em; text-transform:uppercase;
+  padding:5px 12px; border-radius:999px; margin-bottom:18px;
+}
+.pending-badge svg{display:block;}
+
+.toolrow{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:14px;}
+.filterlink{background:none; border:none; color:var(--ink-3); font-family:'IBM Plex Sans',sans-serif; font-size:0.74rem; text-decoration:underline; text-underline-offset:2px; cursor:pointer; padding:3px 2px;}
+.filterlink:hover{color:var(--ink-1);}
+.rowcount{color:var(--ink-3); font-size:0.78rem; font-family:'IBM Plex Mono',monospace; margin-left:auto;}
+
+.tablepanel{background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden;}
+.tablescroll{overflow:auto; max-width:100%;}
+table{border-collapse:collapse; width:100%; font-size:0.82rem; white-space:nowrap;}
+thead th{
+  position:sticky; top:0; background:var(--surface-2); text-align:left; padding:8px 10px;
+  font-family:'IBM Plex Sans',sans-serif; font-weight:600; color:var(--ink-1); border-bottom:1px solid var(--border);
+  user-select:none; white-space:nowrap;
+}
+thead th .arrow{display:inline-block; width:0.9em; color:var(--accent); font-size:0.72rem;}
+.th-inner{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+.th-label{cursor:pointer; display:flex; align-items:center;}
+.th-label:hover{color:var(--accent);}
+.th-filter-btn{
+  flex:0 0 auto; width:20px; height:20px; display:flex; align-items:center; justify-content:center;
+  background:transparent; border:1px solid transparent; border-radius:5px; padding:0; cursor:pointer; color:var(--ink-3);
+}
+.th-filter-btn:hover{background:var(--surface); color:var(--ink-1); border-color:var(--border);}
+.th-filter-btn.active{color:var(--accent); border-color:var(--accent); background:var(--surface);}
+.th-filter-btn svg{display:block;}
+tbody td{padding:9px 12px; border-bottom:1px solid var(--border); color:var(--ink-2); font-family:'IBM Plex Mono',monospace; font-size:0.8rem;}
+tbody tr:last-child td{border-bottom:none;}
+td.negative{color:var(--churn-ink);}
+
+.emptystate{padding:48px 24px; text-align:center; color:var(--ink-2);}
+.emptystate p{margin:0 auto 4px; max-width:56ch; line-height:1.6; font-size:0.92rem;}
+
+/* ---- column-filter popover (Google-Sheets-style multi-select), same as
+   hypercare-sellers.html ---- */
+.popover{
+  position:fixed; z-index:50; background:var(--surface); border:1px solid var(--border); border-radius:10px;
+  box-shadow:0 12px 32px rgba(0,0,0,.18); padding:8px; min-width:200px; max-width:280px;
+}
+.popover-search{
+  width:100%; box-sizing:border-box; background:var(--surface-2); border:1px solid var(--border); border-radius:6px;
+  padding:6px 8px; font-family:'IBM Plex Sans',sans-serif; font-size:0.78rem; color:var(--ink-1); margin-bottom:6px;
+}
+.popover-search:focus{outline:none; border-color:var(--accent);}
+.popover-actions{display:flex; gap:10px; padding:2px 6px 8px; border-bottom:1px solid var(--border); margin-bottom:6px;}
+.popover-action{background:none; border:none; color:var(--accent); font-family:'IBM Plex Sans',sans-serif; font-size:0.76rem; font-weight:600; cursor:pointer; padding:0;}
+.popover-action:hover{text-decoration:underline;}
+.popover-list{max-height:260px; overflow-y:auto; display:flex; flex-direction:column; gap:1px;}
+.popover-item{
+  display:flex; align-items:center; gap:7px; padding:5px 6px; border-radius:6px; cursor:pointer;
+  font-family:'IBM Plex Sans',sans-serif; font-size:0.78rem; color:var(--ink-1);
+}
+.popover-item:hover{background:var(--surface-2);}
+.popover-item input{flex:0 0 auto; cursor:pointer;}
+.popover-item span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+</style>
+<div class="wrap">
+  <h1>1K-5K Hypercare &mdash; Finance Issues</h1>
+
+  <div class="pending-badge">
+    <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.8v3.6l2.4 1.4"/></svg>
+    63 sellers with a negative current remittance cycle &middot; Eligible ARR &amp; Exemption Eligibility pending a data source
+  </div>
+
+  <div class="toolrow">
+    <button type="button" class="filterlink" id="clearFilters">Clear column filters</button>
+    <button type="button" class="filterlink" id="downloadCsv">Download CSV</button>
+    <span class="rowcount" id="rowcount">0 sellers</span>
+  </div>
+
+  <div class="tablepanel">
+    <div class="tablescroll">
+      <table id="dataTable">
+        <thead>
+          <tr id="headRow"></tr>
+        </thead>
+        <tbody id="bodyRows"></tbody>
+      </table>
+    </div>
+    <div class="emptystate" id="emptyState">
+      <p><b>No sellers currently carry a negative remittance balance.</b> This tab lists every 1K-5K Hypercare seller whose current payment cycle (card 15881) is negative, with the expense breakdown since their last positive cycle.</p>
+    </div>
+  </div>
+</div>
+
+<div id="filterPopover" class="popover" hidden>
+  <input type="text" class="popover-search" id="popoverSearch" placeholder="Search values&hellip;">
+  <div class="popover-actions">
+    <button type="button" class="popover-action" id="popoverSelectAll">Select all</button>
+    <button type="button" class="popover-action" id="popoverClear">Clear</button>
+  </div>
+  <div class="popover-list" id="popoverList"></div>
+</div>
+<script>
+// ---- column schema ----
+// Sourced from card 15881 ("Negative Remittance X Expense Attribution (inc.
+// Weight Delta)"), run in bulk against all 1K-5K Hypercare sellers rather
+// than the per-seller form the card is saved in (see the runbook for the
+// bulk-rewrite SQL). Seller ID/name/GL/GM are mirrored from
+// hypercare-sellers.html's DATA (same duplication pattern already used by
+// hypercare-overall.html) -- regenerate this file's DATA whenever that
+// file's roster or remittance figures refresh. Eligible ARR and Exemption
+// Eligibility are placeholders (TBD on data source, per Rishabh's own
+// framing) -- pushed as null until a source is confirmed.
+const COLUMNS = [
+  {key:'seller_id', label:'Seller ID'},
+  {key:'seller_name', label:'Seller name'},
+  {key:'gl_name', label:'GL Name'},
+  {key:'gm_name', label:'GM Name'},
+  {key:'last_positive_cycle', label:'Last Positive Cycle'},
+  {key:'last_positive_remittance_amount', label:'Last Positive Remittance Amount'},
+  {key:'current_cycle', label:'Current Cycle'},
+  {key:'current_remittance_amount', label:'Current Remittance Amount'},
+  {key:'shipping_charge', label:'Shipping Charge'},
+  {key:'weight_delta', label:'Weight Delta'},
+  {key:'nushop_commission', label:'Nushop Commission'},
+  {key:'marketing_spend', label:'Marketing Spend'},
+  {key:'return_refund', label:'Return / Refund'},
+  {key:'dispute', label:'Dispute'},
+  {key:'arrears', label:'Arrears'},
+  {key:'services_spend', label:'Services Spend'},
+  {key:'wallet_deduction_inflow', label:'Wallet Deduction Inflow'},
+  {key:'total_cod_amount', label:'Total COD Amount'},
+  {key:'total_online_amount', label:'Total Online Amount'},
+  {key:'cycles_since_last_positive', label:'Cycles Since Last Positive'},
+  {key:'eligible_arr', label:'Eligible ARR'},
+  {key:'exemption_eligibility', label:'Exemption Eligibility'},
+];
+
+// ---- data: every seller whose current remittance cycle is negative ----
+const DATA = [
+  {seller_id:'68fc89a7c5935e88f960e7d7', seller_name:'AAA RETAILHUB PRIVATE LIMITED', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-08-17 – 2026-08-19', last_positive_remittance_amount:484.93, current_cycle:'2026-09-21 – 2026-09-23', current_remittance_amount:-85.6, shipping_charge:-85, weight_delta:null, nushop_commission:0, marketing_spend:-0.6, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:4, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'691aeb94b3fc9df7da146e32', seller_name:'AARVEE', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-08-06 – 2026-08-09', last_positive_remittance_amount:515.66, current_cycle:'2026-08-10 – 2026-08-12', current_remittance_amount:-1.1, shipping_charge:0, weight_delta:null, nushop_commission:0, marketing_spend:-1.1, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:1, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69e9f889317e68f10e1f8a14', seller_name:'AASTHA Sarees', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-08-10 – 2026-08-12', last_positive_remittance_amount:13920.33, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-9416.67, shipping_charge:-13086.5, weight_delta:-544, nushop_commission:-2889.77, marketing_spend:-60837.4, return_refund:0, dispute:1300, arrears:0, services_spend:0, wallet_deduction_inflow:66097, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:13, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69df71f3aec13a33284584f6', seller_name:'Aarkennaco', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-07-09 – 2026-07-12', last_positive_remittance_amount:7205.5, current_cycle:'2026-08-20 – 2026-08-23', current_remittance_amount:-1023.43, shipping_charge:-609, weight_delta:null, nushop_commission:0, marketing_spend:-15.43, return_refund:-399, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:9, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69de57bc317e68f10e9f0a14', seller_name:'Aurafresh', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-07-06 – 2026-07-08', last_positive_remittance_amount:5885.91, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-21451.52, shipping_charge:-17616.44, weight_delta:-25777, nushop_commission:-2355.45, marketing_spend:-63903.13, return_refund:0, dispute:4448.5, arrears:0, services_spend:0, wallet_deduction_inflow:57975, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:23, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69edd411171862fe94d2dc40', seller_name:'BJ JEWELLERS', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-09-07 – 2026-09-09', last_positive_remittance_amount:2672.56, current_cycle:'2026-09-21 – 2026-09-23', current_remittance_amount:-6.09, shipping_charge:0, weight_delta:null, nushop_commission:0, marketing_spend:-6.09, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:2, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'68ef094ec90debec104893ae', seller_name:'CHEF CENTRIC LLP', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-06-15 – 2026-06-17', last_positive_remittance_amount:3589.15, current_cycle:'2026-09-10 – 2026-09-13', current_remittance_amount:-18.72, shipping_charge:-2427, weight_delta:-2606, nushop_commission:-69.34, marketing_spend:-21.88, return_refund:0, dispute:2499.5, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:10, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69b03b39a33138acbee62a8b', seller_name:'Dealioimpex LLP', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-08-27 – 2026-08-30', last_positive_remittance_amount:1217.11, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-2258.02, shipping_charge:-3551, weight_delta:-21679, nushop_commission:0, marketing_spend:-7.02, return_refund:0, dispute:1300, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:6, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'6937c54bdae58418ac533488', seller_name:'Dev', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-05-07 – 2026-05-10', last_positive_remittance_amount:300.63, current_cycle:'2026-07-23 – 2026-07-26', current_remittance_amount:-4229.21, shipping_charge:-4225, weight_delta:-4225, nushop_commission:0, marketing_spend:-4.21, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:8, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'693d6276317e68f10e248f4c', seller_name:'Elgixpro', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-04-02 – 2026-04-05', last_positive_remittance_amount:3883.5, current_cycle:'2026-06-18 – 2026-06-21', current_remittance_amount:-6406.99, shipping_charge:-15922.25, weight_delta:null, nushop_commission:-1513.92, marketing_spend:-24704.32, return_refund:0, dispute:823.5, arrears:0, services_spend:0, wallet_deduction_inflow:34910, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:10, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'6996e41c53897ca5da23965c', seller_name:'Frendora', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-06-08 – 2026-06-10', last_positive_remittance_amount:498.41, current_cycle:'2026-09-21 – 2026-09-23', current_remittance_amount:-41717.1, shipping_charge:-21013, weight_delta:null, nushop_commission:-3669.49, marketing_spend:-103913.61, return_refund:0, dispute:2494.5, arrears:0, services_spend:0, wallet_deduction_inflow:84384.5, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:26, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'699c40b0b5cb4ebd200c9616', seller_name:'Fun Nation', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-06-11 – 2026-06-14', last_positive_remittance_amount:1563.4, current_cycle:'2026-06-25 – 2026-06-28', current_remittance_amount:-392.97, shipping_charge:-370, weight_delta:null, nushop_commission:-13.28, marketing_spend:-9.69, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:4, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69b3c016084b1eeffa216210', seller_name:'GAMES WORLD', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-07-13 – 2026-07-15', last_positive_remittance_amount:1306.14, current_cycle:'2026-09-21 – 2026-09-23', current_remittance_amount:-17107.14, shipping_charge:-15692, weight_delta:-15977, nushop_commission:-602.86, marketing_spend:-12080.78, return_refund:0, dispute:309.5, arrears:0, services_spend:0, wallet_deduction_inflow:10959, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:14, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69e8daf6a38ee88857f8e8a8', seller_name:'Grid 11', gl_name:'Rayala Bhanu Sriraj', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-08-10 – 2026-08-12', last_positive_remittance_amount:5251.12, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-10024.36, shipping_charge:-15354, weight_delta:null, nushop_commission:-4319, marketing_spend:-61679.11, return_refund:-1199, dispute:552.5, arrears:0, services_spend:0, wallet_deduction_inflow:71974.25, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:13, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'695b51fb3abd30477e303a3c', seller_name:'H K Enterprise', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-05-25 – 2026-05-27', last_positive_remittance_amount:213.77, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-3402.06, shipping_charge:-3482, weight_delta:-2574, nushop_commission:-105.57, marketing_spend:-63.99, return_refund:0, dispute:249.5, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:20, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69940704e047dbb0070574bc', seller_name:'Indiacraft', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-06-01 – 2026-06-03', last_positive_remittance_amount:2483.37, current_cycle:'2026-09-10 – 2026-09-13', current_remittance_amount:-42283.63, shipping_charge:-50749, weight_delta:-48456, nushop_commission:-2941.89, marketing_spend:-32980.74, return_refund:0, dispute:2649, arrears:0, services_spend:0, wallet_deduction_inflow:41739, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:27, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'6882074b6ec5ae5201741c67', seller_name:'Jatin Balotiya', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-08-31 – 2026-09-02', last_positive_remittance_amount:863.29, current_cycle:'2026-09-03 – 2026-09-06', current_remittance_amount:-1.1, shipping_charge:0, weight_delta:-3092, nushop_commission:0, marketing_spend:-1.1, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:1, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'699ff827aa41db817bd36a2d', seller_name:'Krishna Art Gallery', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-08-13 – 2026-08-16', last_positive_remittance_amount:527.24, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-22257.53, shipping_charge:-22657, weight_delta:-24430, nushop_commission:-90.94, marketing_spend:-8.59, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:499, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:10, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69ef442246d9738ddc54e3e4', seller_name:'Krishna Sales', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-08-20 – 2026-08-23', last_positive_remittance_amount:1348.28, current_cycle:'2026-09-21 – 2026-09-23', current_remittance_amount:-771.95, shipping_charge:-3046, weight_delta:null, nushop_commission:-506.45, marketing_spend:0, return_refund:0, dispute:284.5, arrears:0, services_spend:0, wallet_deduction_inflow:2496, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:3, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69b55952bae7db7d24a1ee2f', seller_name:'KuKu Bags', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-06-01 – 2026-06-03', last_positive_remittance_amount:864.66, current_cycle:'2026-08-17 – 2026-08-19', current_remittance_amount:-1877.48, shipping_charge:-1875, weight_delta:-1875, nushop_commission:0, marketing_spend:-2.48, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:3, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'6986e2582d10f2f36ff73b01', seller_name:'Lavita', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-06-18 – 2026-06-21', last_positive_remittance_amount:426.65, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-5787.86, shipping_charge:-8843, weight_delta:-7754, nushop_commission:-155.26, marketing_spend:-80.6, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:3291, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:20, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'696494833eba7b6107a626b0', seller_name:'Lechain', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-05-21 – 2026-05-24', last_positive_remittance_amount:103.6, current_cycle:'2026-09-10 – 2026-09-13', current_remittance_amount:-14244.71, shipping_charge:-14110.52, weight_delta:-7878, nushop_commission:-1335.96, marketing_spend:-28448.23, return_refund:0, dispute:3343, arrears:0, services_spend:0, wallet_deduction_inflow:26307, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:20, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'690f5aa7c1a9cb0c8d26bad7', seller_name:'Little & Wise', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-09-10 – 2026-09-13', last_positive_remittance_amount:757.68, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-16.8, shipping_charge:0, weight_delta:null, nushop_commission:0, marketing_spend:-16.8, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:4, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69b2de02317e68f10e9abcce', seller_name:'Maahi Fashion', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-08-24 – 2026-08-26', last_positive_remittance_amount:2156.07, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-2951.2, shipping_charge:-2950, weight_delta:-2950, nushop_commission:0, marketing_spend:-1.2, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:5, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69b50971bc0278724f9b524c', seller_name:'Madhuram jewellers', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-05-11 – 2026-05-13', last_positive_remittance_amount:603.31, current_cycle:'2026-07-02 – 2026-07-05', current_remittance_amount:-12784.69, shipping_charge:-1263, weight_delta:null, nushop_commission:-950.42, marketing_spend:-28511.77, return_refund:0, dispute:1024.5, arrears:0, services_spend:0, wallet_deduction_inflow:16916, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:7, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69a2b86b632291ee097aec7c', seller_name:'Merindian Boot', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-07-20 – 2026-07-22', last_positive_remittance_amount:2030.3, current_cycle:'2026-08-17 – 2026-08-19', current_remittance_amount:-990, shipping_charge:-990, weight_delta:-990, nushop_commission:0, marketing_spend:0, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:3, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'6999da0739bd33d804c8349d', seller_name:'Nation Symbol', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-06-08 – 2026-06-10', last_positive_remittance_amount:529.39, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-174276.87, shipping_charge:-62941, weight_delta:null, nushop_commission:-5646.91, marketing_spend:-200764.46, return_refund:0, dispute:1575.5, arrears:0, services_spend:0, wallet_deduction_inflow:93500, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:22, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'698b4335317e68f10ef3d140', seller_name:'Nayansh', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-07-27 – 2026-07-29', last_positive_remittance_amount:2340.35, current_cycle:'2026-08-10 – 2026-08-12', current_remittance_amount:-454.43, shipping_charge:-418.5, weight_delta:null, nushop_commission:-18.73, marketing_spend:-17.2, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:4, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'690c7f85c7820b09cbd0b7f8', seller_name:'PURI HANDICRAFT', gl_name:'Sandhya Narwade', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-08-13 – 2026-08-16', last_positive_remittance_amount:1168.24, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-19378.91, shipping_charge:-43030.25, weight_delta:-3433, nushop_commission:-6490.43, marketing_spend:-97058.98, return_refund:-667, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:127867.75, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:12, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'6979c02425da34efa20b2bbd', seller_name:'Pavan patel', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-04-27 – 2026-04-29', last_positive_remittance_amount:7686.28, current_cycle:'2026-08-17 – 2026-08-19', current_remittance_amount:-7144.66, shipping_charge:-4519, weight_delta:-2254, nushop_commission:-373.52, marketing_spend:-11836.64, return_refund:0, dispute:1989.5, arrears:0, services_spend:0, wallet_deduction_inflow:7595, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:8, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'6958dbf2c1141425b8771441', seller_name:'RANIKA CREATIONS', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-08-20 – 2026-08-23', last_positive_remittance_amount:207.19, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-944.77, shipping_charge:-1400, weight_delta:-1222, nushop_commission:-33.62, marketing_spend:-10.15, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:499, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:6, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'691af4b5e4518dcffdb5a574', seller_name:'RIWAAZRANG', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-04-23 – 2026-04-26', last_positive_remittance_amount:7054.27, current_cycle:'2026-07-06 – 2026-07-08', current_remittance_amount:-1963.58, shipping_charge:-1074, weight_delta:null, nushop_commission:-367.41, marketing_spend:-9592.67, return_refund:0, dispute:2173.5, arrears:0, services_spend:0, wallet_deduction_inflow:6897, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:8, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'694bbe2e67079a2f3792efd2', seller_name:'Raatelrue', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-03-30 – 2026-04-01', last_positive_remittance_amount:1288.9, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-22152.0, shipping_charge:-14532, weight_delta:-4371, nushop_commission:-2401.75, marketing_spend:-56974.25, return_refund:-1500, dispute:2449, arrears:0, services_spend:0, wallet_deduction_inflow:50807, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:38, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69e862cc0b97bbe3d1b3b958', seller_name:'Read Office', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-09-07 – 2026-09-09', last_positive_remittance_amount:458.2, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-7997.1, shipping_charge:-7987, weight_delta:-14280, nushop_commission:0, marketing_spend:-10.1, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:5, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'6a3632e2317e68f10e55fc28', seller_name:'Ruchika Sharma', gl_name:'Rayala Bhanu Sriraj', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-09-14 – 2026-09-16', last_positive_remittance_amount:5630.44, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-5161.92, shipping_charge:-2445.5, weight_delta:null, nushop_commission:-470.5, marketing_spend:-13637.92, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:11392, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:3, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'6942a293c5d8f15a4215b0fe', seller_name:'SBL', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-08-13 – 2026-08-16', last_positive_remittance_amount:1323.48, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-313.32, shipping_charge:-31628, weight_delta:-1382, nushop_commission:-4173.73, marketing_spend:-59001.59, return_refund:0, dispute:2446, arrears:0, services_spend:0, wallet_deduction_inflow:92044, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:12, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69c23540d1e75cb2c3dbf303', seller_name:'SHAAN AUTO SPARES & ACCESSORIES', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-06-01 – 2026-06-03', last_positive_remittance_amount:3812.7, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-54709.07, shipping_charge:-100492.75, weight_delta:null, nushop_commission:-19308.31, marketing_spend:-213687.26, return_refund:-777, dispute:952.5, arrears:0, services_spend:0, wallet_deduction_inflow:278603.75, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:29, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'695025cad15f77c14e4a16dc', seller_name:'SHRI SHAKTHI GARMENTS', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-04-06 – 2026-04-08', last_positive_remittance_amount:813.21, current_cycle:'2026-04-20 – 2026-04-22', current_remittance_amount:-818.13, shipping_charge:-2194, weight_delta:null, nushop_commission:-51.35, marketing_spend:-23.78, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:1451, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:4, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'699f1489e3b403e118972657', seller_name:'SNAZZORY', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-05-04 – 2026-05-06', last_positive_remittance_amount:633.49, current_cycle:'2026-05-07 – 2026-05-10', current_remittance_amount:-267, shipping_charge:-267, weight_delta:null, nushop_commission:0, marketing_spend:0, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:1, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'694a467fab10a467d9d3c19d', seller_name:'SRIKANTA BAG', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-04-27 – 2026-04-29', last_positive_remittance_amount:6592.38, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-51832.42, shipping_charge:-76250, weight_delta:-12966, nushop_commission:-7977.19, marketing_spend:-153338.73, return_refund:599, dispute:1858.5, arrears:0, services_spend:0, wallet_deduction_inflow:183276, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:37, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'6971e98dd9f4f319d6b6057c', seller_name:'SUNNY KAPADIYA', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-04-09 – 2026-04-12', last_positive_remittance_amount:10162.79, current_cycle:'2026-09-14 – 2026-09-16', current_remittance_amount:-5398.04, shipping_charge:-1567, weight_delta:0, nushop_commission:-486.64, marketing_spend:-14237.9, return_refund:0, dispute:2248.5, arrears:0, services_spend:0, wallet_deduction_inflow:8645, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:13, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'699e98e48c6b44d5a163d856', seller_name:'SareeVaree', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-08-17 – 2026-08-19', last_positive_remittance_amount:867.94, current_cycle:'2026-09-07 – 2026-09-09', current_remittance_amount:-6773.46, shipping_charge:-1496, weight_delta:null, nushop_commission:-633.65, marketing_spend:-15214.06, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:10570.25, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:6, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'668bcd0e0ca28bdddccfb2a9', seller_name:'Secure Guard', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-06-11 – 2026-06-14', last_positive_remittance_amount:2883.2, current_cycle:'2026-08-24 – 2026-08-26', current_remittance_amount:-7103.45, shipping_charge:-11186, weight_delta:-6916, nushop_commission:-286.66, marketing_spend:-30.79, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:4400, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:13, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69e0857d317e68f10e475c51', seller_name:'Shakya Enterprises', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-07-02 – 2026-07-05', last_positive_remittance_amount:499, current_cycle:'2026-08-24 – 2026-08-26', current_remittance_amount:-7306.74, shipping_charge:-7491, weight_delta:-11185, nushop_commission:0, marketing_spend:-2.35, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:5, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69dca56579951c614eda0c20', seller_name:'Shop', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-06-08 – 2026-06-10', last_positive_remittance_amount:3725.01, current_cycle:'2026-09-14 – 2026-09-16', current_remittance_amount:-6181, shipping_charge:-6181, weight_delta:-5767, nushop_commission:0, marketing_spend:0, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:6, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69e9e90f317e68f10e1991f9', seller_name:'Skylume', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-09-07 – 2026-09-09', last_positive_remittance_amount:480.09, current_cycle:'2026-09-21 – 2026-09-23', current_remittance_amount:-3317.14, shipping_charge:-8382, weight_delta:-346392, nushop_commission:0, marketing_spend:-2.14, return_refund:0, dispute:5067, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:4, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69f9d7fb93382171aa43f831', seller_name:'Stampo', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-08-10 – 2026-08-12', last_positive_remittance_amount:75.13, current_cycle:'2026-09-21 – 2026-09-23', current_remittance_amount:-142.11, shipping_charge:-792, weight_delta:null, nushop_commission:-199.61, marketing_spend:0, return_refund:0, dispute:704.5, arrears:0, services_spend:0, wallet_deduction_inflow:145, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:9, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'6964f4a73185b1161fd14187', seller_name:'Sxteol Creations', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-04-02 – 2026-04-05', last_positive_remittance_amount:739.18, current_cycle:'2026-07-20 – 2026-07-22', current_remittance_amount:-3604, shipping_charge:-3604, weight_delta:-3432, nushop_commission:0, marketing_spend:0, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:3, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'6998523c317e68f10e10fab1', seller_name:'TenderTrove', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-07-13 – 2026-07-15', last_positive_remittance_amount:3040.58, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-43458.16, shipping_charge:-91881.5, weight_delta:-4851, nushop_commission:-9722.57, marketing_spend:-163568.34, return_refund:-299, dispute:753.5, arrears:0, services_spend:0, wallet_deduction_inflow:221259.75, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:21, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69bd237ac4c869c2c114aff3', seller_name:'Tralpha Products', gl_name:'Rayala Bhanu Sriraj', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-09-21 – 2026-09-23', last_positive_remittance_amount:1498.27, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-3781.37, shipping_charge:-1071, weight_delta:null, nushop_commission:-341.92, marketing_spend:-5431.45, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:3063, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:1, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69c633a7638df22b48dbea4f', seller_name:'Universal Traders', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-06-15 – 2026-06-17', last_positive_remittance_amount:207.55, current_cycle:'2026-09-17 – 2026-09-20', current_remittance_amount:-13397.99, shipping_charge:-2093, weight_delta:null, nushop_commission:-472.89, marketing_spend:-18044.1, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:7212, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:20, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'699ffa523ce4c36f3bf21ed7', seller_name:'Vastra Vedam', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-08-17 – 2026-08-19', last_positive_remittance_amount:799, current_cycle:'2026-09-03 – 2026-09-06', current_remittance_amount:-183.49, shipping_charge:-46, weight_delta:null, nushop_commission:0, marketing_spend:-8.46, return_refund:-699, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:4, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'6939586b317e68f10e194fdf', seller_name:'Venditor', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-04-23 – 2026-04-26', last_positive_remittance_amount:338.21, current_cycle:'2026-08-17 – 2026-08-19', current_remittance_amount:-19097.02, shipping_charge:-20126, weight_delta:-694, nushop_commission:-3111.37, marketing_spend:-63606.65, return_refund:0, dispute:2447, arrears:0, services_spend:0, wallet_deduction_inflow:65300, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:19, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'699ee630317e68f10e385ecc', seller_name:'XLI elextronics PVT LTD', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-08-31 – 2026-09-02', last_positive_remittance_amount:2049.44, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-5400.66, shipping_charge:-6137, weight_delta:-41128, nushop_commission:0, marketing_spend:-13.16, return_refund:0, dispute:749.5, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:6, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'698b29922e895eae789310fd', seller_name:'Zariyaan', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-08-03 – 2026-08-05', last_positive_remittance_amount:287.08, current_cycle:'2026-09-17 – 2026-09-20', current_remittance_amount:-7847.87, shipping_charge:-7774, weight_delta:-15788, nushop_commission:0, marketing_spend:-73.87, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:12, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'698c693a9899631d1acfeb36', seller_name:'Zarubya Saree', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-05-04 – 2026-05-06', last_positive_remittance_amount:1886.61, current_cycle:'2026-05-11 – 2026-05-13', current_remittance_amount:-271.52, shipping_charge:-267, weight_delta:null, nushop_commission:0, marketing_spend:-4.52, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:2, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69eda4f1edf8a3b9bb27d99c', seller_name:'Zenius India', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-06-11 – 2026-06-14', last_positive_remittance_amount:5761.58, current_cycle:'2026-09-10 – 2026-09-13', current_remittance_amount:-2776.69, shipping_charge:-5075.11, weight_delta:null, nushop_commission:-1155.97, marketing_spend:-23231.86, return_refund:0, dispute:336, arrears:0, services_spend:0, wallet_deduction_inflow:26350.25, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:8, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'6990248eb7e65245aada1feb', seller_name:'Zoha Studios', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-06-29 – 2026-07-01', last_positive_remittance_amount:962.48, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-4015.22, shipping_charge:-1310, weight_delta:null, nushop_commission:-412.64, marketing_spend:-12350.58, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:9929, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:8, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69c212cfdd7020f042b12b02', seller_name:'baldaniyalaljeebhai', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-07-09 – 2026-07-12', last_positive_remittance_amount:154.96, current_cycle:'2026-08-20 – 2026-08-23', current_remittance_amount:-4741.12, shipping_charge:-5411, weight_delta:-10905, nushop_commission:-24.74, marketing_spend:-4.38, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:699, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:6, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'695f47d04a37c21bcbc1f061', seller_name:'hynahomm', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-05-18 – 2026-05-20', last_positive_remittance_amount:2773.56, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-6523.35, shipping_charge:-9423, weight_delta:-1162, nushop_commission:-837.55, marketing_spend:-14836.8, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:18574, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:32, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69ca70e4b045ef19cc6f80a1', seller_name:'kiago', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-08-27 – 2026-08-30', last_positive_remittance_amount:275.23, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-2203.6, shipping_charge:-5452.45, weight_delta:-140071.1, nushop_commission:0, marketing_spend:-0.15, return_refund:0, dispute:3249, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:8, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69e7148a65bf37a906a87c88', seller_name:'primedeskmanufacturing', gl_name:'Piyush Dubey', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-07-02 – 2026-07-05', last_positive_remittance_amount:509.03, current_cycle:'2026-09-17 – 2026-09-20', current_remittance_amount:-30383.0, shipping_charge:-8039.8, weight_delta:-14122, nushop_commission:0, marketing_spend:-22343.2, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:0, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:11, eligible_arr:null, exemption_eligibility:null},
+  {seller_id:'69d3715e90a4747ba3c7fd67', seller_name:'zeekha', gl_name:'Rayala Bhanu Sriraj', gm_name:'Anshika Satpathy', last_positive_cycle:'2026-09-21 – 2026-09-23', last_positive_remittance_amount:5557.75, current_cycle:'2026-09-24 – 2026-09-27', current_remittance_amount:-1018.24, shipping_charge:-1964, weight_delta:null, nushop_commission:-259.85, marketing_spend:-3285.39, return_refund:0, dispute:0, arrears:0, services_spend:0, wallet_deduction_inflow:4491, total_cod_amount:0, total_online_amount:0, cycles_since_last_positive:1, eligible_arr:null, exemption_eligibility:null}
+];
+
+const headRow = document.getElementById('headRow');
+const bodyRows = document.getElementById('bodyRows');
+const clearFiltersBtn = document.getElementById('clearFilters');
+const downloadCsvBtn = document.getElementById('downloadCsv');
+const rowcountEl = document.getElementById('rowcount');
+const emptyState = document.getElementById('emptyState');
+const tableEl = document.getElementById('dataTable');
+const popoverEl = document.getElementById('filterPopover');
+const popoverSearchEl = document.getElementById('popoverSearch');
+const popoverListEl = document.getElementById('popoverList');
+const popoverSelectAllBtn = document.getElementById('popoverSelectAll');
+const popoverClearBtn = document.getElementById('popoverClear');
+
+let sortKey = 'current_remittance_amount';
+let sortDir = 1; // most negative first by default
+
+const colFilterValues = {};
+
+function valueToFilterString(v){
+  return (v === null || v === undefined || v === '') ? '__BLANK__' : String(v);
+}
+
+function distinctValuesFor(key){
+  const vals = new Set(DATA.map(r => valueToFilterString(r[key])));
+  const arr = [...vals];
+  arr.sort((a, b) => {
+    if (a === '__BLANK__') return 1;
+    if (b === '__BLANK__') return -1;
+    return a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'});
+  });
+  return arr;
+}
+
+let popoverKey = null;
+let currentFilterBtn = null;
+
+function updateFilterBtnState(){
+  if (currentFilterBtn) currentFilterBtn.classList.toggle('active', !!colFilterValues[popoverKey]);
+}
+
+function applyPopoverSearch(){
+  const q = popoverSearchEl.value.trim().toLowerCase();
+  popoverListEl.querySelectorAll('.popover-item').forEach(item => {
+    const text = item.querySelector('span').textContent.toLowerCase();
+    item.style.display = text.includes(q) ? '' : 'none';
+  });
+}
+
+function openPopoverFor(key, btn){
+  popoverKey = key;
+  currentFilterBtn = btn;
+  const all = distinctValuesFor(key);
+  const selected = colFilterValues[key] ? colFilterValues[key] : new Set(all);
+  popoverSearchEl.value = '';
+  popoverListEl.innerHTML = '';
+  all.forEach(v => {
+    const item = document.createElement('label');
+    item.className = 'popover-item';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = selected.has(v);
+    cb.addEventListener('change', () => {
+      if (!colFilterValues[key]) colFilterValues[key] = new Set(all);
+      if (cb.checked) colFilterValues[key].add(v); else colFilterValues[key].delete(v);
+      if (colFilterValues[key].size === all.length) delete colFilterValues[key];
+      updateFilterBtnState();
+      render();
+    });
+    const span = document.createElement('span');
+    span.textContent = v === '__BLANK__' ? '(Blanks)' : v;
+    item.appendChild(cb);
+    item.appendChild(span);
+    popoverListEl.appendChild(item);
+  });
+  const rect = btn.getBoundingClientRect();
+  popoverEl.hidden = false;
+  const top = Math.min(rect.bottom + 4, window.innerHeight - 60);
+  const left = Math.min(rect.left, window.innerWidth - 292);
+  popoverEl.style.top = top + 'px';
+  popoverEl.style.left = Math.max(8, left) + 'px';
+  popoverSearchEl.focus();
+}
+
+function closePopover(){
+  popoverKey = null;
+  currentFilterBtn = null;
+  popoverEl.hidden = true;
+}
+
+popoverSearchEl.addEventListener('input', applyPopoverSearch);
+popoverSelectAllBtn.addEventListener('click', () => {
+  if (!popoverKey) return;
+  delete colFilterValues[popoverKey];
+  const key = popoverKey, btn = currentFilterBtn;
+  openPopoverFor(key, btn);
+  updateFilterBtnState();
+  render();
+});
+popoverClearBtn.addEventListener('click', () => {
+  if (!popoverKey) return;
+  colFilterValues[popoverKey] = new Set();
+  const key = popoverKey, btn = currentFilterBtn;
+  openPopoverFor(key, btn);
+  updateFilterBtnState();
+  render();
+});
+popoverEl.addEventListener('click', (e) => e.stopPropagation());
+document.addEventListener('click', (e) => {
+  if (popoverEl.hidden) return;
+  if (e.target.closest && e.target.closest('.th-filter-btn')) return;
+  closePopover();
+});
+window.addEventListener('scroll', () => closePopover(), true);
+
+const FILTER_ICON_SVG = '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 3h12l-4.5 5.5v3.5l-3 1.5v-5z"/></svg>';
+
+function buildHead(){
+  headRow.innerHTML = '';
+  COLUMNS.forEach(col => {
+    const th = document.createElement('th');
+    const inner = document.createElement('div');
+    inner.className = 'th-inner';
+
+    const labelWrap = document.createElement('span');
+    labelWrap.className = 'th-label';
+    labelWrap.textContent = col.label + ' ';
+    const arrow = document.createElement('span');
+    arrow.className = 'arrow';
+    arrow.textContent = sortKey === col.key ? (sortDir === 1 ? '▲' : '▼') : '';
+    labelWrap.appendChild(arrow);
+    labelWrap.addEventListener('click', () => {
+      if (sortKey === col.key) sortDir = -sortDir; else { sortKey = col.key; sortDir = 1; }
+      buildHead();
+      render();
+    });
+
+    const filterBtn = document.createElement('button');
+    filterBtn.type = 'button';
+    filterBtn.className = 'th-filter-btn' + (colFilterValues[col.key] ? ' active' : '');
+    filterBtn.setAttribute('aria-label', 'Filter ' + col.label);
+    filterBtn.innerHTML = FILTER_ICON_SVG;
+    filterBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (popoverKey === col.key && !popoverEl.hidden){ closePopover(); return; }
+      openPopoverFor(col.key, filterBtn);
+    });
+
+    inner.appendChild(labelWrap);
+    inner.appendChild(filterBtn);
+    th.appendChild(inner);
+    headRow.appendChild(th);
+  });
+}
+
+let lastRenderedRows = [];
+
+function render(){
+  let rows = DATA.filter(r => {
+    return Object.keys(colFilterValues).every(key => {
+      const set = colFilterValues[key];
+      if (!set) return true;
+      return set.has(valueToFilterString(r[key]));
+    });
+  });
+  if (sortKey){
+    rows = rows.slice().sort((a,b) => {
+      const av = a[sortKey], bv = b[sortKey];
+      const an = Number(av), bn = Number(bv);
+      let cmp;
+      if (!Number.isNaN(an) && !Number.isNaN(bn) && av !== '' && bv !== '' && av !== null && bv !== null){
+        cmp = an - bn;
+      } else {
+        cmp = String(av ?? '').localeCompare(String(bv ?? ''));
+      }
+      return cmp * sortDir;
+    });
+  }
+  bodyRows.innerHTML = '';
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    COLUMNS.forEach(c => {
+      const td = document.createElement('td');
+      td.textContent = r[c.key] ?? '';
+      if ((c.key === 'current_remittance_amount' || c.key === 'shipping_charge' || c.key === 'weight_delta' ||
+           c.key === 'nushop_commission' || c.key === 'marketing_spend' || c.key === 'return_refund' ||
+           c.key === 'dispute' || c.key === 'arrears' || c.key === 'services_spend') &&
+          typeof r[c.key] === 'number' && r[c.key] < 0){
+        td.classList.add('negative');
+      }
+      tr.appendChild(td);
+    });
+    bodyRows.appendChild(tr);
+  });
+  rowcountEl.textContent = rows.length + (rows.length === 1 ? ' seller' : ' sellers') +
+    (rows.length === DATA.length ? '' : ' of ' + DATA.length) +
+    (DATA.length ? '' : ' (no sellers currently negative)');
+  tableEl.style.display = DATA.length ? 'table' : 'none';
+  emptyState.style.display = DATA.length ? 'none' : 'block';
+  lastRenderedRows = rows;
+}
+
+function toCsvValue(v){
+  if (v === null || v === undefined) return '';
+  const s = String(v);
+  if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+function downloadCsv(){
+  const lines = [COLUMNS.map(c => toCsvValue(c.label)).join(',')];
+  lastRenderedRows.forEach(r => {
+    lines.push(COLUMNS.map(c => toCsvValue(r[c.key])).join(','));
+  });
+  const blob = new Blob([lines.join('\r\n')], {type: 'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'finance-issues-' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+downloadCsvBtn.addEventListener('click', downloadCsv);
+
+clearFiltersBtn.addEventListener('click', () => {
+  Object.keys(colFilterValues).forEach(k => delete colFilterValues[k]);
+  closePopover();
+  buildHead();
+  render();
+});
+
+buildHead();
+render();
+</script>
+</body></html>
