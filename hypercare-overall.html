@@ -41,32 +41,117 @@
 
 *{box-sizing:border-box;}
 body{background:var(--bg-canvas); color:var(--ink-1); font-family:'IBM Plex Sans',system-ui,sans-serif;}
-.wrap{max-width:1080px; margin:0 auto; padding:6px 24px 72px;}
+.wrap{max-width:1200px; margin:0 auto; padding:6px 24px 72px;}
 
-h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.5rem,2.4vw,2.05rem); letter-spacing:-0.01em; margin:0 0 6px; text-wrap:balance;}
-.subtitle{color:var(--ink-2); font-size:0.98rem; max-width:66ch; line-height:1.5; margin:0 0 22px;}
+h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.5rem,2.4vw,2.05rem); letter-spacing:-0.01em; margin:0 0 18px; text-wrap:balance;}
 
-.panel{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:36px 28px; margin-bottom:20px; text-align:center;}
-.panel-title{font-family:'Sora',system-ui,sans-serif; font-weight:600; font-size:1.05rem; margin-bottom:8px;}
-.pending-badge{
-  display:inline-flex; align-items:center; gap:6px; background:var(--surface-2); border:1px solid var(--border);
-  color:var(--ink-2); font-size:0.78rem; font-weight:600; letter-spacing:0.02em; text-transform:uppercase;
-  padding:6px 14px; border-radius:999px; margin-bottom:16px;
-}
-.pending-badge svg{display:block;}
-.panel p{color:var(--ink-2); font-size:0.94rem; line-height:1.6; max-width:56ch; margin:0 auto;}
+.metric-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:16px;}
+.metric-card{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:22px 24px;}
+.metric-label{font-family:'IBM Plex Sans',sans-serif; font-size:0.78rem; font-weight:600; color:var(--ink-2); text-transform:uppercase; letter-spacing:0.03em; margin-bottom:8px;}
+.metric-count{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:2.3rem; color:var(--ink-1); line-height:1;}
+.metric-count-suffix{font-family:'IBM Plex Sans',sans-serif; font-weight:500; font-size:0.9rem; color:var(--ink-3); margin-left:6px;}
+.metric-gls{font-family:'IBM Plex Sans',sans-serif; font-size:0.72rem; color:var(--ink-3); margin-top:6px; line-height:1.5;}
+.metric-sub{margin-top:16px; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:7px;}
+.metric-sub-row{display:flex; align-items:baseline; justify-content:space-between; gap:10px;}
+.metric-sub-row .k{font-family:'IBM Plex Sans',sans-serif; font-size:0.8rem; color:var(--ink-2);}
+.metric-sub-row .v{font-family:'IBM Plex Mono',monospace; font-size:0.8rem; color:var(--ink-3);}
 </style>
 <div class="wrap">
   <h1>1K-5K Hypercare &mdash; Overall Metrics</h1>
-  <p class="subtitle">Part of the 1K-5K Hypercare view, alongside <a href="hypercare-sellers.html">All sellers</a>.</p>
 
-  <div class="panel">
-    <div class="pending-badge">
-      <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.8v3.6l2.4 1.4"/></svg>
-      Awaiting content
-    </div>
-    <div class="panel-title">This subtab is not yet built out</div>
-    <p>The metrics and layout for Overall Metrics haven&rsquo;t been specified yet. This placeholder will be replaced once the content and data for this view are provided.</p>
-  </div>
+  <div class="metric-grid" id="metricGrid"></div>
 </div>
+<script>
+// ---- seller -> GL mirror, kept in sync with hypercare-sellers.html's DATA on every
+// weekly refresh (only the gl_name field is needed here to size each bucket). ----
+const SELLER_GLS = ['Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Sandhya Narwade', 'Sandhya Narwade', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Sandhya Narwade', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Rayala Bhanu Sriraj', 'Piyush Dubey', 'Sandhya Narwade', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Rayala Bhanu Sriraj', 'Sandhya Narwade', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Rayala Bhanu Sriraj', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Sandhya Narwade', 'Piyush Dubey', 'Sandhya Narwade', 'Piyush Dubey', 'Rayala Bhanu Sriraj', 'Sandhya Narwade', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Sandhya Narwade', 'Piyush Dubey', 'Rayala Bhanu Sriraj', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Sandhya Narwade', 'Piyush Dubey', 'Piyush Dubey', 'Rayala Bhanu Sriraj'];
+
+// ---- GL -> bucket mapping. Edit the `gls` lists freely (names must match the
+// gl_name values above exactly); a GL not listed in any bucket just doesn't count
+// toward one. Card 1 (total) always counts every seller regardless of this mapping. ----
+const GL_BUCKETS = [
+  {
+    key: 'pause21',
+    label: '21 days pause bucket',
+    gls: ['Piyush Dubey', 'Sachin Srivastava'],
+    metrics: ['Revived', 'Spend/Revived', 'BH%', 'Potential%', 'Bucket ARR'],
+  },
+  {
+    key: 'nonscaling',
+    label: 'Non-scaling bucket',
+    gls: ['Rayala Bhanu Sriraj'],
+    metrics: ['Spend/Live', 'BH%', 'Potential%', 'Bucket ARR'],
+  },
+  {
+    key: 'loss',
+    label: 'Loss accounts bucket',
+    gls: ['Sandhya Narwade'],
+    metrics: ['Spend/Live', 'BH%', 'Potential%', 'Bucket ARR'],
+  },
+];
+
+const grid = document.getElementById('metricGrid');
+
+function makeCard({label, count, gls, metrics}){
+  const card = document.createElement('div');
+  card.className = 'metric-card';
+
+  const lbl = document.createElement('div');
+  lbl.className = 'metric-label';
+  lbl.textContent = label;
+  card.appendChild(lbl);
+
+  const countEl = document.createElement('div');
+  countEl.className = 'metric-count';
+  countEl.textContent = count;
+  const suffix = document.createElement('span');
+  suffix.className = 'metric-count-suffix';
+  suffix.textContent = count === 1 ? 'seller' : 'sellers';
+  countEl.appendChild(suffix);
+  card.appendChild(countEl);
+
+  if (gls && gls.length){
+    const glsEl = document.createElement('div');
+    glsEl.className = 'metric-gls';
+    glsEl.textContent = 'GL' + (gls.length > 1 ? 's' : '') + ': ' + gls.join(', ');
+    card.appendChild(glsEl);
+  }
+
+  if (metrics && metrics.length){
+    const sub = document.createElement('div');
+    sub.className = 'metric-sub';
+    metrics.forEach(m => {
+      const row = document.createElement('div');
+      row.className = 'metric-sub-row';
+      const k = document.createElement('span');
+      k.className = 'k';
+      k.textContent = m;
+      const v = document.createElement('span');
+      v.className = 'v';
+      v.textContent = 'TBD';
+      row.appendChild(k);
+      row.appendChild(v);
+      sub.appendChild(row);
+    });
+    card.appendChild(sub);
+  }
+
+  return card;
+}
+
+grid.appendChild(makeCard({
+  label: 'Total accounts in Hypercare',
+  count: SELLER_GLS.length,
+}));
+
+GL_BUCKETS.forEach(bucket => {
+  const count = SELLER_GLS.filter(gl => bucket.gls.includes(gl)).length;
+  grid.appendChild(makeCard({
+    label: bucket.label,
+    count,
+    gls: bucket.gls,
+    metrics: bucket.metrics,
+  }));
+});
+</script>
 </body></html>
