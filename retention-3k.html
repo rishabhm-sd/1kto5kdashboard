@@ -81,6 +81,13 @@ h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.5
 .filtersep{width:1px; align-self:stretch; background:var(--border); margin:0 1px;}
 .grouplabel{color:var(--ink-3); font-size:0.7rem; font-weight:500; padding:0 1px;}
 
+.gmglrow{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:2px 0 14px;}
+.gmglselect{
+  background:var(--surface-2); border:1px solid var(--border); border-radius:7px; color:var(--ink-1);
+  font-family:'IBM Plex Sans',sans-serif; font-size:0.82rem; padding:6px 10px; cursor:pointer; max-width:220px;
+}
+.gmglselect:disabled{opacity:.5; cursor:not-allowed;}
+
 .chart-scroll{overflow-x:auto;}
 svg{display:block; width:100%; height:auto; font-family:'IBM Plex Mono',monospace;}
 .gridline{stroke:var(--border); stroke-width:1;}
@@ -118,7 +125,7 @@ footer{color:var(--ink-3); font-size:0.76rem; margin-top:28px; line-height:1.6;}
   <div class="defrow">
     <div class="chip">Retained means<b>&#8377;3,000+ marketing spend that week</b></div>
     <div class="chip">Cohorts<b>Feb&ndash;Sep 2026 HIT months</b></div>
-    <div class="chip">Sellers tracked<b>417</b></div>
+    <div class="chip">Sellers tracked<b id="sellersTrackedVal">417</b></div>
     <div class="chip">Week 0<b>the first ISO week of the seller's HIT month</b></div>
   </div>
 
@@ -126,6 +133,14 @@ footer{color:var(--ink-3); font-size:0.76rem; margin-top:28px; line-height:1.6;}
     <div class="panel-head">
       <div class="panel-title">Retention by relative week</div>
       <button class="toggle" id="viewToggle" aria-pressed="false">Table view</button>
+    </div>
+
+    <div class="gmglrow">
+      <span class="grouplabel">GM:</span>
+      <select id="gmSelect" class="gmglselect"><option value="">All GMs</option></select>
+      <span class="grouplabel">GL:</span>
+      <select id="glSelect" class="gmglselect" disabled><option value="">All GLs</option></select>
+      <span class="grouplabel" id="gmglCount"></span>
     </div>
 
     <div id="filterRow" class="filterrow"></div>
@@ -155,39 +170,553 @@ footer{color:var(--ink-3); font-size:0.76rem; margin-top:28px; line-height:1.6;}
 <div id="tooltip"></div>
 
 <script>
-const DATA = {"2026-02":[{"pct":73.3,"n_retained":11,"cohort_size":15},{"pct":93.3,"n_retained":14,"cohort_size":15},{"pct":100.0,"n_retained":15,"cohort_size":15},{"pct":93.3,"n_retained":14,"cohort_size":15},{"pct":100.0,"n_retained":15,"cohort_size":15},{"pct":80.0,"n_retained":12,"cohort_size":15},{"pct":86.7,"n_retained":13,"cohort_size":15},{"pct":73.3,"n_retained":11,"cohort_size":15},{"pct":73.3,"n_retained":11,"cohort_size":15},{"pct":73.3,"n_retained":11,"cohort_size":15},{"pct":73.3,"n_retained":11,"cohort_size":15},{"pct":66.7,"n_retained":10,"cohort_size":15},{"pct":80.0,"n_retained":12,"cohort_size":15},{"pct":53.3,"n_retained":8,"cohort_size":15},{"pct":53.3,"n_retained":8,"cohort_size":15},{"pct":60.0,"n_retained":9,"cohort_size":15},{"pct":46.7,"n_retained":7,"cohort_size":15},{"pct":40.0,"n_retained":6,"cohort_size":15},{"pct":46.7,"n_retained":7,"cohort_size":15},{"pct":46.7,"n_retained":7,"cohort_size":15},{"pct":46.7,"n_retained":7,"cohort_size":15},{"pct":40.0,"n_retained":6,"cohort_size":15},{"pct":46.7,"n_retained":7,"cohort_size":15},{"pct":40.0,"n_retained":6,"cohort_size":15},{"pct":33.3,"n_retained":5,"cohort_size":15},{"pct":33.3,"n_retained":5,"cohort_size":15},{"pct":40.0,"n_retained":6,"cohort_size":15},{"pct":40.0,"n_retained":6,"cohort_size":15},{"pct":40.0,"n_retained":6,"cohort_size":15},{"pct":40.0,"n_retained":6,"cohort_size":15},{"pct":33.3,"n_retained":5,"cohort_size":15},{"pct":33.3,"n_retained":5,"cohort_size":15},{"pct":40.0,"n_retained":6,"cohort_size":15},{"pct":33.3,"n_retained":5,"cohort_size":15},{"pct":26.7,"n_retained":4,"cohort_size":15}],"2026-03":[{"pct":95.8,"n_retained":23,"cohort_size":24},{"pct":87.5,"n_retained":21,"cohort_size":24},{"pct":95.8,"n_retained":23,"cohort_size":24},{"pct":91.7,"n_retained":22,"cohort_size":24},{"pct":87.5,"n_retained":21,"cohort_size":24},{"pct":83.3,"n_retained":20,"cohort_size":24},{"pct":70.8,"n_retained":17,"cohort_size":24},{"pct":75.0,"n_retained":18,"cohort_size":24},{"pct":75.0,"n_retained":18,"cohort_size":24},{"pct":66.7,"n_retained":16,"cohort_size":24},{"pct":50.0,"n_retained":12,"cohort_size":24},{"pct":54.2,"n_retained":13,"cohort_size":24},{"pct":45.8,"n_retained":11,"cohort_size":24},{"pct":50.0,"n_retained":12,"cohort_size":24},{"pct":54.2,"n_retained":13,"cohort_size":24},{"pct":45.8,"n_retained":11,"cohort_size":24},{"pct":50.0,"n_retained":12,"cohort_size":24},{"pct":45.8,"n_retained":11,"cohort_size":24},{"pct":50.0,"n_retained":12,"cohort_size":24},{"pct":58.3,"n_retained":14,"cohort_size":24},{"pct":54.2,"n_retained":13,"cohort_size":24},{"pct":58.3,"n_retained":14,"cohort_size":24},{"pct":54.2,"n_retained":13,"cohort_size":24},{"pct":50.0,"n_retained":12,"cohort_size":24},{"pct":45.8,"n_retained":11,"cohort_size":24},{"pct":45.8,"n_retained":11,"cohort_size":24},{"pct":41.7,"n_retained":10,"cohort_size":24},{"pct":45.8,"n_retained":11,"cohort_size":24},{"pct":41.7,"n_retained":10,"cohort_size":24},{"pct":33.3,"n_retained":8,"cohort_size":24},{"pct":37.5,"n_retained":9,"cohort_size":24}],"2026-04":[{"pct":81.4,"n_retained":48,"cohort_size":59},{"pct":88.1,"n_retained":52,"cohort_size":59},{"pct":88.1,"n_retained":52,"cohort_size":59},{"pct":84.7,"n_retained":50,"cohort_size":59},{"pct":86.4,"n_retained":51,"cohort_size":59},{"pct":81.4,"n_retained":48,"cohort_size":59},{"pct":79.7,"n_retained":47,"cohort_size":59},{"pct":76.3,"n_retained":45,"cohort_size":59},{"pct":72.9,"n_retained":43,"cohort_size":59},{"pct":74.6,"n_retained":44,"cohort_size":59},{"pct":67.8,"n_retained":40,"cohort_size":59},{"pct":64.4,"n_retained":38,"cohort_size":59},{"pct":62.7,"n_retained":37,"cohort_size":59},{"pct":64.4,"n_retained":38,"cohort_size":59},{"pct":62.7,"n_retained":37,"cohort_size":59},{"pct":61.0,"n_retained":36,"cohort_size":59},{"pct":57.6,"n_retained":34,"cohort_size":59},{"pct":55.9,"n_retained":33,"cohort_size":59},{"pct":55.9,"n_retained":33,"cohort_size":59},{"pct":49.2,"n_retained":29,"cohort_size":59},{"pct":50.8,"n_retained":30,"cohort_size":59},{"pct":52.5,"n_retained":31,"cohort_size":59},{"pct":47.5,"n_retained":28,"cohort_size":59},{"pct":47.5,"n_retained":28,"cohort_size":59},{"pct":47.5,"n_retained":28,"cohort_size":59},{"pct":42.4,"n_retained":25,"cohort_size":59}],"2026-05":[{"pct":78.8,"n_retained":52,"cohort_size":66},{"pct":84.8,"n_retained":56,"cohort_size":66},{"pct":92.4,"n_retained":61,"cohort_size":66},{"pct":97.0,"n_retained":64,"cohort_size":66},{"pct":97.0,"n_retained":64,"cohort_size":66},{"pct":93.9,"n_retained":62,"cohort_size":66},{"pct":92.4,"n_retained":61,"cohort_size":66},{"pct":90.9,"n_retained":60,"cohort_size":66},{"pct":83.3,"n_retained":55,"cohort_size":66},{"pct":80.3,"n_retained":53,"cohort_size":66},{"pct":78.8,"n_retained":52,"cohort_size":66},{"pct":75.8,"n_retained":50,"cohort_size":66},{"pct":69.7,"n_retained":46,"cohort_size":66},{"pct":66.7,"n_retained":44,"cohort_size":66},{"pct":66.7,"n_retained":44,"cohort_size":66},{"pct":66.7,"n_retained":44,"cohort_size":66},{"pct":63.6,"n_retained":42,"cohort_size":66},{"pct":63.6,"n_retained":42,"cohort_size":66},{"pct":57.6,"n_retained":38,"cohort_size":66},{"pct":62.1,"n_retained":41,"cohort_size":66},{"pct":63.6,"n_retained":42,"cohort_size":66},{"pct":59.1,"n_retained":39,"cohort_size":66}],"2026-06":[{"pct":86.4,"n_retained":38,"cohort_size":44},{"pct":95.5,"n_retained":42,"cohort_size":44},{"pct":97.7,"n_retained":43,"cohort_size":44},{"pct":95.5,"n_retained":42,"cohort_size":44},{"pct":93.2,"n_retained":41,"cohort_size":44},{"pct":88.6,"n_retained":39,"cohort_size":44},{"pct":86.4,"n_retained":38,"cohort_size":44},{"pct":81.8,"n_retained":36,"cohort_size":44},{"pct":79.5,"n_retained":35,"cohort_size":44},{"pct":77.3,"n_retained":34,"cohort_size":44},{"pct":70.5,"n_retained":31,"cohort_size":44},{"pct":68.2,"n_retained":30,"cohort_size":44},{"pct":70.5,"n_retained":31,"cohort_size":44},{"pct":63.6,"n_retained":28,"cohort_size":44},{"pct":65.9,"n_retained":29,"cohort_size":44},{"pct":59.1,"n_retained":26,"cohort_size":44},{"pct":61.4,"n_retained":27,"cohort_size":44}],"2026-07":[{"pct":76.7,"n_retained":46,"cohort_size":60},{"pct":86.7,"n_retained":52,"cohort_size":60},{"pct":98.3,"n_retained":59,"cohort_size":60},{"pct":91.7,"n_retained":55,"cohort_size":60},{"pct":90.0,"n_retained":54,"cohort_size":60},{"pct":90.0,"n_retained":54,"cohort_size":60},{"pct":88.3,"n_retained":53,"cohort_size":60},{"pct":88.3,"n_retained":53,"cohort_size":60},{"pct":76.7,"n_retained":46,"cohort_size":60},{"pct":75.0,"n_retained":45,"cohort_size":60},{"pct":78.3,"n_retained":47,"cohort_size":60},{"pct":73.3,"n_retained":44,"cohort_size":60},{"pct":70.0,"n_retained":42,"cohort_size":60}],"2026-08":[{"pct":84.0,"n_retained":63,"cohort_size":75},{"pct":98.7,"n_retained":74,"cohort_size":75},{"pct":89.3,"n_retained":67,"cohort_size":75},{"pct":89.3,"n_retained":67,"cohort_size":75},{"pct":90.7,"n_retained":68,"cohort_size":75},{"pct":92.0,"n_retained":69,"cohort_size":75},{"pct":82.7,"n_retained":62,"cohort_size":75},{"pct":74.7,"n_retained":56,"cohort_size":75},{"pct":65.3,"n_retained":49,"cohort_size":75}],"2026-09":[{"pct":83.8,"n_retained":62,"cohort_size":74},{"pct":91.9,"n_retained":68,"cohort_size":74},{"pct":90.5,"n_retained":67,"cohort_size":74},{"pct":87.8,"n_retained":65,"cohort_size":74}]};
-
+// ---- static definitions ----
 const MONTH_LABEL = {"2026-02":"Feb","2026-03":"Mar","2026-04":"Apr","2026-05":"May","2026-06":"Jun","2026-07":"Jul","2026-08":"Aug","2026-09":"Sep"};
 const SERIES_VARS = ["--s1","--s2","--s3","--s4","--s5","--s6","--s7","--s8"];
-const cohorts = Object.keys(DATA);
+const ALL_COHORT_KEYS = Object.keys(MONTH_LABEL).sort();
 
-// Overall retention across ALL cohorts -- reached-only base, same logic as the
-// churn-cohort tab's Overall line. Each week's denominator is only the
-// sellers whose HIT-month cohort is actually old enough to have reached that
-// relative week (an immature-cohort filter applied per point), not a fixed
-// 417 held constant. base[i]/retained[i] are the summed cohort_size/n_retained
-// across whichever cohorts contribute at week i, read straight off DATA above.
-const OVERALL_META = {
-  label: 'Overall · 1-5K', color: '--accent', total: 417,
-  base:     [417,417,417,417, 343,343,343,343,343, 268,268,268,268, 208,208,208,208, 164,164,164,164,164, 98,98,98,98, 39,39,39,39,39, 15,15,15,15],
-  retained: [343,379,387,379, 314,304,291,279,257, 203,193,185,179, 130,131,126,122, 92,90,91,92,90, 48,46,44,41, 16,17,16,14,14, 5,6,5,4],
-  cohortsReach: [8,8,8,8, 7,7,7,7,7, 6,6,6,6, 5,5,5,5, 4,4,4,4,4, 3,3,3,3, 2,2,2,2,2, 1,1,1,1]
+// ---- per-seller weekly retention flags for the 417-seller 1-5K population,
+// pulled from the same Metabase query the weekly refresh runs (see the
+// runbook's Query C), plus each seller's GM/GL tag (card 7753). One '1'/'0'
+// character per completed relative week since the seller's own HIT month --
+// this is what lets the GM/GL dropdowns below recompute the whole chart for
+// an arbitrary subset instead of only ever showing the full population. ----
+const SELLERS = [
+  {seller_id:'6581480ab69e050d10a0f89a', cohort:'2026-06', gm:'Aastha Jha', gl:'Sankhajit Ghosh', w:'11011101111111111'},
+  {seller_id:'65b1417de4c89214a6843c3a', cohort:'2026-08', gm:null, gl:null, w:'111111000'},
+  {seller_id:'6620f62f4eb18dfd2a8f2370', cohort:'2026-05', gm:'Ayushi Yadav', gl:'Shivon Bansal', w:'1111111111111111111111'},
+  {seller_id:'668bcd0e0ca28bdddccfb2a9', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'00011111010000000000000000'},
+  {seller_id:'66a763c566d5d999484e89f1', cohort:'2026-05', gm:'Aastha Jha', gl:'Aitesam Khan', w:'0111111111111111111111'},
+  {seller_id:'684d0d3c9d2fa47255ab9f6c', cohort:'2026-04', gm:'Aashirbad Sabat', gl:'Shivam Kumar', w:'11111111111111111111111111'},
+  {seller_id:'684d5d2eab3ced65cd9b6767', cohort:'2026-06', gm:'Aastha Jha', gl:'Sankhajit Ghosh', w:'11111111111111111'},
+  {seller_id:'68500624ec0b17bdeef59f5a', cohort:'2026-09', gm:'Aastha Jha', gl:'Hardik Grover', w:'1111'},
+  {seller_id:'68528652fe4954ac8188d100', cohort:'2026-08', gm:'Biswas Churiwal', gl:null, w:'111111111'},
+  {seller_id:'6882074b6ec5ae5201741c67', cohort:'2026-08', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'011100000'},
+  {seller_id:'6891d214ea5f7df778e56bb4', cohort:'2026-03', gm:'Vikas Tiwari', gl:null, w:'1011111111111111111111111111111'},
+  {seller_id:'6891e6ed873f6f86a3f8dc8b', cohort:'2026-07', gm:'Satyaveer Kumar', gl:'Jaison s', w:'1111111111111'},
+  {seller_id:'689aede1e092741677ddfd23', cohort:'2026-08', gm:'Aastha Jha', gl:'Hardik Grover', w:'011111011'},
+  {seller_id:'68aff593859590b2aa413521', cohort:'2026-05', gm:'Shubham Goyal', gl:'SHREYASH KOTLAWAR', w:'1111111111111111111111'},
+  {seller_id:'68c015dd317e68f10e190e4c', cohort:'2026-04', gm:'Aastha Jha', gl:'Aitesam Khan', w:'11111111111111111111111111'},
+  {seller_id:'68c8f7ebab75f093e462d38f', cohort:'2026-07', gm:'Aastha Jha', gl:'Priyanshu Raj', w:'0011101111111'},
+  {seller_id:'68d93d44eca0848e8fbcddad', cohort:'2026-02', gm:'Aastha Jha', gl:'Hardik Grover', w:'11111111111010000000000000001011100'},
+  {seller_id:'68ef094ec90debec104893ae', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111110000000000000000'},
+  {seller_id:'68fc89a7c5935e88f960e7d7', cohort:'2026-03', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111111111111111111101110000000'},
+  {seller_id:'68fca7af85db9bb67d04496a', cohort:'2026-06', gm:'Aastha Jha', gl:'Sankhajit Ghosh', w:'11111111111111111'},
+  {seller_id:'6901d546317e68f10eeab22e', cohort:'2026-04', gm:'Simran S', gl:null, w:'11111111111111111111111111'},
+  {seller_id:'6909ee7ebe3f41c2ef181096', cohort:'2026-03', gm:'Anubhav Kumar', gl:null, w:'1111111111111111111111111111111'},
+  {seller_id:'690af916317e68f10e246782', cohort:'2026-04', gm:'Aniket Bhujang', gl:'Mannat Chawla', w:'01111111111111111111111100'},
+  {seller_id:'690b431bf3bda8ce7029069b', cohort:'2026-04', gm:'Aashirbad Sabat', gl:'Shivam Kumar', w:'11101111111111111100000000'},
+  {seller_id:'690c7f85c7820b09cbd0b7f8', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Sandhya Narwade', w:'1111111111111111111111'},
+  {seller_id:'690dc668aecd8be117cd6ced', cohort:'2026-04', gm:'Aniket Bhujang', gl:'Mannat Chawla', w:'11111111111111111111111111'},
+  {seller_id:'690f5aa7c1a9cb0c8d26bad7', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111111111111111110110000'},
+  {seller_id:'69148c79317e68f10ed71482', cohort:'2026-02', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111111111111110000000000000000000'},
+  {seller_id:'69169df6fcb2084c70617a7c', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'01000010000000000000000000'},
+  {seller_id:'69184709d388f84547c25c64', cohort:'2026-02', gm:'Aakash A', gl:'Naina Kumari', w:'11111111111111111111111111111111111'},
+  {seller_id:'691aeb94b3fc9df7da146e32', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111111111111000000000'},
+  {seller_id:'691af4b5e4518dcffdb5a574', cohort:'2026-02', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111110011110000000000000000000000'},
+  {seller_id:'691c53a8510393681c74a31a', cohort:'2026-04', gm:'Aniket Bhujang', gl:'Mannat Chawla', w:'11111111111111111110011111'},
+  {seller_id:'691d9460317e68f10e730b54', cohort:'2026-03', gm:'Aastha Jha', gl:'Parth Mohanty', w:'1111111111000011111111110000000'},
+  {seller_id:'691da096317e68f10e76b605', cohort:'2026-05', gm:'Satyaveer Kumar', gl:'Jaison s', w:'1111111111111111111111'},
+  {seller_id:'69200487dda34ac204711ff5', cohort:'2026-02', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111111000000000000000000000000000'},
+  {seller_id:'6924759312afcedf769a73ac', cohort:'2026-05', gm:'Manorama Yadav', gl:null, w:'1111111111111111111111'},
+  {seller_id:'6926a64a4f765d1c20e9b8c5', cohort:'2026-02', gm:'Aastha Jha', gl:'Hardik Grover', w:'01111111111111111001111000000000000'},
+  {seller_id:'692802e275bee395b2a64453', cohort:'2026-03', gm:'Suraj Jogani', gl:null, w:'1011101111011111111111111111111'},
+  {seller_id:'69284d44bfa1a3612fb6b797', cohort:'2026-03', gm:'Aastha Jha', gl:'Hardik Grover', w:'1011111111111111110111101111100'},
+  {seller_id:'692948e2bf950db48c56e1f9', cohort:'2026-08', gm:'Aakash A', gl:'Komal Giri', w:'011111111'},
+  {seller_id:'692aa1add695af4fc6d87a2f', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111111111110000000000'},
+  {seller_id:'692d8e5b1063f557d16c0b7a', cohort:'2026-02', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111111100000000000000000000000000'},
+  {seller_id:'6930021c317e68f10eef0524', cohort:'2026-04', gm:'Anubhav Kumar', gl:null, w:'11111111111111111111111111'},
+  {seller_id:'69313f0020f904d4535128a3', cohort:'2026-03', gm:'Aakash A', gl:'Naina Kumari', w:'1111111111111111111111011111101'},
+  {seller_id:'69327529aecb8e56409497cf', cohort:'2026-03', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1100000000000000000000000000000'},
+  {seller_id:'6932e54f58c0d89cef7b4120', cohort:'2026-03', gm:'Manorama Yadav', gl:null, w:'1111110110000011111111111111111'},
+  {seller_id:'6933e6ff15410aaf7f5dbe94', cohort:'2026-02', gm:'Aastha Jha', gl:'Hardik Grover', w:'11111000000010010010111111111111111'},
+  {seller_id:'6933eebe15a5b56cde8dbd2c', cohort:'2026-02', gm:'Aastha Jha', gl:'Hardik Grover', w:'11111011111111111111111111111111111'},
+  {seller_id:'6933fdf6aecb8e56409c2a56', cohort:'2026-05', gm:'Sweta Singh', gl:null, w:'1111111111111111111111'},
+  {seller_id:'6937c54bdae58418ac533488', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111000000000000000000000'},
+  {seller_id:'6938333b3d736ff18f67420e', cohort:'2026-03', gm:'Aakash A', gl:'Naina Kumari', w:'1111110000111111101111111111111'},
+  {seller_id:'69392875f4a741fdd425ee85', cohort:'2026-05', gm:'Shubham Goyal', gl:'SHREYASH KOTLAWAR', w:'1111111111111111111111'},
+  {seller_id:'693945e3dc96074448b6a78f', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'01100111111111111110000000'},
+  {seller_id:'6939586b317e68f10e194fdf', cohort:'2026-03', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'0111110111111100000000000000000'},
+  {seller_id:'693bf70f2a734d590edbfe2d', cohort:'2026-02', gm:'Simran S', gl:null, w:'11111111111111111111111111111111111'},
+  {seller_id:'693c1028298b88db3c778fc3', cohort:'2026-05', gm:null, gl:null, w:'1111110111000000000000'},
+  {seller_id:'693c38fcf682ea54d7d474a3', cohort:'2026-05', gm:'Manorama Yadav', gl:null, w:'1111111111111111111111'},
+  {seller_id:'693d6276317e68f10e248f4c', cohort:'2026-03', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111111000000000000000000000000'},
+  {seller_id:'693fae5f9ce737b701dad16f', cohort:'2026-03', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111111111000000000000000000000'},
+  {seller_id:'6942a293c5d8f15a4215b0fe', cohort:'2026-02', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111110111111111111111100111100000'},
+  {seller_id:'6945293f1f05be46f4754e2c', cohort:'2026-07', gm:'Ayushi Yadav', gl:'Shivon Bansal', w:'1111111111111'},
+  {seller_id:'694a33e0317e68f10e9c610e', cohort:'2026-03', gm:'Aastha Jha', gl:'Hardik Grover', w:'1111111110000000001111100001011'},
+  {seller_id:'694a467fab10a467d9d3c19d', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111111110000000000000000'},
+  {seller_id:'694bbe2e67079a2f3792efd2', cohort:'2026-03', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111111111100000000000000000000'},
+  {seller_id:'694bd2a6247b854dad13a3da', cohort:'2026-03', gm:'Aastha Jha', gl:'Parth Mohanty', w:'1111110111011110111111111111110'},
+  {seller_id:'695025cad15f77c14e4a16dc', cohort:'2026-03', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1110000000000000000000000000000'},
+  {seller_id:'69514b31de722192f6e71d9d', cohort:'2026-02', gm:'Anubhav Kumar', gl:null, w:'11111111111110000000000000000000000'},
+  {seller_id:'6953986d34d14dbd9c5f1fb2', cohort:'2026-02', gm:'Aastha Jha', gl:'Hardik Grover', w:'01101111111111111111001111110100110'},
+  {seller_id:'6954c95af39bb4204a8ff47c', cohort:'2026-04', gm:'Aashirbad Sabat', gl:'Shivam Kumar', w:'11111111111111111111111111'},
+  {seller_id:'695796eb7dd7978a00d15be5', cohort:'2026-02', gm:'Ravi Singh', gl:null, w:'01111111111111111111100000000000000'},
+  {seller_id:'6958dbf2c1141425b8771441', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111111100000000000000'},
+  {seller_id:'695a0a9c9e4bef2b8c4c4fd2', cohort:'2026-03', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111111111111110000000000000000'},
+  {seller_id:'695b51fb3abd30477e303a3c', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111000110000000000000000'},
+  {seller_id:'695b92b87dbd49083627e27b', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111111110111110000000000'},
+  {seller_id:'695b9a8d1d9b264827bff6c0', cohort:'2026-03', gm:'Aastha Jha', gl:'Hardik Grover', w:'1111111000000000000111111111111'},
+  {seller_id:'695d04ebae7f6c5173e2d3a5', cohort:'2026-04', gm:'Aniket Bhujang', gl:'Mannat Chawla', w:'11011111111111110001111110'},
+  {seller_id:'695f47d04a37c21bcbc1f061', cohort:'2026-03', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111111111110000000000000000000'},
+  {seller_id:'695f74bfe890c12cc4e5787a', cohort:'2026-05', gm:'Biswas Churiwal', gl:null, w:'1111111111111111111000'},
+  {seller_id:'6961f0b010db062590b1e2f0', cohort:'2026-07', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1100000000000'},
+  {seller_id:'696494833eba7b6107a626b0', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11100111110000000000000000'},
+  {seller_id:'6964f158d69c4c89cf1eb880', cohort:'2026-06', gm:'Suraj Jogani', gl:null, w:'11111111111111100'},
+  {seller_id:'6964f4a73185b1161fd14187', cohort:'2026-02', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'00111000000000000000000000000000000'},
+  {seller_id:'6965bce67554a026e8cad89d', cohort:'2026-03', gm:null, gl:null, w:'1111000111000000000000000000000'},
+  {seller_id:'6968df900668a021df50223c', cohort:'2026-07', gm:'Aastha Jha', gl:'Parth Mohanty', w:'1111111111111'},
+  {seller_id:'6969ed43637f017d6027d06a', cohort:'2026-04', gm:'Aashirbad Sabat', gl:'Shivam Kumar', w:'11111111111111111111111111'},
+  {seller_id:'696f7023e20a632ab82707ad', cohort:'2026-04', gm:'Biswas Churiwal', gl:null, w:'11111111111111111111111111'},
+  {seller_id:'6971e98dd9f4f319d6b6057c', cohort:'2026-03', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111111000000000000000000000000'},
+  {seller_id:'697213b699ce26772e04b4ed', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111110000000000000000000'},
+  {seller_id:'69723a5fb7e8361d51f3f501', cohort:'2026-04', gm:null, gl:null, w:'11111111100000000000000000'},
+  {seller_id:'69730fc8c256d81477b77c69', cohort:'2026-04', gm:'Biswas Churiwal', gl:null, w:'11111111111111111111111111'},
+  {seller_id:'697316f1cf121a7b9cfe8888', cohort:'2026-04', gm:'Aastha Jha', gl:'Hardik Grover', w:'11111101111111111111111110'},
+  {seller_id:'69733854317e68f10eb20117', cohort:'2026-05', gm:'Aastha Jha', gl:'Sankhajit Ghosh', w:'1111111111111111111111'},
+  {seller_id:'6974d8eff5b59e038ec04622', cohort:'2026-03', gm:'Aastha Jha', gl:'Hardik Grover', w:'1111111111110111111111111111101'},
+  {seller_id:'6976fbbd2b8eb3926e91aa98', cohort:'2026-03', gm:'Manav Bansal', gl:null, w:'1111111111111111111111111100000'},
+  {seller_id:'69786dcc4ba3f12cc43ecc53', cohort:'2026-04', gm:'Anubhav Kumar', gl:null, w:'11111111100011111111111111'},
+  {seller_id:'6979c02425da34efa20b2bbd', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'10111000000000000000000000'},
+  {seller_id:'697cb3503032e5c748c23e78', cohort:'2026-05', gm:'Anubhav Kumar', gl:null, w:'1111111111111111111111'},
+  {seller_id:'697de666827f1d811cbc167f', cohort:'2026-06', gm:'Aastha Jha', gl:'Sankhajit Ghosh', w:'11111111000100000'},
+  {seller_id:'6980740fd5ac427b13fae4de', cohort:'2026-05', gm:'Satyaveer Kumar', gl:'Jaison s', w:'1110100000000100111111'},
+  {seller_id:'69820178317e68f10e043d0a', cohort:'2026-04', gm:'Vikas Tiwari', gl:null, w:'11101111011111111110011111'},
+  {seller_id:'69844651317e68f10eaecc09', cohort:'2026-06', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11100000000000000'},
+  {seller_id:'69847504128577464b0a9585', cohort:'2026-05', gm:'Satyaveer Kumar', gl:'Jaison s', w:'1111111111110001111111'},
+  {seller_id:'6986e2582d10f2f36ff73b01', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111110111000000000000001'},
+  {seller_id:'698712ad317e68f10e948bbc', cohort:'2026-04', gm:'Aashirbad Sabat', gl:'Harshita Gupta', w:'01111100001111111111111111'},
+  {seller_id:'69889087317e68f10e0ef085', cohort:'2026-06', gm:'Sweta Singh', gl:null, w:'11111111111111111'},
+  {seller_id:'698b29922e895eae789310fd', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111111111111000000000'},
+  {seller_id:'698b4335317e68f10ef3d140', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111111111000001000000000'},
+  {seller_id:'698c693a9899631d1acfeb36', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'01110000000000000000000000'},
+  {seller_id:'698c839a8ef0408b4113a801', cohort:'2026-09', gm:'Aashirbad Sabat', gl:'Shivam Kumar', w:'1111'},
+  {seller_id:'698e027c2be7f8993b7e0fc0', cohort:'2026-07', gm:'Aashirbad Sabat', gl:'Harshita Gupta', w:'1110000100111'},
+  {seller_id:'698f1f27007abc3d12d345f4', cohort:'2026-04', gm:null, gl:null, w:'10000000000000000000000000'},
+  {seller_id:'6990248eb7e65245aada1feb', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111111110000000000111'},
+  {seller_id:'69903193b7e65245aada62d4', cohort:'2026-05', gm:'Aniket Bhujang', gl:'Saurabh Kumar', w:'0011111000000000000000'},
+  {seller_id:'69906957317e68f10e9506a2', cohort:'2026-04', gm:'Manorama Yadav', gl:null, w:'11101101111111111111111111'},
+  {seller_id:'69907c8fe928f137f8ca46b8', cohort:'2026-04', gm:'Aniket Bhujang', gl:'Mannat Chawla', w:'01011011111111111111111111'},
+  {seller_id:'69940704e047dbb0070574bc', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'00110011111100000000000000'},
+  {seller_id:'6994463cec15669a348b8ba7', cohort:'2026-04', gm:'Suraj Jogani', gl:null, w:'11111111111111111111111111'},
+  {seller_id:'69944ac89c45718e135b68a6', cohort:'2026-05', gm:'Ayushi Yadav', gl:'Shivon Bansal', w:'1111111111111111111110'},
+  {seller_id:'69955236bbf9360c55653266', cohort:'2026-04', gm:'Aniket Bhujang', gl:'Mannat Chawla', w:'11111111111111111111111110'},
+  {seller_id:'6996e00ae430946d0df786fa', cohort:'2026-08', gm:'Aashirbad Sabat', gl:'Shivam Kumar', w:'111111100'},
+  {seller_id:'6996e41c53897ca5da23965c', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'0011111111111011000000'},
+  {seller_id:'6998523c317e68f10e10fab1', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111111111111111110111'},
+  {seller_id:'6999da0739bd33d804c8349d', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'01011111111111110000000000'},
+  {seller_id:'699c26ea317e68f10e4b1b02', cohort:'2026-05', gm:'Ayushi Yadav', gl:'Shivon Bansal', w:'1111111111111100000011'},
+  {seller_id:'699c3657524a3a0bdfe109eb', cohort:'2026-04', gm:'Simran S', gl:null, w:'10000000001001111111111111'},
+  {seller_id:'699c40b0b5cb4ebd200c9616', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111100011000000000000000'},
+  {seller_id:'699d798a317e68f10eb92fa2', cohort:'2026-04', gm:'Aniket Bhujang', gl:'Mannat Chawla', w:'11111111111111111111110010'},
+  {seller_id:'699e98e48c6b44d5a163d856', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111111111111100011110000'},
+  {seller_id:'699ee630317e68f10e385ecc', cohort:'2026-07', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111011100000'},
+  {seller_id:'699ef0c0317e68f10e3d0b80', cohort:'2026-05', gm:'Aashirbad Sabat', gl:'Harshita Gupta', w:'1111111111111111111111'},
+  {seller_id:'699f141fe3b403e118972401', cohort:'2026-05', gm:'Ayushi Yadav', gl:'Shivon Bansal', w:'1111111111111111111111'},
+  {seller_id:'699f1489e3b403e118972657', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11100000000000000000000000'},
+  {seller_id:'699ff827aa41db817bd36a2d', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111111111000000000000000'},
+  {seller_id:'699ffa523ce4c36f3bf21ed7', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1110111100000000000000'},
+  {seller_id:'69a020803ce4c36f3bf35cc2', cohort:'2026-04', gm:'Anubhav Kumar', gl:null, w:'11111111111111111111111111'},
+  {seller_id:'69a04869317e68f10eb732d5', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Sandhya Narwade', w:'1111111111111111111111'},
+  {seller_id:'69a05c0a99e4339b2ca79baf', cohort:'2026-05', gm:'Anubhav Kumar', gl:null, w:'1111001111111111111111'},
+  {seller_id:'69a18023317e68f10e22beef', cohort:'2026-07', gm:'Aashirbad Sabat', gl:'Harshita Gupta', w:'1111111111110'},
+  {seller_id:'69a287a747394b986d0db901', cohort:'2026-05', gm:'Aashirbad Sabat', gl:'Harshita Gupta', w:'1101111111111111111111'},
+  {seller_id:'69a29defe30177a4dc1d9c51', cohort:'2026-04', gm:'Vikas Tiwari', gl:null, w:'11111111111111111111111111'},
+  {seller_id:'69a2b86b632291ee097aec7c', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'10111000000100000000000000'},
+  {seller_id:'69a57abb7f10bf02a5d48393', cohort:'2026-04', gm:'Aashirbad Sabat', gl:'Shivam Kumar', w:'11111111111111111111111111'},
+  {seller_id:'69a6914b0f61998b5a49d679', cohort:'2026-07', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111111100000'},
+  {seller_id:'69aa7f78317e68f10eee48a1', cohort:'2026-04', gm:'Sweta Singh', gl:null, w:'01111111111111111111111111'},
+  {seller_id:'69ac0eda6bd5ae0d3e7cdeb2', cohort:'2026-04', gm:'Suraj Jogani', gl:null, w:'11111111111111111111111000'},
+  {seller_id:'69ac22112e2370e7de42866e', cohort:'2026-06', gm:'Ayushi Yadav', gl:'Tuleshwar Sahu', w:'11111111110011111'},
+  {seller_id:'69ad4959317e68f10ece791a', cohort:'2026-08', gm:'PRIYANSHU NANDAN', gl:'LEHAR GUPTA', w:'111111110'},
+  {seller_id:'69aec6e0cc8be0a51497d0bc', cohort:'2026-04', gm:'Anubhav Kumar', gl:null, w:'11111111111111111110000000'},
+  {seller_id:'69b03b39a33138acbee62a8b', cohort:'2026-06', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111111111000000'},
+  {seller_id:'69b2865bcb4f86a634780f4b', cohort:'2026-04', gm:'Suraj Jogani', gl:null, w:'11111111110111111111100111'},
+  {seller_id:'69b2de02317e68f10e9abcce', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111111111111111000000'},
+  {seller_id:'69b3c016084b1eeffa216210', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111011111010000000000'},
+  {seller_id:'69b42da4812f0faf04c1c604', cohort:'2026-07', gm:'Simran S', gl:null, w:'1111111111111'},
+  {seller_id:'69b50971bc0278724f9b524c', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111111000000000000000000'},
+  {seller_id:'69b514c8317e68f10e4db5ee', cohort:'2026-05', gm:'Aashirbad Sabat', gl:'Harshita Gupta', w:'1111111111111111111111'},
+  {seller_id:'69b54b98a4f20ef1bb4c5658', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111110000000000000000000'},
+  {seller_id:'69b556fd317e68f10e66423e', cohort:'2026-06', gm:'Ayushi Yadav', gl:'Tuleshwar Sahu', w:'11111111111111111'},
+  {seller_id:'69b55952bae7db7d24a1ee2f', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111111000000000000000000'},
+  {seller_id:'69b79e6ed48db88f8a452805', cohort:'2026-05', gm:'Vikas Tiwari', gl:null, w:'1111111111111111111111'},
+  {seller_id:'69b7e0f36a564dfcf6852c26', cohort:'2026-09', gm:'Aniket Bhujang', gl:'Himanshu mall', w:'0001'},
+  {seller_id:'69b8185412fea7414ef474e0', cohort:'2026-05', gm:'Aashirbad Sabat', gl:'Harshita Gupta', w:'1101101111111111111111'},
+  {seller_id:'69b8fe5f22e412ea49a0388d', cohort:'2026-08', gm:'Anshika Satpathy', gl:'Sandhya Narwade', w:'111111111'},
+  {seller_id:'69b9041b24eae980cd73be31', cohort:'2026-04', gm:'Suraj Jogani', gl:null, w:'11111111111111111111111111'},
+  {seller_id:'69ba7e62e2d4f4d5937e8edf', cohort:'2026-07', gm:'Aastha Jha', gl:'Sankhajit Ghosh', w:'1111111111111'},
+  {seller_id:'69ba9c09a8636fba31af8442', cohort:'2026-05', gm:'Satyaveer Kumar', gl:'Jaison s', w:'1111111111111111111111'},
+  {seller_id:'69baaff3317e68f10e14a829', cohort:'2026-08', gm:'Roshita Dulani', gl:'Pushp Raj', w:'110111111'},
+  {seller_id:'69bbdf35afd4f0cb20f608c3', cohort:'2026-06', gm:'Simran S', gl:null, w:'11111111111111111'},
+  {seller_id:'69bd237ac4c869c2c114aff3', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Rayala Bhanu Sriraj', w:'1111111111111111111111'},
+  {seller_id:'69bd23f0e818ca6523bf0a2f', cohort:'2026-06', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111111000000000'},
+  {seller_id:'69be529e2f5804a1f64ab7e2', cohort:'2026-07', gm:'Shubham Goyal', gl:'SHREYASH KOTLAWAR', w:'1111110111111'},
+  {seller_id:'69c0f143f9cf517be2238375', cohort:'2026-05', gm:'Shubham Goyal', gl:'SHREYASH KOTLAWAR', w:'0011111111111100011111'},
+  {seller_id:'69c0f6bdf578fd375b1eb07a', cohort:'2026-06', gm:'PRIYANSHU NANDAN', gl:'LEHAR GUPTA', w:'11111111111011111'},
+  {seller_id:'69c13183317e68f10e106129', cohort:'2026-07', gm:'Manorama Yadav', gl:null, w:'1111111111111'},
+  {seller_id:'69c1360d8f229538a8351bdf', cohort:'2026-07', gm:'Shubham Goyal', gl:'SHREYASH KOTLAWAR', w:'1111111110011'},
+  {seller_id:'69c212cfdd7020f042b12b02', cohort:'2026-04', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111111111111000000000000'},
+  {seller_id:'69c23540d1e75cb2c3dbf303', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111111111110000000000'},
+  {seller_id:'69c377fe1073712d5d021d4b', cohort:'2026-05', gm:'Aastha Jha', gl:'Aitesam Khan', w:'1011111111111111110000'},
+  {seller_id:'69c3ca9c370b1cae49835814', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'0011110000000000000000'},
+  {seller_id:'69c3d7ea1565104a344a4499', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111111100000000000000'},
+  {seller_id:'69c3f69f317e68f10ee49a00', cohort:'2026-06', gm:'Sweta Singh', gl:null, w:'01111111111111111'},
+  {seller_id:'69c4e0bffece413843e771cb', cohort:'2026-05', gm:'Aashirbad Sabat', gl:'Shivam Kumar', w:'1111111111111111110000'},
+  {seller_id:'69c4eeaa317e68f10e2ab99e', cohort:'2026-05', gm:'Ayushi Yadav', gl:'Shivon Bansal', w:'1111111111111111111111'},
+  {seller_id:'69c538f9317e68f10e42cbc0', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'0101111111100010001110'},
+  {seller_id:'69c53e58317e68f10e44543f', cohort:'2026-05', gm:'Aastha Jha', gl:'Aitesam Khan', w:'1111111111111111110111'},
+  {seller_id:'69c633a7638df22b48dbea4f', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111111000000000000000'},
+  {seller_id:'69c679a70a1e1a55aeed925d', cohort:'2026-04', gm:'Aastha Jha', gl:'Aitesam Khan', w:'00111111111111111111111111'},
+  {seller_id:'69c7b86c4b9948aa56cd919a', cohort:'2026-07', gm:'Aastha Jha', gl:'Priyanshu Raj', w:'1111111111100'},
+  {seller_id:'69c7fa35317e68f10effe3eb', cohort:'2026-06', gm:'Aastha Jha', gl:'Sankhajit Ghosh', w:'11111111111111111'},
+  {seller_id:'69ca70e4b045ef19cc6f80a1', cohort:'2026-06', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111111110000000'},
+  {seller_id:'69ca858d317e68f10eae9c4e', cohort:'2026-06', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111111110000000'},
+  {seller_id:'69cb5832317e68f10edf652a', cohort:'2026-06', gm:'Suraj Jogani', gl:null, w:'11111111111111111'},
+  {seller_id:'69cbb8e887e294746a69d85f', cohort:'2026-05', gm:'Suraj Jogani', gl:null, w:'1101101111111111111111'},
+  {seller_id:'69cbd85ac2ea297bfdea5cbd', cohort:'2026-06', gm:'Aniket Bhujang', gl:'Saurabh Kumar', w:'11111111111111111'},
+  {seller_id:'69ce569e317e68f10ec0f67c', cohort:'2026-07', gm:'Ayushi Yadav', gl:'Tuleshwar Sahu', w:'1111111111111'},
+  {seller_id:'69cfd01593d54eaff9f12529', cohort:'2026-05', gm:'Aashirbad Sabat', gl:'Shivam Kumar', w:'1111111111111111111111'},
+  {seller_id:'69d0bbd9cedf122efdaaeba9', cohort:'2026-08', gm:'Aastha Jha', gl:'SHRADHA KUMARI', w:'111111110'},
+  {seller_id:'69d3715e90a4747ba3c7fd67', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Rayala Bhanu Sriraj', w:'1111111111111111111110'},
+  {seller_id:'69d4c3cb8e60f2b02716bc9a', cohort:'2026-05', gm:'Sweta Singh', gl:null, w:'1111111111111111111111'},
+  {seller_id:'69d4d03f16ccce91990833c5', cohort:'2026-06', gm:'Aastha Jha', gl:'Aitesam Khan', w:'11111111111111111'},
+  {seller_id:'69d4dcce32cf4076263b221f', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'0111111111111100000111'},
+  {seller_id:'69d5ea3324507f168a9679d0', cohort:'2026-08', gm:'Aashirbad Sabat', gl:'Shivam Kumar', w:'111111111'},
+  {seller_id:'69d61e1c317e68f10e07a769', cohort:'2026-07', gm:'Satyaveer Kumar', gl:'Jaison s', w:'0111111111111'},
+  {seller_id:'69d623410e23dc1321341f3f', cohort:'2026-07', gm:'Aniket Bhujang', gl:'Saurabh Kumar', w:'0111111111111'},
+  {seller_id:'69d7987656389304575eb5d3', cohort:'2026-05', gm:'Simran S', gl:null, w:'1111111111111111111111'},
+  {seller_id:'69d79e361a8c21f3c24f1804', cohort:'2026-06', gm:'Ayushi Yadav', gl:'Tuleshwar Sahu', w:'11111111111111100'},
+  {seller_id:'69d9f0a543782a07a52e900d', cohort:'2026-05', gm:'Anubhav Kumar', gl:null, w:'1111111111111111111111'},
+  {seller_id:'69da09f304daa5367c0b5be0', cohort:'2026-06', gm:'Ayushi Yadav', gl:'Tuleshwar Sahu', w:'11111111111111111'},
+  {seller_id:'69da1770c967d830bdb1824a', cohort:'2026-05', gm:'Sweta Singh', gl:null, w:'1111111111111111000000'},
+  {seller_id:'69da3c69c967d830bdb2b367', cohort:'2026-07', gm:'Aniket Bhujang', gl:'Saurabh Kumar', w:'1111111111000'},
+  {seller_id:'69dca56579951c614eda0c20', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111110000000000000000'},
+  {seller_id:'69dcceaf317e68f10e1d664f', cohort:'2026-06', gm:'Simran S', gl:null, w:'11111111111111111'},
+  {seller_id:'69de29971a323f7cb108aeb2', cohort:'2026-05', gm:'Aastha Jha', gl:'Aitesam Khan', w:'0011111110100011110000'},
+  {seller_id:'69de57bc317e68f10e9f0a14', cohort:'2026-06', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'01111111111110000'},
+  {seller_id:'69df2899ae9546f23255f107', cohort:'2026-09', gm:'Aastha Jha', gl:'Sankhajit Ghosh', w:'0111'},
+  {seller_id:'69df31b8bf9b1483433668b0', cohort:'2026-08', gm:'Aastha Jha', gl:'Priyanshu Raj', w:'111111111'},
+  {seller_id:'69df609ae3a72d76807b525a', cohort:'2026-09', gm:'Md Azharul Imam', gl:'Aditya Bargotra', w:'1000'},
+  {seller_id:'69df71f3aec13a33284584f6', cohort:'2026-06', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111000000000000'},
+  {seller_id:'69df8c45ae9546f23259a839', cohort:'2026-09', gm:'Roshita Dulani', gl:'Tanisha Mangal', w:'1111'},
+  {seller_id:'69e0857d317e68f10e475c51', cohort:'2026-06', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11110000000000000'},
+  {seller_id:'69e0b649d9003cd1d39c0be3', cohort:'2026-09', gm:'Aastha Jha', gl:'SHRADHA KUMARI', w:'0111'},
+  {seller_id:'69e0ce13fcfe8d350658b3bb', cohort:'2026-09', gm:'Mayank Nagar', gl:'Animesh Tiwari', w:'1111'},
+  {seller_id:'69e0fd37958b387d09e913e8', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'0111111111100011100000'},
+  {seller_id:'69e31da4cdf79501502c989c', cohort:'2026-08', gm:'Aastha Jha', gl:'Priyanshu Raj', w:'111111111'},
+  {seller_id:'69e4e9040d5d5b9a25456499', cohort:'2026-05', gm:'Manorama Yadav', gl:null, w:'0111111111111111111111'},
+  {seller_id:'69e5cbad41c620ab1a08c21d', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111111100000000000000'},
+  {seller_id:'69e5f9e5f0a30edeb9495dc1', cohort:'2026-08', gm:'Mayank Nagar', gl:'Patil Jayesh', w:'111111110'},
+  {seller_id:'69e60abb3510e6b5bab129ea', cohort:'2026-07', gm:'Mayank Nagar', gl:'Patil Jayesh', w:'1111111111111'},
+  {seller_id:'69e7148a65bf37a906a87c88', cohort:'2026-06', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'01101110000000000'},
+  {seller_id:'69e758f801ae416a6e490a04', cohort:'2026-08', gm:'Aastha Jha', gl:'SHRADHA KUMARI', w:'111111111'},
+  {seller_id:'69e862cc0b97bbe3d1b3b958', cohort:'2026-06', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111110111110000'},
+  {seller_id:'69e8a1cd317e68f10eb4e7b9', cohort:'2026-06', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111110000000000'},
+  {seller_id:'69e8c98e317e68f10ec32750', cohort:'2026-06', gm:'PRIYANSHU NANDAN', gl:'LEHAR GUPTA', w:'11111111111111111'},
+  {seller_id:'69e8daf6a38ee88857f8e8a8', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Rayala Bhanu Sriraj', w:'0011111111111111111111'},
+  {seller_id:'69e9e90f317e68f10e1991f9', cohort:'2026-07', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111111100000'},
+  {seller_id:'69e9f889317e68f10e1f8a14', cohort:'2026-06', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11111111111110000'},
+  {seller_id:'69ea2d46317e68f10e315198', cohort:'2026-06', gm:'Anubhav Kumar', gl:null, w:'11111111111111111'},
+  {seller_id:'69ea332b452ac17a606f3fad', cohort:'2026-08', gm:'Aastha Jha', gl:'Priyanshu Raj', w:'111111111'},
+  {seller_id:'69eca13b4f2c5ead16943af1', cohort:'2026-07', gm:'Ayushi Yadav', gl:'Tuleshwar Sahu', w:'1111111110000'},
+  {seller_id:'69eda4f1edf8a3b9bb27d99c', cohort:'2026-05', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'0011111100000000000000'},
+  {seller_id:'69edd411171862fe94d2dc40', cohort:'2026-08', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'111110000'},
+  {seller_id:'69ef13ca76d08ba3f082ec35', cohort:'2026-08', gm:'Aakash A', gl:'Komal Giri', w:'111011111'},
+  {seller_id:'69ef437c71b1e4372e938d65', cohort:'2026-08', gm:'Aastha Jha', gl:'SHRADHA KUMARI', w:'111111111'},
+  {seller_id:'69ef442246d9738ddc54e3e4', cohort:'2026-08', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'111000000'},
+  {seller_id:'69ef6e622ef18d7edca6675a', cohort:'2026-05', gm:'Ayushi Yadav', gl:'Shivon Bansal', w:'0011111111111111111111'},
+  {seller_id:'69ef7a14317e68f10ed392ad', cohort:'2026-06', gm:'Aakash A', gl:'Naina Kumari', w:'11111111111111111'},
+  {seller_id:'69f059b08a271f51cd677e89', cohort:'2026-08', gm:'PRIYANSHU NANDAN', gl:'LEHAR GUPTA', w:'110111111'},
+  {seller_id:'69f06f5a97171b8ceec33c2c', cohort:'2026-08', gm:'Aastha Jha', gl:'Parth Mohanty', w:'111111111'},
+  {seller_id:'69f1f62f317e68f10e8f75d1', cohort:'2026-06', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'11110000000000000'},
+  {seller_id:'69f32d71fdef28961fbe490d', cohort:'2026-06', gm:'Aniket Bhujang', gl:'Saurabh Kumar', w:'00111111111111111'},
+  {seller_id:'69f5b6f6317e68f10ea83139', cohort:'2026-09', gm:'Satyaveer Kumar', gl:'Jaison s', w:'1111'},
+  {seller_id:'69f8805aa2b09fb03971ae50', cohort:'2026-07', gm:'Simran S', gl:null, w:'1111111111111'},
+  {seller_id:'69f9ca25317e68f10edd6169', cohort:'2026-06', gm:'Ayushi Yadav', gl:'Tuleshwar Sahu', w:'11111111111111111'},
+  {seller_id:'69f9d7fb93382171aa43f831', cohort:'2026-07', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111110000000'},
+  {seller_id:'69faf0ecf785d9702b220bed', cohort:'2026-07', gm:'PRIYANSHU NANDAN', gl:'LEHAR GUPTA', w:'1111111111111'},
+  {seller_id:'69fb148e3addf0b327f1d04a', cohort:'2026-08', gm:'Anshika Satpathy', gl:'Sandhya Narwade', w:'110111100'},
+  {seller_id:'69fb3d67317e68f10e4d042c', cohort:'2026-07', gm:'Aniket Bhujang', gl:'Saurabh Kumar', w:'1110111000000'},
+  {seller_id:'69fb43b8e930e7a89084e6bd', cohort:'2026-08', gm:'Aashirbad Sabat', gl:'Harshita Gupta', w:'111111111'},
+  {seller_id:'69fc3a8c6a438f37d37d2738', cohort:'2026-06', gm:'Sweta Singh', gl:null, w:'11111111111111111'},
+  {seller_id:'69fd869f317e68f10ef6dfcf', cohort:'2026-08', gm:'Satyaveer Kumar', gl:'Jaison s', w:'111111111'},
+  {seller_id:'69fd9927af315516e43103d6', cohort:'2026-05', gm:'Sweta Singh', gl:null, w:'0001111111111111111111'},
+  {seller_id:'6a01b4c8c2b2b82172d79a50', cohort:'2026-07', gm:'Mayank Nagar', gl:'Patil Jayesh', w:'1111111111111'},
+  {seller_id:'6a0323aa317e68f10ea14f82', cohort:'2026-06', gm:'Aastha Jha', gl:'Parth Mohanty', w:'11111111111111101'},
+  {seller_id:'6a046d00466e299699859397', cohort:'2026-08', gm:'Aastha Jha', gl:'Hardik Grover', w:'111111111'},
+  {seller_id:'6a055e57d70cda765c17edef', cohort:'2026-08', gm:'Aakash A', gl:'Komal Giri', w:'111111111'},
+  {seller_id:'6a05964a9b75804012f148fc', cohort:'2026-08', gm:'Aastha Jha', gl:'Priyanshu Raj', w:'111111111'},
+  {seller_id:'6a059863c38d8cd59361069e', cohort:'2026-07', gm:'Mayank Nagar', gl:'Patil Jayesh', w:'1111111111111'},
+  {seller_id:'6a05d72f5c95daf7799163d5', cohort:'2026-08', gm:'Roshita Dulani', gl:'Pushp Raj', w:'111111111'},
+  {seller_id:'6a05e7ec101dad1ca4f485c2', cohort:'2026-08', gm:'PRIYANSHU NANDAN', gl:'LEHAR GUPTA', w:'111101100'},
+  {seller_id:'6a06c67bdfd55a340d2dbc80', cohort:'2026-08', gm:'Rebecca Raechel Anil', gl:'Sanjib Kumar Bhagabati', w:'111111100'},
+  {seller_id:'6a06eaf8d50287ccede5bcd2', cohort:'2026-06', gm:'Utkarsh', gl:null, w:'11111111111111111'},
+  {seller_id:'6a081f53e4409ee9a90cc32d', cohort:'2026-07', gm:'Biswas Churiwal', gl:null, w:'0111011111111'},
+  {seller_id:'6a0ab7b879519fdf35875f19', cohort:'2026-09', gm:'Shubham Goyal', gl:'SHREYASH KOTLAWAR', w:'1111'},
+  {seller_id:'6a0b10fd9f9ea6d4b9ecefd9', cohort:'2026-08', gm:'Aastha Jha', gl:'Hardik Grover', w:'111111111'},
+  {seller_id:'6a0bfd891ad6468ab6e0cb59', cohort:'2026-07', gm:null, gl:null, w:'1111100000000'},
+  {seller_id:'6a0c43d037c3c927726f6eeb', cohort:'2026-07', gm:'Aastha Jha', gl:'Priyanshu Raj', w:'1111111111111'},
+  {seller_id:'6a0d55c2586de68288070f6d', cohort:'2026-06', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'10111000000000000'},
+  {seller_id:'6a0d88a7f12db57e2e062fe9', cohort:'2026-07', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1110011100000'},
+  {seller_id:'6a0da009cd8b4aff768990c0', cohort:'2026-08', gm:'PRIYANSHU NANDAN', gl:'LEHAR GUPTA', w:'111111100'},
+  {seller_id:'6a0eac8d621e19047fa5141b', cohort:'2026-09', gm:'Aakash A', gl:'Komal Giri', w:'1111'},
+  {seller_id:'6a101badff0931ff15fef361', cohort:'2026-06', gm:'PRIYANSHU NANDAN', gl:'LEHAR GUPTA', w:'11111111100000111'},
+  {seller_id:'6a115ca53b332d7cd972f952', cohort:'2026-09', gm:'Yash Sureshbhai', gl:'Vikas Tribhuwan Pandey', w:'1111'},
+  {seller_id:'6a1439f2317e68f10e4fd19b', cohort:'2026-08', gm:'PRIYANSHU NANDAN', gl:'LEHAR GUPTA', w:'111111111'},
+  {seller_id:'6a144957317e68f10e567e42', cohort:'2026-07', gm:'PRIYANSHU NANDAN', gl:'LEHAR GUPTA', w:'1111111111111'},
+  {seller_id:'6a1593ef863bac1aece2e58c', cohort:'2026-08', gm:'Mayank Nagar', gl:'Patil Jayesh', w:'111111111'},
+  {seller_id:'6a15ae408aa44d6263282101', cohort:'2026-09', gm:'Md Azharul Imam', gl:'MUSADDIK KURUNDWAD', w:'1111'},
+  {seller_id:'6a16b99200988fc1e9c7d731', cohort:'2026-08', gm:'Roshita Dulani', gl:'Pushp Raj', w:'010111100'},
+  {seller_id:'6a16cb0858903234050f888b', cohort:'2026-07', gm:'Ayushi Yadav', gl:'Shivon Bansal', w:'1111111100111'},
+  {seller_id:'6a16d36e00988fc1e9ca69d8', cohort:'2026-08', gm:'Mayank Nagar', gl:'Patil Jayesh', w:'111111111'},
+  {seller_id:'6a1801210e942182aefc36f4', cohort:'2026-07', gm:'Shubham Goyal', gl:'SHREYASH KOTLAWAR', w:'1111111111111'},
+  {seller_id:'6a192bd787382eb6d08265e0', cohort:'2026-07', gm:'Ayushi Yadav', gl:'Shivon Bansal', w:'1111111111111'},
+  {seller_id:'6a196362a8d0811c1971d342', cohort:'2026-06', gm:'Simran S', gl:null, w:'11111111111111111'},
+  {seller_id:'6a1967c95890323405308e0b', cohort:'2026-06', gm:'Suraj Jogani', gl:null, w:'01111111111111111'},
+  {seller_id:'6a199fc7317e68f10e8a223c', cohort:'2026-08', gm:'Mayank Nagar', gl:'Patil Jayesh', w:'111111011'},
+  {seller_id:'6a1a816b0e942182ae198508', cohort:'2026-08', gm:'Aashirbad Sabat', gl:'Harshita Gupta', w:'111111111'},
+  {seller_id:'6a1be7d2589032340549bb46', cohort:'2026-07', gm:'Ayushi Yadav', gl:'Tuleshwar Sahu', w:'1111111111111'},
+  {seller_id:'6a1eb6ee58903234056a6838', cohort:'2026-09', gm:'Aashirbad Sabat', gl:'Shivam Kumar', w:'1111'},
+  {seller_id:'6a1eb73358903234056a728f', cohort:'2026-07', gm:'Aastha Jha', gl:'Sankhajit Ghosh', w:'1011100001110'},
+  {seller_id:'6a1ecc520e942182ae4d98bf', cohort:'2026-06', gm:'Aniket Bhujang', gl:'Saurabh Kumar', w:'01111111111111111'},
+  {seller_id:'6a2258ee0c7e0c0b54b166ef', cohort:'2026-08', gm:'Aakash A', gl:'Komal Giri', w:'111111111'},
+  {seller_id:'6a2282710e942182ae7fa256', cohort:'2026-08', gm:'Ayushi Yadav', gl:'Shivon Bansal', w:'111111000'},
+  {seller_id:'6a22a33d0c7e0c0b54b81022', cohort:'2026-08', gm:'Anshika Satpathy', gl:'Sandhya Narwade', w:'111111111'},
+  {seller_id:'6a22b3830e942182ae833ce6', cohort:'2026-07', gm:'Manorama Yadav', gl:null, w:'1111111111111'},
+  {seller_id:'6a23a5d50c7e0c0b54c11527', cohort:'2026-09', gm:'Aashirbad Sabat', gl:'Harshita Gupta', w:'1111'},
+  {seller_id:'6a27f997340b652202ad5e84', cohort:'2026-09', gm:'Roshita Dulani', gl:'Pushp Raj', w:'1111'},
+  {seller_id:'6a2a5b40962d97d03fa53edb', cohort:'2026-07', gm:'PRIYANSHU NANDAN', gl:'LEHAR GUPTA', w:'1111111111100'},
+  {seller_id:'6a2a6712317e68f10e89310b', cohort:'2026-09', gm:'Anshika Satpathy', gl:'Rayala Bhanu Sriraj', w:'0011'},
+  {seller_id:'6a2bd62c0e942182aef7b86a', cohort:'2026-09', gm:'Roshita Dulani', gl:'Pushp Raj', w:'1011'},
+  {seller_id:'6a2bfe0b0e942182aefc1ec0', cohort:'2026-07', gm:'Ayushi Yadav', gl:'Tuleshwar Sahu', w:'1111111100111'},
+  {seller_id:'6a2c0681962d97d03fc062d2', cohort:'2026-08', gm:'Mayank Nagar', gl:'Patil Jayesh', w:'111111111'},
+  {seller_id:'6a2c0ebc962d97d03fc0c071', cohort:'2026-08', gm:'Aastha Jha', gl:'Parth Mohanty', w:'111011111'},
+  {seller_id:'6a2c21770e942182aefd996a', cohort:'2026-07', gm:'PRIYANSHU NANDAN', gl:'LEHAR GUPTA', w:'1111111111111'},
+  {seller_id:'6a2c2542317e68f10e20ceb3', cohort:'2026-09', gm:'Aniket Bhujang', gl:'Mannat Chawla', w:'1111'},
+  {seller_id:'6a2cecdb0e942182ae045fdb', cohort:'2026-08', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'111000000'},
+  {seller_id:'6a2d3dc4317e68f10e7d7b83', cohort:'2026-07', gm:'Sweta Singh', gl:null, w:'1111111111111'},
+  {seller_id:'6a2d7431962d97d03fd16552', cohort:'2026-08', gm:'Aniket Bhujang', gl:'Mannat Chawla', w:'011111110'},
+  {seller_id:'6a2fad6b0e942182ae210134', cohort:'2026-08', gm:'Satyaveer Kumar', gl:'Jaison s', w:'111111111'},
+  {seller_id:'6a301d8a962d97d03febe17f', cohort:'2026-09', gm:'Sweta Singh', gl:null, w:'1111'},
+  {seller_id:'6a31203d962d97d03fface10', cohort:'2026-08', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'110000000'},
+  {seller_id:'6a313f9e962d97d03ffdb9b1', cohort:'2026-09', gm:'Anshika Satpathy', gl:'Sandhya Narwade', w:'1111'},
+  {seller_id:'6a3257ae4d9107e43de1220c', cohort:'2026-07', gm:'Aniket Bhujang', gl:'Saurabh Kumar', w:'1111111111111'},
+  {seller_id:'6a3267f24d9107e43de2b3f0', cohort:'2026-08', gm:'Aastha Jha', gl:'SHRADHA KUMARI', w:'011111110'},
+  {seller_id:'6a32a729d7fb150538a6339f', cohort:'2026-09', gm:'Aakash A', gl:'Naina Kumari', w:'1100'},
+  {seller_id:'6a32ce51317e68f10e537ad5', cohort:'2026-08', gm:'Ayushi Yadav', gl:'Shivon Bansal', w:'110001110'},
+  {seller_id:'6a33a3a7317e68f10e8c00d3', cohort:'2026-07', gm:'Aastha Jha', gl:'Sankhajit Ghosh', w:'1111111000100'},
+  {seller_id:'6a33b4827af14e7128a6dd18', cohort:'2026-07', gm:'Aashirbad Sabat', gl:'Shivam Kumar', w:'1111111111111'},
+  {seller_id:'6a33ff21317e68f10eac7a04', cohort:'2026-08', gm:'Manorama Yadav', gl:null, w:'111111111'},
+  {seller_id:'6a35165d317e68f10e007bbc', cohort:'2026-07', gm:'Anshika Satpathy', gl:'Sandhya Narwade', w:'1111111111111'},
+  {seller_id:'6a35168c317e68f10e008b5f', cohort:'2026-07', gm:'Simran S', gl:null, w:'1111111111111'},
+  {seller_id:'6a3539496ceb6ef19a91544c', cohort:'2026-08', gm:'Satyaveer Kumar', gl:'Jaison s', w:'011111000'},
+  {seller_id:'6a353c276ceb6ef19a916f4a', cohort:'2026-08', gm:'Aastha Jha', gl:'Parth Mohanty', w:'111000011'},
+  {seller_id:'6a353e69317e68f10e0f5e1c', cohort:'2026-07', gm:'Aniket Bhujang', gl:'Mannat Chawla', w:'0011111111111'},
+  {seller_id:'6a362e577af14e7128c62a03', cohort:'2026-09', gm:'Aakash A', gl:'Naina Kumari', w:'1111'},
+  {seller_id:'6a3632e2317e68f10e55fc28', cohort:'2026-07', gm:'Anshika Satpathy', gl:'Rayala Bhanu Sriraj', w:'0111111111110'},
+  {seller_id:'6a3649366ceb6ef19a9e10f1', cohort:'2026-09', gm:'Shubham Goyal', gl:'SHREYASH KOTLAWAR', w:'1100'},
+  {seller_id:'6a3653b57af14e7128ca6cee', cohort:'2026-07', gm:'Ayushi Yadav', gl:'Tuleshwar Sahu', w:'0111111111111'},
+  {seller_id:'6a3a282dab97916663f51873', cohort:'2026-07', gm:'Anshika Satpathy', gl:'Piyush Dubey', w:'1111000000000'},
+  {seller_id:'6a3a2ca6ab97916663f5aec1', cohort:'2026-08', gm:'Aakash A', gl:'Komal Giri', w:'110111111'},
+  {seller_id:'6a3a73856ceb6ef19ad01251', cohort:'2026-07', gm:'Shubham Goyal', gl:'SHREYASH KOTLAWAR', w:'0111111111101'},
+  {seller_id:'6a3a73f96ceb6ef19ad01381', cohort:'2026-07', gm:'Aastha Jha', gl:'Sankhajit Ghosh', w:'0011111111010'},
+  {seller_id:'6a3a7609ab97916663fc8de6', cohort:'2026-08', gm:'Aakash A', gl:'Komal Giri', w:'111111110'},
+  {seller_id:'6a3b8a15317e68f10e07d473', cohort:'2026-07', gm:'Satyaveer Kumar', gl:'Jaison s', w:'0111111111111'},
+  {seller_id:'6a3b9f0bab9791666309e721', cohort:'2026-09', gm:'PRIYANSHU NANDAN', gl:'Tanvi Parihar', w:'0111'},
+  {seller_id:'6a3bba2e6ceb6ef19ae081f9', cohort:'2026-09', gm:'Maloo Pratibha', gl:'Ankit Jaiswal', w:'1111'},
+  {seller_id:'6a3bd86c6ceb6ef19ae39343', cohort:'2026-09', gm:'PRIYANSHU NANDAN', gl:'LEHAR GUPTA', w:'1111'},
+  {seller_id:'6a3be74fab979166630ff336', cohort:'2026-08', gm:'Aniket Bhujang', gl:'Saurabh Kumar', w:'111111100'},
+  {seller_id:'6a3cc18eab97916663178308', cohort:'2026-07', gm:'Utkarsh', gl:null, w:'0011111111111'},
+  {seller_id:'6a3d1632ab979166631fefe9', cohort:'2026-08', gm:'Mayank Nagar', gl:'Patil Jayesh', w:'111011000'},
+  {seller_id:'6a3e420541713deb3fced82d', cohort:'2026-07', gm:'Ayushi Yadav', gl:'Shivon Bansal', w:'1111111111111'},
+  {seller_id:'6a3e71b541713deb3fd240a0', cohort:'2026-09', gm:'Aashirbad Sabat', gl:'Harshita Gupta', w:'1111'},
+  {seller_id:'6a3f92607801e638bf5a95e6', cohort:'2026-08', gm:'Manorama Yadav', gl:null, w:'111111111'},
+  {seller_id:'6a3f9cbdd1c9608e5361e481', cohort:'2026-09', gm:'Ayushi Yadav', gl:'Piyush Patil', w:'1100'},
+  {seller_id:'6a3fb22e317e68f10e607907', cohort:'2026-09', gm:'Gaurav Mittal', gl:'Vaibhavi Waghmare', w:'1111'},
+  {seller_id:'6a3fbfb6d1c9608e53656621', cohort:'2026-08', gm:'Aastha Jha', gl:'Priyanshu Raj', w:'111111111'},
+  {seller_id:'6a40e2347801e638bf679ab6', cohort:'2026-09', gm:'Aastha Jha', gl:'Hardik Grover', w:'1111'},
+  {seller_id:'6a422f92317e68f10e27fada', cohort:'2026-07', gm:'Shubham Goyal', gl:'SHREYASH KOTLAWAR', w:'0010111111101'},
+  {seller_id:'6a42456a7801e638bf78cf71', cohort:'2026-08', gm:'Aastha Jha', gl:'SHRADHA KUMARI', w:'111111111'},
+  {seller_id:'6a4251bc7801e638bf7a0fe6', cohort:'2026-07', gm:'Simran S', gl:null, w:'0011111111111'},
+  {seller_id:'6a4397a8d1c9608e539089f8', cohort:'2026-08', gm:'Aniket Bhujang', gl:'Saurabh Kumar', w:'111111100'},
+  {seller_id:'6a462b87f5537490c20a39a3', cohort:'2026-09', gm:'Ayushi Yadav', gl:'Jatin Kuchhal', w:'1111'},
+  {seller_id:'6a462e269a9b692a1068f518', cohort:'2026-09', gm:'Aniket Bhujang', gl:'Saurabh Kumar', w:'1111'},
+  {seller_id:'6a464dfda40bd58360290748', cohort:'2026-09', gm:'Aastha Jha', gl:'Parth Mohanty', w:'1110'},
+  {seller_id:'6a46842be76a997f7b9f14e5', cohort:'2026-08', gm:'Anshika Satpathy', gl:'Sandhya Narwade', w:'111111111'},
+  {seller_id:'6a4778b6e76a997f7baba9f0', cohort:'2026-09', gm:'Aastha Jha', gl:'Sankhajit Ghosh', w:'1111'},
+  {seller_id:'6a48a40ce76a997f7bbc154e', cohort:'2026-07', gm:'Mayank Nagar', gl:'Patil Jayesh', w:'0011111111111'},
+  {seller_id:'6a48bc7ce76a997f7bbef2b3', cohort:'2026-08', gm:'Suraj Jogani', gl:null, w:'111111111'},
+  {seller_id:'6a4bb2a45f4bad5a1edc7bf9', cohort:'2026-08', gm:'Aastha Jha', gl:'SHRADHA KUMARI', w:'111111111'},
+  {seller_id:'6a4c8d3432dec1abb6ced177', cohort:'2026-09', gm:'Aakash A', gl:'Naina Kumari', w:'1111'},
+  {seller_id:'6a4ce3f2ef2439b5e176f7b9', cohort:'2026-08', gm:'Vikas Tiwari', gl:null, w:'111111111'},
+  {seller_id:'6a4df3e6e4ebf0bb482cf093', cohort:'2026-09', gm:'Aakash A', gl:'Naina Kumari', w:'1111'},
+  {seller_id:'6a4f60cf223c2a5cae83dd13', cohort:'2026-09', gm:'Roshita Dulani', gl:'Pushp Raj', w:'1111'},
+  {seller_id:'6a509b2560601926d4b992d9', cohort:'2026-09', gm:null, gl:null, w:'0000'},
+  {seller_id:'6a50f6c18c39d4735a9ebb6a', cohort:'2026-08', gm:'Sweta Singh', gl:null, w:'111111111'},
+  {seller_id:'6a521659ef3ebefe92d8fdf3', cohort:'2026-09', gm:'Vipin Gautam', gl:'Pathan khadeer', w:'1110'},
+  {seller_id:'6a521caaef3ebefe92d99e38', cohort:'2026-08', gm:'Aastha Jha', gl:'SHRADHA KUMARI', w:'011111110'},
+  {seller_id:'6a5237146f8c14f7a521cdec', cohort:'2026-09', gm:'Roshita Dulani', gl:'Pushp Raj', w:'1111'},
+  {seller_id:'6a548c1fef3ebefe92ee34d6', cohort:'2026-09', gm:'Maloo Pratibha', gl:'Ankit Jaiswal', w:'0111'},
+  {seller_id:'6a54d207ef3ebefe92f6bf5f', cohort:'2026-08', gm:'Ayushi Yadav', gl:'Tuleshwar Sahu', w:'111111111'},
+  {seller_id:'6a54e3d0ef3ebefe92f8b371', cohort:'2026-09', gm:'Anshika Satpathy', gl:'Sandhya Narwade', w:'1111'},
+  {seller_id:'6a5602b46f8c14f7a5503aec', cohort:'2026-08', gm:'Aakash A', gl:'Komal Giri', w:'111111111'},
+  {seller_id:'6a57330b9d4eaaf22d73cfcb', cohort:'2026-09', gm:'Roshita Dulani', gl:'Aarushi Kumar', w:'1111'},
+  {seller_id:'6a588401b8627edb8f18de70', cohort:'2026-08', gm:'PRIYANSHU NANDAN', gl:'LEHAR GUPTA', w:'111111111'},
+  {seller_id:'6a59cc717d93d56a6c20eb4f', cohort:'2026-09', gm:'Satyaveer Kumar', gl:'Jaison s', w:'1111'},
+  {seller_id:'6a5b179e9d4eaaf22dafd1e0', cohort:'2026-09', gm:'Aastha Jha', gl:'Priyanshu Raj', w:'1111'},
+  {seller_id:'6a5b4d3c9d4eaaf22db5e8e7', cohort:'2026-08', gm:'Anshika Satpathy', gl:'Sankhajit Ghosh', w:'011111111'},
+  {seller_id:'6a5e06cd7d93d56a6c5af1ba', cohort:'2026-09', gm:'Aniket Bhujang', gl:'Saurabh Kumar', w:'0111'},
+  {seller_id:'6a5e28467d93d56a6c5dc832', cohort:'2026-09', gm:'Aastha Jha', gl:'Hardik Grover', w:'1111'},
+  {seller_id:'6a5f61247d93d56a6c6eb154', cohort:'2026-09', gm:'Maloo Pratibha', gl:'Ankit Jaiswal', w:'1111'},
+  {seller_id:'6a607dd7ec928a365f6d8b7b', cohort:'2026-09', gm:'Anshika Satpathy', gl:'Rayala Bhanu Sriraj', w:'1111'},
+  {seller_id:'6a609fcaec928a365f7226a1', cohort:'2026-08', gm:'Roshita Dulani', gl:'Pushp Raj', w:'000111111'},
+  {seller_id:'6a60a6bb9d4eaaf22d030bf3', cohort:'2026-08', gm:'Aastha Jha', gl:'SHRADHA KUMARI', w:'011111111'},
+  {seller_id:'6a60ca83ec928a365f76c3d8', cohort:'2026-09', gm:'Yash Sureshbhai', gl:'Ayushi Sonkar', w:'0111'},
+  {seller_id:'6a61b4179d4eaaf22d0f3c21', cohort:'2026-09', gm:'Satyaveer Kumar', gl:'Jaison s', w:'1111'},
+  {seller_id:'6a6329afec928a365f96da18', cohort:'2026-08', gm:'Bhavana Ahirwar', gl:'Somoshri Sarkar', w:'111111100'},
+  {seller_id:'6a637a86ec928a365f9d790b', cohort:'2026-09', gm:'Ayushi Yadav', gl:'Piyush Patil', w:'1000'},
+  {seller_id:'6a68754a9d4eaaf22d706763', cohort:'2026-09', gm:'Md Azharul Imam', gl:'Sadiya Rajgoli', w:'1111'},
+  {seller_id:'6a688ad29d4eaaf22d73118e', cohort:'2026-08', gm:'Aastha Jha', gl:'SHRADHA KUMARI', w:'011111001'},
+  {seller_id:'6a689a1ff62ec8d7cfda2cad', cohort:'2026-09', gm:'Aashirbad Sabat', gl:'Shivam Kumar', w:'1111'},
+  {seller_id:'6a6aed379d4eaaf22d96dd9a', cohort:'2026-09', gm:'Aniket Bhujang', gl:'Mannat Chawla', w:'1111'},
+  {seller_id:'6a6b3958ec928a365f0f910b', cohort:'2026-09', gm:'Aastha Jha', gl:'Parth Mohanty', w:'1111'},
+  {seller_id:'6a6ca918ec928a365f293088', cohort:'2026-09', gm:'Aakash A', gl:'Naina Kumari', w:'1111'},
+  {seller_id:'6a72fb414d3f770bbaae372b', cohort:'2026-09', gm:'Aastha Jha', gl:'Parth Mohanty', w:'1111'},
+  {seller_id:'6a733808b88a713cefe30422', cohort:'2026-09', gm:'Aastha Jha', gl:'Parth Mohanty', w:'1111'},
+  {seller_id:'6a7446344d3f770bbac33ead', cohort:'2026-09', gm:'Aniket Bhujang', gl:'Saurabh Kumar', w:'1111'},
+  {seller_id:'6a74ad15d285a5dc4ff46f32', cohort:'2026-09', gm:'Anshika Satpathy', gl:'Sandhya Narwade', w:'1111'},
+  {seller_id:'6a75b94cd285a5dc4f03c91e', cohort:'2026-09', gm:'Md Azharul Imam', gl:'MUSADDIK KURUNDWAD', w:'1110'},
+  {seller_id:'6a795c4c659225f54036c15f', cohort:'2026-09', gm:'Satyaveer Kumar', gl:'Jaison s', w:'1111'},
+  {seller_id:'6a79bd3b659225f54043d9e2', cohort:'2026-09', gm:'Shubham Goyal', gl:'Sejal Somani', w:'1111'},
+  {seller_id:'6a7accfdc291e6c3f28e0965', cohort:'2026-09', gm:'Shubham Goyal', gl:'SHREYASH KOTLAWAR', w:'1111'},
+  {seller_id:'6a7ad9ec659225f540526924', cohort:'2026-09', gm:'Roshita Dulani', gl:'Pushp Raj', w:'1111'},
+  {seller_id:'6a7db36b659225f54086073f', cohort:'2026-09', gm:'Roshita Dulani', gl:'Pushp Raj', w:'1111'},
+  {seller_id:'6a840fac659225f540d8adfa', cohort:'2026-09', gm:'Md Azharul Imam', gl:'Prerna Kedia', w:'1111'},
+  {seller_id:'6a8955a08b2450b7154638f9', cohort:'2026-09', gm:'Shubham Goyal', gl:'SHREYASH KOTLAWAR', w:'1111'},
+  {seller_id:'6a8d7f51497189634b968730', cohort:'2026-09', gm:'Aniket Bhujang', gl:'Mannat Chawla', w:'1111'},
+  {seller_id:'6a903391e3d2629f9bdc8f4c', cohort:'2026-09', gm:'Roshita Dulani', gl:'Pushp Raj', w:'0111'},
+  {seller_id:'6a92a892b442516a1841f282', cohort:'2026-09', gm:'Satyaveer Kumar', gl:'Anushka Agrawal', w:'0111'},
+  {seller_id:'6a9a748de3d2629f9b6d2d7d', cohort:'2026-09', gm:'Aastha Jha', gl:'Sankhajit Ghosh', w:'0111'}
+];
+
+// ---- GM -> GL mapping (card 7753), used to populate the two dropdowns ----
+const GM_TO_GLS = {
+  'Aakash A': ['Komal Giri', 'Naina Kumari'],
+  'Aashirbad Sabat': ['Harshita Gupta', 'Shivam Kumar'],
+  'Aastha Jha': ['Aitesam Khan', 'Hardik Grover', 'Parth Mohanty', 'Priyanshu Raj', 'SHRADHA KUMARI', 'Sankhajit Ghosh'],
+  'Aniket Bhujang': ['Himanshu mall', 'Mannat Chawla', 'Saurabh Kumar'],
+  'Anshika Satpathy': ['Piyush Dubey', 'Rayala Bhanu Sriraj', 'Sandhya Narwade'],
+  'Anubhav Kumar': [],
+  'Ayushi Yadav': ['Jatin Kuchhal', 'Piyush Patil', 'Shivon Bansal', 'Tuleshwar Sahu'],
+  'Bhavana Ahirwar': ['Somoshri Sarkar'],
+  'Biswas Churiwal': [],
+  'Gaurav Mittal': ['Vaibhavi Waghmare'],
+  'Maloo Pratibha': ['Ankit Jaiswal'],
+  'Manav Bansal': [],
+  'Manorama Yadav': [],
+  'Mayank Nagar': ['Animesh Tiwari', 'Patil Jayesh'],
+  'Md Azharul Imam': ['Aditya Bargotra', 'MUSADDIK KURUNDWAD', 'Prerna Kedia', 'Sadiya Rajgoli'],
+  'PRIYANSHU NANDAN': ['LEHAR GUPTA', 'Tanvi Parihar'],
+  'Ravi Singh': [],
+  'Rebecca Raechel Anil': ['Sanjib Kumar Bhagabati'],
+  'Roshita Dulani': ['Aarushi Kumar', 'Pushp Raj', 'Tanisha Mangal'],
+  'Satyaveer Kumar': ['Anushka Agrawal', 'Jaison s'],
+  'Shubham Goyal': ['SHREYASH KOTLAWAR', 'Sejal Somani'],
+  'Simran S': [],
+  'Suraj Jogani': [],
+  'Sweta Singh': [],
+  'Utkarsh': [],
+  'Vikas Tiwari': [],
+  'Vipin Gautam': ['Pathan khadeer'],
+  'Yash Sureshbhai': ['Ayushi Sonkar', 'Vikas Tribhuwan Pandey']
 };
+const GM_LIST = Object.keys(GM_TO_GLS);
+
+let currentGM = '';
+let currentGL = '';
+
+function filteredSellers(){
+  return SELLERS.filter(s => {
+    if (currentGM && s.gm !== currentGM) return false;
+    if (currentGL && s.gl !== currentGL) return false;
+    return true;
+  });
+}
+
+// Overall retention across ALL contributing cohorts -- reached-only base, same
+// logic as the churn-cohort tab's Overall line. Recomputed (along with DATA)
+// every time the GM/GL filter changes, from the raw per-seller weekly flags
+// above, instead of being pre-aggregated in SQL -- the chart/table rendering
+// logic below (render/renderTable/renderOverallTable/showTip) is unchanged.
+let DATA = {};
+let cohorts = [];
+let OVERALL_META = null;
+let weeks = 0, TICK_STEP = 1, xTicks = [];
+
+function computeAll(){
+  const sellers = filteredSellers();
+
+  const byCohort = {};
+  sellers.forEach(s => { (byCohort[s.cohort] = byCohort[s.cohort] || []).push(s); });
+
+  DATA = {};
+  ALL_COHORT_KEYS.forEach(cm => {
+    const list = byCohort[cm];
+    if (!list || !list.length) return;
+    const len = list[0].w.length;
+    if (!len) return;
+    const series = [];
+    for (let wk = 0; wk < len; wk++){
+      let retained = 0;
+      list.forEach(s => { if (s.w[wk] === '1') retained++; });
+      series.push({pct: Math.round(retained/list.length*1000)/10, n_retained: retained, cohort_size: list.length});
+    }
+    DATA[cm] = series;
+  });
+  cohorts = Object.keys(DATA);
+
+  const maxLen = sellers.length ? Math.max(...sellers.map(s => s.w.length)) : 0;
+  const base = [], retained = [], cohortsReach = [];
+  for (let wk = 0; wk < maxLen; wk++){
+    let b = 0, r = 0;
+    const seen = new Set();
+    sellers.forEach(s => {
+      if (s.w.length > wk){
+        b++;
+        if (s.w[wk] === '1') r++;
+        seen.add(s.cohort);
+      }
+    });
+    base.push(b); retained.push(r); cohortsReach.push(seen.size);
+  }
+  OVERALL_META = {
+    label: 'Overall · 1-5K', color: '--accent', total: sellers.length,
+    base, retained, cohortsReach, totalCohorts: cohorts.length
+  };
+
+  weeks = Math.max(maxLen, 1);
+  TICK_STEP = weeks <= 10 ? 1 : Math.ceil(weeks / 9);
+  xTicks = [];
+  for (let w = 0; w < weeks; w += TICK_STEP) xTicks.push(w);
+  if (xTicks[xTicks.length-1] !== weeks-1) xTicks.push(weeks-1);
+}
+
+function allKeys(){ return ['OVERALL', ...cohorts]; }
+let visible = new Set(['OVERALL']); // start on the overall line; click a chip to add cohort detail
+
+function isOverall(key){ return key === 'OVERALL'; }
 function overallSeries(){
   return OVERALL_META.base.map((b,i) => {
     const n_retained = OVERALL_META.retained[i];
     return {
-      pct: Math.round(n_retained/b*1000)/10,
+      pct: b ? Math.round(n_retained/b*1000)/10 : 0,
       n_retained, cohort_size: b,
       cohorts_reach: OVERALL_META.cohortsReach[i]
     };
   });
 }
-
-const seriesKeys = ['OVERALL', ...cohorts];
-const visible = new Set(['OVERALL']); // start on the overall line; click a chip to add cohort detail
-
-function isOverall(key){ return key === 'OVERALL'; }
 function dataFor(key){ return isOverall(key) ? overallSeries() : DATA[key]; }
 
 function cssVar(name){
@@ -195,7 +724,7 @@ function cssVar(name){
 }
 function colorFor(key){
   if (isOverall(key)) return cssVar(OVERALL_META.color);
-  return cssVar(SERIES_VARS[cohorts.indexOf(key)]);
+  return cssVar(SERIES_VARS[ALL_COHORT_KEYS.indexOf(key)]);
 }
 function labelFor(key){
   return isOverall(key) ? OVERALL_META.label : (MONTH_LABEL[key] + " '26");
@@ -209,14 +738,8 @@ const W = 1240, H = 460;
 const M = {top: 18, right: 54, bottom: 40, left: 40};
 const plotW = W - M.left - M.right;
 const plotH = H - M.top - M.bottom;
-const weeks = Math.max(...cohorts.map(cm => DATA[cm].length), OVERALL_META.base.length);
-function xOf(w){ return M.left + (plotW * w) / (weeks - 1); }
+function xOf(w){ return weeks > 1 ? M.left + (plotW * w) / (weeks - 1) : M.left; }
 function yOf(pct){ return M.top + plotH * (1 - pct/100); }
-
-const TICK_STEP = weeks <= 10 ? 1 : Math.ceil(weeks / 9);
-const xTicks = [];
-for (let w = 0; w < weeks; w += TICK_STEP) xTicks.push(w);
-if (xTicks[xTicks.length-1] !== weeks-1) xTicks.push(weeks-1);
 
 const svg = document.getElementById('chart');
 const ns = 'http://www.w3.org/2000/svg';
@@ -285,7 +808,7 @@ function renderFilters(){
   showAll.type = 'button';
   showAll.textContent = 'Select all';
   showAll.addEventListener('click', () => {
-    seriesKeys.forEach(k => visible.add(k));
+    allKeys().forEach(k => visible.add(k));
     row.querySelectorAll('.filter-chip').forEach(b => b.setAttribute('aria-pressed','true'));
     render();
   });
@@ -373,14 +896,14 @@ function showTip(e, w){
   const tip = document.getElementById('tooltip');
   let html = '<div class="tt-week">Week ' + w + '</div>';
 
-  seriesKeys.forEach(key => {
+  allKeys().forEach(key => {
     if (!visible.has(key)) return;
     const series = dataFor(key);
     const d = series[w];
     if (!d) return;
     html += '<div class="tt-row"><span style="color:'+colorFor(key)+'">'+labelFor(key)+'</span><span>' + d.pct.toFixed(1) + '% (' + d.n_retained + '/' + d.cohort_size + ')</span></div>';
     if (isOverall(key)) {
-      html += '<div class="tt-row tt-dim"><span>&nbsp;&nbsp;cohorts old enough to reach this week</span><span>' + d.cohorts_reach + ' of 8</span></div>';
+      html += '<div class="tt-row tt-dim"><span>&nbsp;&nbsp;cohorts old enough to reach this week</span><span>' + d.cohorts_reach + ' of ' + OVERALL_META.totalCohorts + '</span></div>';
     }
   });
 
@@ -434,16 +957,63 @@ function renderOverallTable(){
   let head = '<thead><tr><th>Week</th><th>Cohorts reached</th><th>Sellers reached</th><th>Retained</th><th>Retention %</th></tr></thead>';
   let body = '<tbody>';
   series.forEach((p, w) => {
-    body += '<tr><td>W' + w + '</td><td>' + p.cohorts_reach + ' of 8</td><td>' + p.cohort_size + '</td><td>' + p.n_retained + '</td><td>' + p.pct.toFixed(1) + '%</td></tr>';
+    body += '<tr><td>W' + w + '</td><td>' + p.cohorts_reach + ' of ' + OVERALL_META.totalCohorts + '</td><td>' + p.cohort_size + '</td><td>' + p.n_retained + '</td><td>' + p.pct.toFixed(1) + '%</td></tr>';
   });
   body += '</tbody>';
   table.innerHTML = head + body;
 }
 
-renderFilters();
-render();
-renderTable();
-renderOverallTable();
+// ---- GM / GL filter dropdowns ----
+const gmSelect = document.getElementById('gmSelect');
+const glSelect = document.getElementById('glSelect');
+const gmglCount = document.getElementById('gmglCount');
+const sellersTrackedVal = document.getElementById('sellersTrackedVal');
+
+GM_LIST.forEach(gm => {
+  const opt = document.createElement('option');
+  opt.value = gm;
+  opt.textContent = gm;
+  gmSelect.appendChild(opt);
+});
+
+function refreshGlOptions(){
+  glSelect.innerHTML = '<option value="">All GLs</option>';
+  const gls = currentGM ? (GM_TO_GLS[currentGM] || []) : [];
+  gls.forEach(gl => {
+    const opt = document.createElement('option');
+    opt.value = gl;
+    opt.textContent = gl;
+    glSelect.appendChild(opt);
+  });
+  glSelect.disabled = !currentGM || !gls.length;
+  glSelect.value = '';
+}
+
+function refreshAll(){
+  computeAll();
+  visible = new Set(['OVERALL']);
+  renderFilters();
+  render();
+  renderTable();
+  renderOverallTable();
+  const n = filteredSellers().length;
+  sellersTrackedVal.textContent = String(n);
+  gmglCount.textContent = currentGM ? (n + ' seller' + (n===1?'':'s') + ' in view') : '';
+}
+
+gmSelect.addEventListener('change', () => {
+  currentGM = gmSelect.value;
+  currentGL = '';
+  refreshGlOptions();
+  refreshAll();
+});
+glSelect.addEventListener('change', () => {
+  currentGL = glSelect.value;
+  refreshAll();
+});
+
+refreshGlOptions();
+refreshAll();
 window.addEventListener('resize', render);
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
 
