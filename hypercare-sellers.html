@@ -157,6 +157,7 @@ tbody tr:hover{background:var(--surface-2); cursor:pointer;}
   <div class="toolrow">
     <span class="grouplabel">GL:</span>
     <div id="glChips" class="glchips"></div>
+    <button type="button" class="filterlink" id="clearGL">Clear all</button>
     <button type="button" class="filterlink" id="clearFilters">Clear column filters</button>
     <span class="rowcount" id="rowcount">0 sellers</span>
   </div>
@@ -338,6 +339,7 @@ const headRow = document.getElementById('headRow');
 const filterRow = document.getElementById('filterRow');
 const bodyRows = document.getElementById('bodyRows');
 const glChipsEl = document.getElementById('glChips');
+const clearGLBtn = document.getElementById('clearGL');
 const clearFiltersBtn = document.getElementById('clearFilters');
 const rowcountEl = document.getElementById('rowcount');
 const emptyState = document.getElementById('emptyState');
@@ -590,6 +592,14 @@ function render(){
   tableEl.style.display = DATA.length ? 'table' : 'none';
   emptyState.style.display = DATA.length ? 'none' : 'block';
 }
+
+clearGLBtn.addEventListener('click', () => {
+  activeGL.clear();
+  glChipsEl.querySelectorAll('.gl-chip').forEach(btn => btn.setAttribute('aria-pressed', 'false'));
+  closePopover();
+  buildHead(); // gl_name/gm_name columns come back once no GL chip is active
+  render();
+});
 
 clearFiltersBtn.addEventListener('click', () => {
   Object.keys(colFilterValues).forEach(k => delete colFilterValues[k]);
