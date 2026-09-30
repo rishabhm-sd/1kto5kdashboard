@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Churn Timing Diagnostic - Hypercare Eligibility</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root{
+  --bg-canvas:#f4f6f4;
+  --surface:#ffffff;
+  --surface-2:#eef1ef;
+  --border:#dde3e0;
+  --ink-1:#161b19;
+  --ink-2:#4c5854;
+  --ink-3:#828e8a;
+  --accent:#0f6d5c;
+  --accent-ink:#ffffff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg-canvas:#0e1210;
+    --surface:#171c1a;
+    --surface-2:#1e2422;
+    --border:#2b322f;
+    --ink-1:#f2f5f3;
+    --ink-2:#bcc7c2;
+    --ink-3:#7d8985;
+    --accent:#3fb69a;
+    --accent-ink:#08110d;
+  }
+}
+:root[data-theme="dark"]{
+  --bg-canvas:#0e1210;
+  --surface:#171c1a;
+  --surface-2:#1e2422;
+  --border:#2b322f;
+  --ink-1:#f2f5f3;
+  --ink-2:#bcc7c2;
+  --ink-3:#7d8985;
+  --accent:#3fb69a;
+  --accent-ink:#08110d;
+}
+
+*{box-sizing:border-box;}
+body{margin:0; background:var(--bg-canvas); color:var(--ink-1); font-family:'IBM Plex Sans',system-ui,sans-serif;}
+.wrap{max-width:1200px; margin:0 auto; padding:6px 24px 72px;}
+
+h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.5rem,2.4vw,2.05rem); letter-spacing:-0.01em; margin:0 0 18px; text-wrap:balance;}
+
+.placeholder-card{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:28px 26px; color:var(--ink-2); font-size:0.92rem; line-height:1.6;}
+.placeholder-card .tbd{font-family:'IBM Plex Mono',monospace; font-size:0.78rem; color:var(--ink-3); margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Churn Timing Diagnostic &mdash; Hypercare Eligibility</h1>
+  <div class="placeholder-card">
+    Awaiting content &mdash; this tab is set up and ready to go, but the eligibility criteria
+    haven&rsquo;t been specified yet.
+    <div class="tbd">TBD</div>
+  </div>
+</div>
+</body>
+</html>
