@@ -152,13 +152,10 @@ footer{width:100%; margin:0; padding:8px 28px 40px; color:var(--ink-3); font-siz
   <nav class="navlist" id="navlist" role="tablist" aria-label="Dashboard">
     <button type="button" class="navitem" role="tab" data-target="frame-retention" aria-selected="true">Churn-Cohort Retention</button>
     <button type="button" class="navitem" role="tab" data-target="frame-3k" aria-selected="false">1-5K 3K Retention</button>
-    <div class="navgroup-label">Churn Timing Diagnostic</div>
-    <div class="navgroup">
-      <button type="button" class="navitem" role="tab" data-target="frame-timing" aria-selected="false">Timing Diagnostic</button>
-      <button type="button" class="navitem" role="tab" data-target="frame-hy-eligibility" aria-selected="false">Hypercare Eligibility</button>
-    </div>
+    <button type="button" class="navitem" role="tab" data-target="frame-timing" aria-selected="false">Churn Timing Diagnostic</button>
     <div class="navgroup-label">1K-5K Hypercare</div>
     <div class="navgroup">
+      <button type="button" class="navitem" role="tab" data-target="frame-hy-eligibility" aria-selected="false">Hypercare Eligibility</button>
       <button type="button" class="navitem" role="tab" data-target="frame-hy-overall" aria-selected="false">Overall Metrics</button>
       <button type="button" class="navitem" role="tab" data-target="frame-hy-sellers" aria-selected="false">All sellers</button>
       <button type="button" class="navitem" role="tab" data-target="frame-hy-finance" aria-selected="false">Finance Issues</button>
@@ -180,7 +177,7 @@ footer{width:100%; margin:0; padding:8px 28px 40px; color:var(--ink-3); font-siz
       <iframe id="frame-retention" class="active" src="retention.html" title="HITS Churn-Cohort Retention"></iframe>
       <iframe id="frame-3k" src="retention-3k.html" title="1-5K 3K Retention"></iframe>
       <iframe id="frame-timing" src="timing.html" title="HITS Churn Timing Diagnostic"></iframe>
-      <iframe id="frame-hy-eligibility" src="hypercare-eligibility.html" title="Churn Timing Diagnostic - Hypercare Eligibility"></iframe>
+      <iframe id="frame-hy-eligibility" src="hypercare-eligibility.html" title="1K-5K Hypercare - Hypercare Eligibility"></iframe>
       <iframe id="frame-hy-overall" src="hypercare-overall.html" title="1K-5K Hypercare - Overall Metrics"></iframe>
       <iframe id="frame-hy-sellers" src="hypercare-sellers.html" title="1K-5K Hypercare - All sellers"></iframe>
       <iframe id="frame-hy-finance" src="hypercare-finance.html" title="1K-5K Hypercare - Finance Issues"></iframe>
