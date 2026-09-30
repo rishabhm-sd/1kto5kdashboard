@@ -1,0 +1,200 @@
+    item.appendChild(cb);
+    item.appendChild(span);
+    popoverListEl.appendChild(item);
+  });
+  const rect = btn.getBoundingClientRect();
+  popoverEl.hidden = false;
+  const top = Math.min(rect.bottom + 4, window.innerHeight - 60);
+  const left = Math.min(rect.left, window.innerWidth - 292);
+  popoverEl.style.top = top + 'px';
+  popoverEl.style.left = Math.max(8, left) + 'px';
+  popoverSearchEl.focus();
+}
+
+function closePopover(){
+  popoverKey = null;
+  currentFilterBtn = null;
+  popoverEl.hidden = true;
+}
+
+popoverSearchEl.addEventListener('input', applyPopoverSearch);
+
+popoverSelectAllBtn.addEventListener('click', () => {
+  if (!popoverKey) return;
+  delete colFilterValues[popoverKey];
+  const key = popoverKey, btn = currentFilterBtn;
+  openPopoverFor(key, btn);
+  updateFilterBtnState();
+  render();
+});
+popoverClearBtn.addEventListener('click', () => {
+  if (!popoverKey) return;
+  colFilterValues[popoverKey] = new Set();
+  const key = popoverKey, btn = currentFilterBtn;
+  openPopoverFor(key, btn);
+  updateFilterBtnState();
+  render();
+});
+popoverEl.addEventListener('click', (e) => e.stopPropagation());
+document.addEventListener('click', (e) => {
+  if (popoverEl.hidden) return;
+  if (e.target.closest && e.target.closest('.th-filter-btn')) return;
+  closePopover();
+});
+window.addEventListener('scroll', () => closePopover(), true);
+
+const FILTER_ICON_SVG = '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 3h12l-4.5 5.5v3.5l-3 1.5v-5z"/></svg>';
+
+function buildHead(){
+  const cols = visibleColumns();
+
+  headRow.innerHTML = '';
+  cols.forEach(col => {
+    const th = document.createElement('th');
+    const inner = document.createElement('div');
+    inner.className = 'th-inner';
+
+    const labelWrap = document.createElement('span');
+    labelWrap.className = 'th-label';
+    labelWrap.textContent = col.label + ' ';
+    const arrow = document.createElement('span');
+    arrow.className = 'arrow';
+    arrow.textContent = sortKey === col.key ? (sortDir === 1 ? '▲' : '▼') : '';
+    labelWrap.appendChild(arrow);
+    labelWrap.addEventListener('click', () => {
+      if (sortKey === col.key) sortDir = -sortDir; else { sortKey = col.key; sortDir = 1; }
+      buildHead(); // so the sort arrow indicator actually shows on the clicked column
+      render();
+    });
+
+    const filterBtn = document.createElement('button');
+    filterBtn.type = 'button';
+    filterBtn.className = 'th-filter-btn' + (colFilterValues[col.key] ? ' active' : '');
+    filterBtn.setAttribute('aria-label', 'Filter ' + col.label);
+    filterBtn.innerHTML = FILTER_ICON_SVG;
+    filterBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (popoverKey === col.key && !popoverEl.hidden){ closePopover(); return; }
+      openPopoverFor(col.key, filterBtn);
+    });
+
+    inner.appendChild(labelWrap);
+    inner.appendChild(filterBtn);
+    th.appendChild(inner);
+    headRow.appendChild(th);
+  });
+}
+
+// When this page is embedded in index.html's iframe shell, the iframe is
+// resized to the full content height (no inner scroll) and the OUTER shell
+// page does the scrolling instead -- so a plain "position:fixed" modal ends
+// up centered over the whole (very tall) document rather than over whatever
+// slice of it is actually on screen, forcing a scroll to find it. Since the
+// shell and this page are same-origin, read the real scroll position/height
+// from window.top (which is just `window` when this page is opened
+// standalone) and position the modal there instead.
+function currentViewport(){
+  try {
+    return { top: window.top.scrollY, height: window.top.innerHeight };
+  } catch (e) {
+    return { top: window.scrollY, height: window.innerHeight };
+  }
+}
+function updateModalPosition(){
+  const vp = currentViewport();
+  modalOverlay.style.top = vp.top + 'px';
+  modalOverlay.style.height = vp.height + 'px';
+}
+
+function addModalRow(label, v, opts){
+  opts = opts || {};
+  const row = document.createElement('div');
+  row.className = 'modal-row' + (opts.negative ? ' negative' : '');
+  const labelEl = document.createElement('div');
+  labelEl.className = 'modal-label';
+  labelEl.textContent = label;
+  const value = document.createElement('div');
+  value.className = 'modal-value';
+  value.textContent = (v === null || v === undefined || v === '') ? '—' : v;
+  row.appendChild(labelEl);
+  row.appendChild(value);
+  modalBody.appendChild(row);
+}
+
+function addModalSection(label){
+  const s = document.createElement('div');
+  s.className = 'modal-section-label';
+  s.textContent = label;
+  modalBody.appendChild(s);
+}
+
+// ---- Remittance Info: last positive vs. current payment cycle (card 15881),
+// plus, when the current cycle is negative, a breakdown of which expense
+// categories accumulated since the last positive cycle explain it. Only
+// non-zero categories are shown -- every negative row has at least one. ----
+const REMIT_ATTRIBUTION_FIELDS = [
+  ['remit_shipping_charge', 'Shipping charge'],
+  ['remit_weight_delta', 'Weight delta (subset of shipping)'],
+  ['remit_nushop_commission', 'Nushop commission'],
+  ['remit_marketing_spend', 'Marketing spend'],
+  ['remit_return_refund', 'Return / refund'],
+  ['remit_dispute', 'Dispute'],
+  ['remit_arrears', 'Arrears'],
+  ['remit_services_spend', 'Services spend'],
+  ['remit_wallet_deduction_inflow', 'Wallet deduction inflow'],
+  ['remit_total_cod_amount', 'Total COD amount'],
+  ['remit_total_online_amount', 'Total online amount'],
+];
+
+function renderRemittanceInfo(r){
+  addModalSection('Remittance Info');
+  addModalRow('Last positive cycle',
+    (r.remit_lp_start && r.remit_lp_end) ? (r.remit_lp_start + ' – ' + r.remit_lp_end) : null);
+  addModalRow('Last positive remittance amount', r.remit_lp_amt);
+  addModalRow('Current cycle',
+    (r.remit_cur_start && r.remit_cur_end) ? (r.remit_cur_start + ' – ' + r.remit_cur_end) : null);
+  const isNegative = typeof r.remit_cur_amt === 'number' && r.remit_cur_amt < 0;
+  addModalRow('Current remittance amount', r.remit_cur_amt, {negative: isNegative});
+  if (isNegative){
+    const nonZero = REMIT_ATTRIBUTION_FIELDS.filter(([key]) => r[key] !== null && r[key] !== undefined && r[key] !== 0);
+    if (nonZero.length){
+      addModalSection('Attribution since last positive cycle');
+      nonZero.forEach(([key, label]) => addModalRow(label, r[key]));
+      addModalRow('Cycles since last positive', r.remit_cycles_since);
+    }
+  }
+}
+
+function openSellerModal(r){
+  modalTitle.textContent = r.seller_name || r.seller_id;
+  modalBody.innerHTML = '';
+  DETAIL_KEYS.forEach(key => {
+    addModalRow(DETAIL_LABELS[key] || key, r[key]);
+  });
+  renderRemittanceInfo(r);
+  modalOverlay.hidden = false;
+  updateModalPosition();
+  try { window.top.addEventListener('scroll', updateModalPosition, true); } catch (e) {}
+  window.addEventListener('resize', updateModalPosition);
+}
+
+function closeModal(){
+  modalOverlay.hidden = true;
+  try { window.top.removeEventListener('scroll', updateModalPosition, true); } catch (e) {}
+  window.removeEventListener('resize', updateModalPosition);
+}
+modalClose.addEventListener('click', closeModal);
+modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape'){ closeModal(); closePopover(); }
+});
+
+let lastRenderedRows = [];
+
+function render(){
+  let rows = DATA.filter(r => {
+    if (activeGL.size && !activeGL.has(r.gl_name)) return false;
+    return Object.keys(colFilterValues).every(key => {
+      const set = colFilterValues[key];
+      if (!set) return true;
+      return set.has(valueToFilterString(r[key]));
