@@ -152,6 +152,7 @@ footer{width:100%; margin:0; padding:8px 28px 40px; color:var(--ink-3); font-siz
   <nav class="navlist" id="navlist" role="tablist" aria-label="Dashboard">
     <button type="button" class="navitem" role="tab" data-target="frame-retention" aria-selected="true">Churn-Cohort Retention</button>
     <button type="button" class="navitem" role="tab" data-target="frame-3k" aria-selected="false">1-5K 3K Retention</button>
+    <button type="button" class="navitem" role="tab" data-target="frame-running3k-sl" aria-selected="false">Running 3K S/L</button>
     <button type="button" class="navitem" role="tab" data-target="frame-timing" aria-selected="false">Churn Timing Diagnostic</button>
     <div class="navgroup-label">1K-5K Hypercare</div>
     <div class="navgroup">
@@ -176,6 +177,7 @@ footer{width:100%; margin:0; padding:8px 28px 40px; color:var(--ink-3); font-siz
     <div class="frame-wrap">
       <iframe id="frame-retention" class="active" src="retention.html" title="HITS Churn-Cohort Retention"></iframe>
       <iframe id="frame-3k" src="retention-3k.html" title="1-5K 3K Retention"></iframe>
+      <iframe id="frame-running3k-sl" src="running-3k-sl.html" title="Running 3K S/L"></iframe>
       <iframe id="frame-timing" src="timing.html" title="HITS Churn Timing Diagnostic"></iframe>
       <iframe id="frame-hy-eligibility" src="hypercare-eligibility.html" title="1K-5K Hypercare - Hypercare Eligibility"></iframe>
       <iframe id="frame-hy-overall" src="hypercare-overall.html" title="1K-5K Hypercare - Overall Metrics"></iframe>
@@ -185,12 +187,12 @@ footer{width:100%; margin:0; padding:8px 28px 40px; color:var(--ink-3); font-siz
     </div>
   </main>
 
-  <footer>Each view loads its own page (retention.html, retention-3k.html, timing.html, hypercare-eligibility.html, hypercare-overall.html, hypercare-sellers.html, hypercare-finance.html, hypercare-incentives.html) inside this shell &mdash; open any of them directly if you just need one. Built for Blitzscale &middot; ShopDeck HITS &amp; Revenue seller cohorts.</footer>
+  <footer>Each view loads its own page (retention.html, retention-3k.html, running-3k-sl.html, timing.html, hypercare-eligibility.html, hypercare-overall.html, hypercare-sellers.html, hypercare-finance.html, hypercare-incentives.html) inside this shell &mdash; open any of them directly if you just need one. Built for Blitzscale &middot; ShopDeck HITS &amp; Revenue seller cohorts.</footer>
 </div>
 
 <script>
 const REPO = 'rishabhm-sd/1kto5kdashboard';
-const DATA_FILES = ['retention.html','timing.html','retention-3k.html','hypercare-overall.html','hypercare-sellers.html','hypercare-finance.html','hypercare-incentives.html','hypercare-eligibility.html'];
+const DATA_FILES = ['retention.html','timing.html','retention-3k.html','hypercare-overall.html','hypercare-sellers.html','hypercare-finance.html','hypercare-incentives.html','hypercare-eligibility.html','running-3k-sl.html'];
 
 /* ---------- live clock (IST, 24hr) ---------- */
 const clockEl = document.getElementById('clock');
