@@ -1,0 +1,253 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>1K-5K Hypercare - All sellers</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root{
+  --bg-canvas:#f4f6f4;
+  --surface:#ffffff;
+  --surface-2:#eef1ef;
+  --border:#dde3e0;
+  --ink-1:#161b19;
+  --ink-2:#4c5854;
+  --ink-3:#828e8a;
+  --accent:#0f6d5c;
+  --accent-ink:#ffffff;
+  --churn-bg:#fdeeec;
+  --churn-border:#d8695a;
+  --churn-ink:#a8402f;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg-canvas:#0e1210;
+    --surface:#171c1a;
+    --surface-2:#1e2422;
+    --border:#2b322f;
+    --ink-1:#f2f5f3;
+    --ink-2:#bcc7c2;
+    --ink-3:#7d8985;
+    --accent:#3fb69a;
+    --accent-ink:#08110d;
+    --churn-bg:#2a1713;
+    --churn-border:#a8402f;
+    --churn-ink:#e58c7a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg-canvas:#0e1210;
+  --surface:#171c1a;
+  --surface-2:#1e2422;
+  --border:#2b322f;
+  --ink-1:#f2f5f3;
+  --ink-2:#bcc7c2;
+  --ink-3:#7d8985;
+  --accent:#3fb69a;
+  --accent-ink:#08110d;
+  --churn-bg:#2a1713;
+  --churn-border:#a8402f;
+  --churn-ink:#e58c7a;
+}
+
+*{box-sizing:border-box;}
+body{background:var(--bg-canvas); color:var(--ink-1); font-family:'IBM Plex Sans',system-ui,sans-serif;}
+.wrap{max-width:1600px; margin:0 auto; padding:6px 24px 72px;}
+
+h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.5rem,2.4vw,2.05rem); letter-spacing:-0.01em; margin:0 0 6px; text-wrap:balance;}
+.subtitle{color:var(--ink-2); font-size:0.98rem; max-width:70ch; line-height:1.5; margin:0 0 22px;}
+
+.pending-badge{
+  display:inline-flex; align-items:center; gap:6px; background:var(--surface-2); border:1px solid var(--border);
+  color:var(--ink-2); font-size:0.72rem; font-weight:600; letter-spacing:0.02em; text-transform:uppercase;
+  padding:5px 12px; border-radius:999px; margin-bottom:18px;
+}
+.pending-badge svg{display:block;}
+
+.toolrow{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:14px;}
+.grouplabel{color:var(--ink-3); font-size:0.7rem; font-weight:500; padding:0 1px;}
+.glchips{display:flex; flex-wrap:wrap; gap:6px;}
+.gl-chip{
+  background:var(--surface-2); border:1px solid var(--border); border-radius:14px; padding:5px 12px;
+  font-family:'IBM Plex Sans',sans-serif; font-size:0.76rem; font-weight:500; color:var(--ink-2);
+  cursor:pointer; transition:background .15s, color .15s, border-color .15s;
+}
+.gl-chip:hover{background:var(--border);}
+.gl-chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-weight:600;}
+.filterlink{background:none; border:none; color:var(--ink-3); font-family:'IBM Plex Sans',sans-serif; font-size:0.74rem; text-decoration:underline; text-underline-offset:2px; cursor:pointer; padding:3px 2px;}
+.filterlink:hover{color:var(--ink-1);}
+.rowcount{color:var(--ink-3); font-size:0.78rem; font-family:'IBM Plex Mono',monospace; margin-left:auto;}
+
+.tablepanel{background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden;}
+.tablescroll{overflow:auto; max-width:100%;}
+table{border-collapse:collapse; width:100%; font-size:0.82rem; white-space:nowrap;}
+thead th{
+  position:sticky; top:0; background:var(--surface-2); text-align:left; padding:8px 10px;
+  font-family:'IBM Plex Sans',sans-serif; font-weight:600; color:var(--ink-1); border-bottom:1px solid var(--border);
+  user-select:none; white-space:nowrap;
+}
+thead th .arrow{display:inline-block; width:0.9em; color:var(--accent); font-size:0.72rem;}
+.th-inner{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+.th-label{cursor:pointer; display:flex; align-items:center;}
+.th-label:hover{color:var(--accent);}
+.th-filter-btn{
+  flex:0 0 auto; width:20px; height:20px; display:flex; align-items:center; justify-content:center;
+  background:transparent; border:1px solid transparent; border-radius:5px; padding:0; cursor:pointer; color:var(--ink-3);
+}
+.th-filter-btn:hover{background:var(--surface); color:var(--ink-1); border-color:var(--border);}
+.th-filter-btn.active{color:var(--accent); border-color:var(--accent); background:var(--surface);}
+.th-filter-btn svg{display:block;}
+tbody td{padding:9px 12px; border-bottom:1px solid var(--border); color:var(--ink-2); font-family:'IBM Plex Mono',monospace; font-size:0.8rem;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--surface-2); cursor:pointer;}
+
+.emptystate{padding:48px 24px; text-align:center; color:var(--ink-2);}
+.emptystate p{margin:0 auto 4px; max-width:56ch; line-height:1.6; font-size:0.92rem;}
+
+/* ---- column-filter popover (Google-Sheets-style multi-select) ---- */
+.popover{
+  position:fixed; z-index:50; background:var(--surface); border:1px solid var(--border); border-radius:10px;
+  box-shadow:0 12px 32px rgba(0,0,0,.18); padding:8px; min-width:200px; max-width:280px;
+}
+.popover-search{
+  width:100%; box-sizing:border-box; background:var(--surface-2); border:1px solid var(--border); border-radius:6px;
+  padding:6px 8px; font-family:'IBM Plex Sans',sans-serif; font-size:0.78rem; color:var(--ink-1); margin-bottom:6px;
+}
+.popover-search:focus{outline:none; border-color:var(--accent);}
+.popover-actions{display:flex; gap:10px; padding:2px 6px 8px; border-bottom:1px solid var(--border); margin-bottom:6px;}
+.popover-action{background:none; border:none; color:var(--accent); font-family:'IBM Plex Sans',sans-serif; font-size:0.76rem; font-weight:600; cursor:pointer; padding:0;}
+.popover-action:hover{text-decoration:underline;}
+.popover-list{max-height:260px; overflow-y:auto; display:flex; flex-direction:column; gap:1px;}
+.popover-item{
+  display:flex; align-items:center; gap:7px; padding:5px 6px; border-radius:6px; cursor:pointer;
+  font-family:'IBM Plex Sans',sans-serif; font-size:0.78rem; color:var(--ink-1);
+}
+.popover-item:hover{background:var(--surface-2);}
+.popover-item input{flex:0 0 auto; cursor:pointer;}
+.popover-item span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+
+/* ---- seller detail modal ---- */
+.modal-overlay{
+  position:absolute; left:0; width:100%; background:rgba(10,14,12,.45); z-index:60;
+  display:flex; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;
+}
+.modal{
+  background:var(--surface); border-radius:14px; border:1px solid var(--border); box-shadow:0 24px 60px rgba(0,0,0,.28);
+  width:100%; max-width:440px; max-height:86vh; overflow:auto;
+}
+.modal-head{
+  display:flex; align-items:baseline; justify-content:space-between; gap:12px; padding:18px 20px 12px;
+  border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--surface);
+}
+.modal-title{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:1.05rem; color:var(--ink-1);}
+.modal-close{
+  background:none; border:none; color:var(--ink-3); font-size:1.4rem; line-height:1; cursor:pointer; padding:0 2px;
+}
+.modal-close:hover{color:var(--ink-1);}
+.modal-body{padding:6px 20px 20px;}
+.modal-row{display:flex; justify-content:space-between; gap:16px; padding:11px 0; border-bottom:1px solid var(--border);}
+.modal-row:last-child{border-bottom:none;}
+.modal-label{color:var(--ink-3); font-family:'IBM Plex Sans',sans-serif; font-size:0.82rem; flex:0 0 auto;}
+.modal-value{color:var(--ink-1); font-family:'IBM Plex Mono',monospace; font-size:0.85rem; text-align:right; word-break:break-word;}
+.modal-section-label{
+  font-family:'IBM Plex Sans',sans-serif; font-size:0.72rem; font-weight:600; color:var(--ink-3);
+  text-transform:uppercase; letter-spacing:0.03em; padding:16px 0 4px;
+}
+.modal-row.negative .modal-value{color:var(--churn-ink);}
+
+/* ---- GL-bucket metric cards, shown over the table once a GL chip tagged to
+   a bucket (see GL_BUCKETS below) is toggled -- same bucket/metric shape as
+   hypercare-overall.html's cards, just scoped to the active GL(s). ---- */
+.glbucketrow{display:none; flex-wrap:wrap; gap:12px; margin-bottom:14px;}
+.glbucket-card{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; flex:1 1 220px; min-width:210px;}
+.glbucket-label{font-family:'IBM Plex Sans',sans-serif; font-size:0.72rem; font-weight:600; color:var(--ink-2); text-transform:uppercase; letter-spacing:0.03em; margin-bottom:8px; line-height:1.4;}
+.glbucket-count{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:1.4rem; color:var(--ink-1); margin-bottom:10px;}
+.glbucket-count span{font-family:'IBM Plex Sans',sans-serif; font-weight:500; font-size:0.82rem; color:var(--ink-3); margin-left:5px;}
+.glbucket-metrics{display:flex; flex-direction:column; gap:6px;}
+.glbucket-metric-row{display:flex; align-items:baseline; justify-content:space-between; gap:10px; font-family:'IBM Plex Sans',sans-serif; font-size:0.8rem; color:var(--ink-2);}
+.glbucket-metric-row .v{font-family:'IBM Plex Mono',monospace; font-size:0.8rem; color:var(--ink-3);}
+</style>
+<div class="wrap">
+  <h1>1K-5K Hypercare &mdash; All sellers</h1>
+
+  <div class="pending-badge">
+    <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.8v3.6l2.4 1.4"/></svg>
+    104 sellers loaded &middot; 18 of 28 columns live &middot; 10 still pending a data source
+  </div>
+
+  <div class="toolrow">
+    <span class="grouplabel">GL:</span>
+    <div id="glChips" class="glchips"></div>
+    <button type="button" class="filterlink" id="clearGL">Clear all</button>
+    <button type="button" class="filterlink" id="clearFilters">Clear column filters</button>
+    <button type="button" class="filterlink" id="downloadCsv">Download CSV</button>
+    <span class="rowcount" id="rowcount">0 sellers</span>
+  </div>
+
+  <div class="glbucketrow" id="glBucketRow"></div>
+
+  <div class="tablepanel">
+    <div class="tablescroll">
+      <table id="dataTable">
+        <thead>
+          <tr id="headRow"></tr>
+        </thead>
+        <tbody id="bodyRows"></tbody>
+      </table>
+    </div>
+    <div class="emptystate" id="emptyState">
+      <p><b>No seller data loaded yet.</b> The 28 columns below are wired up and ready &mdash; once seller-level rows are provided (Metabase export, CSV, or pasted data), this table will populate, and search + click-to-sort on every column will work immediately.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTitle"></div>
+      <button type="button" class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+<div id="filterPopover" class="popover" hidden>
+  <input type="text" class="popover-search" id="popoverSearch" placeholder="Search values&hellip;">
+  <div class="popover-actions">
+    <button type="button" class="popover-action" id="popoverSelectAll">Select all</button>
+    <button type="button" class="popover-action" id="popoverClear">Clear</button>
+  </div>
+  <div class="popover-list" id="popoverList"></div>
+</div>
+<script>
+// ---- column schema (confirmed) ----
+const COLUMNS = [
+  {key:'seller_id', label:'Seller ID'},
+  {key:'seller_name', label:'Seller name'},
+  {key:'l1_category', label:'L1 category'},
+  {key:'gl_name', label:'GL Name'},
+  {key:'gm_name', label:'GM Name'},
+  {key:'date_of_handover', label:'Date of Handover'},
+  {key:'date_of_hc_handover', label:'Date of HC handover'},
+  {key:'lifetime_spend', label:'Lifetime Spend'},
+  {key:'spend_since_hc_handover', label:'Spend since HC Handover'},
+  {key:'wtd_spend', label:'WTD Spend'},
+  {key:'yesterday_spend', label:'Yesterday Spend'},
+  {key:'last_spend_date', label:'Last Spend Date'},
+  {key:'revival_tag', label:'Revival Tag'},
+  {key:'yesterday_arr', label:'Yesterday ARR'},
+  {key:'yesterday_s_gmv', label:'Yesterday S/GMV'},
+  {key:'be_s_gmv', label:'BE S/GMV'},
+  {key:'w1_budget', label:'(W-1) Budget'},
+  {key:'w1_pnl', label:'(W-1) PNL'},
+  {key:'w1_spend', label:'(W-1) Spend'},
+  {key:'w2_pnl', label:'(W-2) PNL'},
+  {key:'w2_spend', label:'(W-2) Spend'},
+  {key:'lifetime_pq', label:'Lifetime PQ'},
+  {key:'pnl_tag', label:'PNL tag'},
+  {key:'ad_account_no', label:'Ad account No.'},
+  {key:'last_call_date', label:'Last Call date'},
+  {key:'last_call_context', label:'Last Call Context'},
+  {key:'revival_status', label:'Revival Status'},
+  {key:'blocker', label:'Blocker'},
+];
+
+// ---- data (live, refreshed via the master BigQuery + Redshift queries) ----
+const DATA = [
