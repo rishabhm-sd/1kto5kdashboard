@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retention Playbooks</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root{
+  --bg-canvas:#f4f6f4;
+  --surface:#ffffff;
+  --surface-2:#eef1ef;
+  --border:#dde3e0;
+  --ink-1:#161b19;
+  --ink-2:#4c5854;
+  --ink-3:#828e8a;
+  --accent:#0f6d5c;
+  --accent-ink:#ffffff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg-canvas:#0e1210;
+    --surface:#171c1a;
+    --surface-2:#1e2422;
+    --border:#2b322f;
+    --ink-1:#f2f5f3;
+    --ink-2:#bcc7c2;
+    --ink-3:#7d8985;
+    --accent:#3fb69a;
+    --accent-ink:#08110d;
+  }
+}
+:root[data-theme="dark"]{
+  --bg-canvas:#0e1210;
+  --surface:#171c1a;
+  --surface-2:#1e2422;
+  --border:#2b322f;
+  --ink-1:#f2f5f3;
+  --ink-2:#bcc7c2;
+  --ink-3:#7d8985;
+  --accent:#3fb69a;
+  --accent-ink:#08110d;
+}
+
+*{box-sizing:border-box;}
+body{margin:0; background:var(--bg-canvas); color:var(--ink-1); font-family:'IBM Plex Sans',system-ui,sans-serif;}
+.wrap{max-width:900px; margin:0 auto; padding:6px 24px 72px;}
+
+h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.5rem,2.4vw,2.05rem); letter-spacing:-0.01em; margin:0 0 6px; text-wrap:balance;}
+.subtitle{color:var(--ink-2); font-size:0.92rem; max-width:70ch; line-height:1.5; margin:0 0 18px;}
+
+.pending-badge{
+  display:inline-flex; align-items:center; gap:6px; background:var(--surface-2); border:1px solid var(--border);
+  color:var(--ink-2); font-size:0.72rem; font-weight:600; letter-spacing:0.02em; text-transform:uppercase;
+  padding:5px 12px; border-radius:999px; margin-bottom:18px;
+}
+.pending-badge svg{display:block;}
+
+.playbook-panel{background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden;}
+.playbook-row{
+  display:flex; align-items:center; gap:14px; padding:14px 18px; border-bottom:1px solid var(--border);
+}
+.playbook-row:last-child{border-bottom:none;}
+.playbook-num{
+  flex:0 0 auto; width:26px; height:26px; border-radius:50%; background:var(--surface-2);
+  display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace;
+  font-size:0.76rem; font-weight:600; color:var(--ink-3);
+}
+.playbook-name{flex:1 1 auto; font-family:'IBM Plex Sans',sans-serif; font-size:0.9rem; font-weight:500; color:var(--ink-1);}
+.playbook-link{flex:0 0 auto; font-family:'IBM Plex Sans',sans-serif; font-size:0.8rem; font-weight:600;}
+.playbook-link a{color:var(--accent); text-decoration:none;}
+.playbook-link a:hover{text-decoration:underline;}
+.playbook-link.pending{color:var(--ink-3); font-weight:500; font-style:italic;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Retention Playbooks</h1>
+  <p class="subtitle">The playbooks being deployed for retention. Each row will link out to its own doc as those are shared &mdash; rows without a doc yet are marked "Link pending".</p>
+
+  <div class="pending-badge">
+    <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.8v3.6l2.4 1.4"/></svg>
+    13 playbooks listed &middot; 0 of 13 doc links live
+  </div>
+
+  <div class="playbook-panel" id="playbookPanel"></div>
+</div>
+<script>
+// ---- Playbook list. Add a `url` to any entry once its doc is shared and
+// this row will render as a live link instead of "Link pending" -- no other
+// change needed. ----
+const PLAYBOOKS = [
+  { name: '1k-5k Hypercare Document', url: null },
+  { name: 'Hypercare CRM flow', url: null },
+  { name: 'HITs Addition - Postpaid flow', url: null },
+  { name: 'Weight Delta Exemption', url: null },
+  { name: 'Remittance Exemption', url: null },
+  { name: 'RTO - Gokwik integration', url: null },
+  { name: 'Website Tools and Code snippet', url: null },
+  { name: 'Wrong scaling indicator - Scale Up/Down Automation', url: null },
+  { name: 'Stock and sourcing - Product KR', url: null },
+  { name: 'Early churn predictor', url: null },
+  { name: 'Negative remittance tasks (at -10k and -20k)', url: null },
+  { name: 'Retention calling task', url: null },
+  { name: 'Handover Task (with PPT similar to prelive calls)', url: null },
+];
+
+const panel = document.getElementById('playbookPanel');
+PLAYBOOKS.forEach((p, i) => {
+  const row = document.createElement('div');
+  row.className = 'playbook-row';
+
+  const num = document.createElement('div');
+  num.className = 'playbook-num';
+  num.textContent = i + 1;
+  row.appendChild(num);
+
+  const name = document.createElement('div');
+  name.className = 'playbook-name';
+  name.textContent = p.name;
+  row.appendChild(name);
+
+  const link = document.createElement('div');
+  if (p.url){
+    link.className = 'playbook-link';
+    const a = document.createElement('a');
+    a.href = p.url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.textContent = 'Open doc ↗';
+    link.appendChild(a);
+  } else {
+    link.className = 'playbook-link pending';
+    link.textContent = 'Link pending';
+  }
+  row.appendChild(link);
+
+  panel.appendChild(row);
+});
+</script>
+</body>
+</html>
