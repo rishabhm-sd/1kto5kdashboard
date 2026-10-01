@@ -121,7 +121,7 @@ td.marker-yes{color:var(--churn-ink); font-weight:600;}
 
   <div class="pending-badge">
     <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.8v3.6l2.4 1.4"/></svg>
-    317 sellers loaded &middot; 17 of 19 columns live &middot; HC Eligibility &amp; HC Tag pending a data source
+    311 sellers loaded &middot; 17 of 19 columns live &middot; HC Eligibility &amp; HC Tag pending a data source
   </div>
 
   <div class="toolrow">
@@ -140,7 +140,7 @@ td.marker-yes{color:var(--churn-ink); font-weight:600;}
       </table>
     </div>
     <div class="emptystate" id="emptyState">
-      <p><b>No sellers loaded.</b> This tab lists every 1K-5K bucket seller (417 total) minus the sellers already in the Hypercare book (100 as of this refresh, tagged to GM Anshika Satpathy) &mdash; the remaining candidates for Hypercare eligibility.</p>
+      <p><b>No sellers loaded.</b> This tab lists every 1K-5K bucket seller (420 total) minus the sellers already in the Hypercare book (109 as of this refresh, tagged to GM Anshika Satpathy) &mdash; the remaining candidates for Hypercare eligibility.</p>
     </div>
   </div>
 </div>
@@ -160,15 +160,15 @@ td.marker-yes{color:var(--churn-ink); font-weight:600;}
 <script>
 // ---- column schema ----
 // Population = every seller in the 1K-5K/HITS bucket (csv_upload.hit_master_data,
-// team='HITS' OR hit2=1, good_seller IS NULL -- 417 sellers) MINUS sellers already
-// tagged to GM Anshika Satpathy (the existing Hypercare book -- 100 of those 417
+// team='HITS' OR hit2=1, good_seller IS NULL -- 420 sellers) MINUS sellers already
+// tagged to GM Anshika Satpathy (the existing Hypercare book -- 109 of those 420
 // as of this refresh; the site-wide "104" figure quoted elsewhere reflects an
 // earlier snapshot and drifts week to week as the roster changes, same as every
-// other roster count on this site). GL/GM come from card 7753
-// (seller_manager_mapping). HITs Handover Date is hit_master_data.hit_year_week
-// converted to that ISO week's Monday. Spends after HITs Handover sums
-// nushop.gc_view_3 marketing_spend from that week onward. Last Spend Date is the
-// most recent day with FB spend > 0 (fb_marketing_insights, breakdown_key IS
+// other roster count on this site). GL/GM come from analytics.seller_console_metrics_summary
+// (gc_name/gm_name), deduped via ROW_NUMBER, whitespace-normalized. HITs Handover Date is
+// hit_master_data.hit_year_week converted to that ISO week's Monday. Spends after HITs
+// Handover sums nushop.gc_view_3 marketing_spend from that week onward. Last Spend Date is
+// the most recent day with FB spend > 0 (fb_marketing_insights, breakdown_key IS
 // NULL) in the last 400 days. 21-Day Marker = 'Yes' when today - Last Spend Date
 // >= 21 days (same threshold as the "21 days pause bucket" elsewhere on this
 // site). No. of Call Attempts = count of nushop.exotel_call_details rows in the
