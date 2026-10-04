@@ -61,14 +61,19 @@ h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.5
 
   <div class="metric-grid" id="metricGrid"></div>
 </div>
+<script src="sellers-data-1.js"></script>
+<script src="sellers-data-2.js"></script>
+<script src="sellers-data-3.js"></script>
 <script>
-// ---- seller -> GL mirror, kept in sync with hypercare-sellers.html's DATA on every
-// weekly refresh (only the gl_name field is needed here to size each bucket). ----
-const SELLER_GLS = ['Sachin Srivastava', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Sachin Srivastava', 'Sachin Srivastava', 'Piyush Dubey', 'Sandhya Narwade', 'Sandhya Narwade', 'Sachin Srivastava', 'Piyush Dubey', 'Piyush Dubey', 'Sandhya Narwade', 'Sachin Srivastava', 'Sandhya Narwade', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Rayala Bhanu Sriraj', 'Sachin Srivastava', 'Sachin Srivastava', 'Rayala Bhanu Sriraj', 'Piyush Dubey', 'Sachin Srivastava', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Sachin Srivastava', 'Piyush Dubey', 'Piyush Dubey', 'Rayala Bhanu Sriraj', 'Piyush Dubey', 'Sandhya Narwade', 'Sachin Srivastava', 'Piyush Dubey', 'Rayala Bhanu Sriraj', 'Piyush Dubey', 'Piyush Dubey', 'Sachin Srivastava', 'Sachin Srivastava', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Sandhya Narwade', 'Sachin Srivastava', 'Sachin Srivastava', 'Sachin Srivastava', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Sachin Srivastava', 'Piyush Dubey', 'Sachin Srivastava', 'Piyush Dubey', 'Piyush Dubey', 'Sandhya Narwade', 'Sachin Srivastava', 'Sachin Srivastava', 'Sandhya Narwade', 'Sachin Srivastava', 'Sachin Srivastava', 'Sachin Srivastava', 'Piyush Dubey', 'Rayala Bhanu Sriraj', 'Sachin Srivastava', 'Piyush Dubey', 'Piyush Dubey', 'Sachin Srivastava', 'Piyush Dubey', 'Piyush Dubey', 'Sachin Srivastava', 'Sachin Srivastava', 'Sachin Srivastava', 'Sachin Srivastava', 'Rayala Bhanu Sriraj', 'Piyush Dubey', 'Sachin Srivastava', 'Sachin Srivastava', 'Piyush Dubey', 'Sachin Srivastava', 'Sachin Srivastava', 'Piyush Dubey', 'Sandhya Narwade', 'Piyush Dubey', 'Piyush Dubey', 'Sachin Srivastava', 'Sachin Srivastava', 'Piyush Dubey', 'Sandhya Narwade', 'Sachin Srivastava', 'Piyush Dubey', 'Rayala Bhanu Sriraj', 'Sachin Srivastava', 'Piyush Dubey', 'Piyush Dubey', 'Piyush Dubey', 'Rayala Bhanu Sriraj', 'Sachin Srivastava', 'Sachin Srivastava', 'Sandhya Narwade', 'Piyush Dubey', 'Sandhya Narwade', 'Sachin Srivastava', 'Sachin Srivastava', 'Piyush Dubey', 'Rayala Bhanu Sriraj', 'Sachin Srivastava', 'Piyush Dubey'];
+// ---- Full per-seller data, same source files as hypercare-sellers.html, kept in
+// sync with every weekly refresh. Only the fields needed for bucket metrics are
+// read here (gl_name, revival_tag, pnl_tag, yesterday_spend, yesterday_arr). ----
+const ALL_SELLERS = [...SELLERS_DATA_1, ...SELLERS_DATA_2, ...SELLERS_DATA_3];
 
 // ---- GL -> bucket mapping. Edit the `gls` lists freely (names must match the
-// gl_name values above exactly); a GL not listed in any bucket just doesn't count
-// toward one. Card 1 (total) always counts every seller regardless of this mapping. ----
+// gl_name values in the data above exactly); a GL not listed in any bucket just
+// doesn't count toward one. Card 1 (total) always counts every seller regardless
+// of this mapping. ----
 const GL_BUCKETS = [
   {
     key: 'pause21',
@@ -90,9 +95,43 @@ const GL_BUCKETS = [
   },
 ];
 
+// ---- Same bucket-metric math as hypercare-sellers.html's GL-wise boxes, but
+// pooled across every GL mapped to the bucket (not scoped to one active GL chip,
+// and not averaged per-GL) -- e.g. pause21's Revived count is Piyush Dubey's and
+// Sachin Srivastava's Revived sellers added together. ----
+function pct(n, d){
+  if (!d) return '—';
+  return (100 * n / d).toFixed(1) + '%';
+}
+function avg(nums){
+  if (!nums.length) return '—';
+  const v = nums.reduce((a,b) => a+b, 0) / nums.length;
+  return Math.round(v).toLocaleString('en-IN');
+}
+function computeBucketMetrics(sellers, bucketKey){
+  const revived = sellers.filter(r => r.revival_tag === 'Revived');
+  const isBH = r => r.pnl_tag === 'Bucket Health' || r.pnl_tag === 'B.E. Bucket Health';
+  const isPotential = r => r.pnl_tag === 'Potential';
+  const denomBase = bucketKey === 'pause21' ? revived : sellers;
+  const out = {};
+  if (bucketKey === 'pause21'){
+    out['Revived'] = String(revived.length);
+    const spendRevived = revived.filter(r => Math.abs(Number(r.yesterday_spend) || 0) > 100);
+    out['Spend/Revived'] = pct(spendRevived.length, revived.length);
+  } else {
+    const live = sellers.filter(r => (Number(r.yesterday_spend) || 0) > 10);
+    out['Spend/Live'] = pct(live.length, sellers.length);
+  }
+  out['BH%'] = pct(denomBase.filter(isBH).length, denomBase.length);
+  out['Potential%'] = pct(denomBase.filter(isPotential).length, denomBase.length);
+  const arrVals = denomBase.map(r => Number(r.yesterday_arr)).filter(v => !Number.isNaN(v) && v !== null);
+  out['Bucket ARR'] = avg(arrVals);
+  return out;
+}
+
 const grid = document.getElementById('metricGrid');
 
-function makeCard({label, count, gls, metrics}){
+function makeCard({label, count, gls, metricValues, metricOrder}){
   const card = document.createElement('div');
   card.className = 'metric-card';
 
@@ -117,10 +156,10 @@ function makeCard({label, count, gls, metrics}){
     card.appendChild(glsEl);
   }
 
-  if (metrics && metrics.length){
+  if (metricOrder && metricOrder.length){
     const sub = document.createElement('div');
     sub.className = 'metric-sub';
-    metrics.forEach(m => {
+    metricOrder.forEach(m => {
       const row = document.createElement('div');
       row.className = 'metric-sub-row';
       const k = document.createElement('span');
@@ -128,7 +167,7 @@ function makeCard({label, count, gls, metrics}){
       k.textContent = m;
       const v = document.createElement('span');
       v.className = 'v';
-      v.textContent = 'TBD';
+      v.textContent = metricValues[m];
       row.appendChild(k);
       row.appendChild(v);
       sub.appendChild(row);
@@ -141,16 +180,18 @@ function makeCard({label, count, gls, metrics}){
 
 grid.appendChild(makeCard({
   label: 'Total accounts in Hypercare',
-  count: SELLER_GLS.length,
+  count: ALL_SELLERS.length,
 }));
 
 GL_BUCKETS.forEach(bucket => {
-  const count = SELLER_GLS.filter(gl => bucket.gls.includes(gl)).length;
+  const sellers = ALL_SELLERS.filter(r => bucket.gls.includes(r.gl_name));
+  const metricValues = computeBucketMetrics(sellers, bucket.key);
   grid.appendChild(makeCard({
     label: bucket.label,
-    count,
+    count: sellers.length,
     gls: bucket.gls,
-    metrics: bucket.metrics,
+    metricValues,
+    metricOrder: bucket.metrics,
   }));
 });
 </script>
