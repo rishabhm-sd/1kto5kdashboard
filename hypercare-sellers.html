@@ -307,10 +307,16 @@ const activeGL = new Set();
 // shape as hypercare-overall.html's GL_BUCKETS -- kept as a second, minimal
 // mirror here rather than shared code, matching how hypercare-overall.html
 // already mirrors gl_name out of this file's DATA. If the bucket definitions
-// change, update both files. Metric values are TBD here for the same reason
-// they're TBD on the Overall Metrics tab: the Revived/Spend/BH%/Potential%/
-// ARR calculation logic hasn't been specified yet -- once it is, both this
-// card and the Overall Metrics tab's cards should be wired up together. ----
+// change, update both files.
+//
+// Metric formulas (confirmed 2026-10-04, computed client-side from DATA):
+//   Revived       = count of sellers (in the active GL(s)) with revival_tag === 'Revived'
+//   Spend/Revived = (count with |yesterday_spend| > 100) / (Revived count), as %
+//   BH%           = (count with pnl_tag in {'Bucket Health','B.E. Bucket Health'}) / denom, as %
+//   Potential%    = (count with pnl_tag === 'Potential') / denom, as %
+//     denom = Revived count for the pause21 bucket; all sellers in the active GL(s) for the other two buckets
+//   Bucket ARR    = average yesterday_arr over that same denom base
+//   Spend/Live    = (count with yesterday_spend > 10) / (all sellers in the active GL(s)), as % -- nonscaling/loss only
 const GL_BUCKETS = [
   {
     key: 'pause21',
@@ -332,6 +338,37 @@ const GL_BUCKETS = [
   },
 ];
 
+function pct(n, d){
+  if (!d) return '—';
+  return (100 * n / d).toFixed(1) + '%';
+}
+function avg(nums){
+  if (!nums.length) return '—';
+  const v = nums.reduce((a,b) => a+b, 0) / nums.length;
+  return Math.round(v).toLocaleString('en-IN');
+}
+
+function computeBucketMetrics(sellers, bucketKey){
+  const revived = sellers.filter(r => r.revival_tag === 'Revived');
+  const isBH = r => r.pnl_tag === 'Bucket Health' || r.pnl_tag === 'B.E. Bucket Health';
+  const isPotential = r => r.pnl_tag === 'Potential';
+  const denomBase = bucketKey === 'pause21' ? revived : sellers;
+  const out = {};
+  if (bucketKey === 'pause21'){
+    out['Revived'] = String(revived.length);
+    const spendRevived = revived.filter(r => Math.abs(Number(r.yesterday_spend) || 0) > 100);
+    out['Spend/Revived'] = pct(spendRevived.length, revived.length);
+  } else {
+    const live = sellers.filter(r => (Number(r.yesterday_spend) || 0) > 10);
+    out['Spend/Live'] = pct(live.length, sellers.length);
+  }
+  out['BH%'] = pct(denomBase.filter(isBH).length, denomBase.length);
+  out['Potential%'] = pct(denomBase.filter(isPotential).length, denomBase.length);
+  const arrVals = denomBase.map(r => Number(r.yesterday_arr)).filter(v => !Number.isNaN(v) && v !== null);
+  out['Bucket ARR'] = avg(arrVals);
+  return out;
+}
+
 const glBucketRowEl = document.getElementById('glBucketRow');
 
 function renderGlBucketMetrics(){
@@ -345,7 +382,9 @@ function renderGlBucketMetrics(){
   }
   glBucketRowEl.style.display = 'flex';
   matched.forEach(({bucket, gls}) => {
-    const count = DATA.filter(r => gls.includes(r.gl_name)).length;
+    const sellers = DATA.filter(r => gls.includes(r.gl_name));
+    const count = sellers.length;
+    const metricVals = computeBucketMetrics(sellers, bucket.key);
     const card = document.createElement('div');
     card.className = 'glbucket-card';
 
@@ -373,7 +412,7 @@ function renderGlBucketMetrics(){
       k.textContent = m;
       const v = document.createElement('span');
       v.className = 'v';
-      v.textContent = 'TBD';
+      v.textContent = metricVals[m] !== undefined ? metricVals[m] : 'TBD';
       tile.appendChild(k);
       tile.appendChild(v);
       metricsEl.appendChild(tile);
