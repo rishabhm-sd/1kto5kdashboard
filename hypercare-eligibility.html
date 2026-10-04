@@ -121,7 +121,7 @@ td.marker-yes{color:var(--churn-ink); font-weight:600;}
 
   <div class="pending-badge">
     <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.8v3.6l2.4 1.4"/></svg>
-    312 sellers loaded &middot; 17 of 19 columns live &middot; HC Eligibility &amp; HC Tag pending a data source
+    312 sellers loaded &middot; 19 of 19 columns live &middot; HC Eligibility &amp; HC Tag computed from the 21-Day Pause / Non-Scaling / Loss Bucket rules
   </div>
 
   <div class="toolrow">
@@ -171,13 +171,31 @@ td.marker-yes{color:var(--churn-ink); font-weight:600;}
 // the most recent day with FB spend > 0 (fb_marketing_insights, breakdown_key IS
 // NULL) in the last 400 days. 21-Day Marker = 'Yes' when today - Last Spend Date
 // >= 21 days (same threshold as the "21 days pause bucket" elsewhere on this
-// site). No. of Call Attempts = count of nushop.exotel_call_details rows in the
-// last 400 days. W-1..W-4 PNL/Spend come from analytics.seller_fb_pnl_weekly
-// (card 12067's own trailing-4-completed-ISO-week filter), Spend shown as a
-// positive number (the source table stores it as a negative/debit figure).
-// HC Eligibility and HC Tag have no defined source/logic yet -- pushed as null
-// until Rishabh specifies them, per the same TBD convention used everywhere
-// else on this site.
+// site). These two definitions (Last Spend Date / 21-Day Marker) are intentionally
+// kept separate from the churn-curve's weekly-aggregate logic used elsewhere on
+// this site -- by explicit decision, not an oversight.
+//
+// No. of Call Attempts = count of nushop.exotel_call_details rows whose call date
+// (start_time) falls AFTER that seller's Last Spend Date, open-ended through today
+// (the previous flat 400-day COUNT(*) window has been dropped entirely -- this
+// column now answers "how many times have we called since the seller went quiet").
+//
+// W-1..W-4 PNL are net_profit_percentage from analytics.seller_fb_pnl_weekly (same
+// switch from raw net_profit already applied on the All Sellers tab); W-1..W-4
+// Spend are unchanged, from the same table's trailing-4-completed-ISO-week filter,
+// shown as a positive number (the source table stores it as a negative/debit figure).
+// A -999.99 PNL% value is a pass-through data-source sentinel, not computed here.
+//
+// HC Eligibility = 'Yes' if the seller matches ANY of three bucket rules (HC Tag
+// records which one matched; checked in this order):
+//   1. 21 Days Pause      -- 21-Day Marker = 'Yes' AND No. of Call Attempts > 10
+//   2. Non-Scaling Bucket -- W-1 PNL% >= 5 AND W-2 PNL% >= 5 AND W-1 Spend AND
+//                            W-2 Spend both between Rs 3,500-14,000 inclusive
+//   3. Loss Bucket        -- at least 3 of the 4 weeks (W-1..W-4) each independently
+//                            satisfy (PNL% between -50% and 0%) AND (Spend between
+//                            Rs 3,500-14,000 inclusive) -- the 4th week's values don't
+//                            matter -- AND W-1 PNL% must be negative (not >= 0%)
+// Else HC Eligibility = 'No' and HC Tag = null.
 const COLUMNS = [
   {key:'seller_id', label:'Seller ID'},
   {key:'seller_name', label:'Seller name'},
