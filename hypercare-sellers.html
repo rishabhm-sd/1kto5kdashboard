@@ -312,6 +312,8 @@ const activeGL = new Set();
 // Metric formulas (confirmed 2026-10-04, computed client-side from DATA):
 //   Revived       = count of sellers (in the active GL(s)) with revival_tag === 'Revived'
 //   Spend/Revived = (count with |yesterday_spend| > 100) / (Revived count), as %
+//   Spending      = count of sellers (in the active GL(s)) with yesterday_spend > 10 -- pause21 only
+//   In Pipeline   = TBD, no logic defined yet -- pause21 only
 //   BH%           = (count with pnl_tag in {'Bucket Health','B.E. Bucket Health'}) / denom, as %
 //   Potential%    = (count with pnl_tag === 'Potential') / denom, as %
 //     denom = Revived count for the pause21 bucket; all sellers in the active GL(s) for the other two buckets
@@ -322,7 +324,7 @@ const GL_BUCKETS = [
     key: 'pause21',
     label: '21 days pause bucket',
     gls: ['Piyush Dubey', 'Sachin Srivastava'],
-    metrics: ['Revived', 'Spend/Revived', 'BH%', 'Potential%', 'Bucket ARR'],
+    metrics: ['Revived', 'Spend/Revived', 'Spending', 'In Pipeline', 'BH%', 'Potential%', 'Bucket ARR'],
   },
   {
     key: 'nonscaling',
@@ -358,6 +360,9 @@ function computeBucketMetrics(sellers, bucketKey){
     out['Revived'] = String(revived.length);
     const spendRevived = revived.filter(r => Math.abs(Number(r.yesterday_spend) || 0) > 100);
     out['Spend/Revived'] = pct(spendRevived.length, revived.length);
+    const spending = sellers.filter(r => (Number(r.yesterday_spend) || 0) > 10);
+    out['Spending'] = String(spending.length);
+    out['In Pipeline'] = 'TBD';
   } else {
     const live = sellers.filter(r => (Number(r.yesterday_spend) || 0) > 10);
     out['Spend/Live'] = pct(live.length, sellers.length);
