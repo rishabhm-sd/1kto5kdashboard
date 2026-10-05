@@ -630,24 +630,7 @@ function addModalSection(label){
   modalBody.appendChild(s);
 }
 
-// ---- Remittance Info: last positive vs. current payment cycle (card 15881),
-// plus, when the current cycle is negative, a breakdown of which expense
-// categories accumulated since the last positive cycle explain it. Only
-// non-zero categories are shown -- every negative row has at least one. ----
-const REMIT_ATTRIBUTION_FIELDS = [
-  ['remit_shipping_charge', 'Shipping charge'],
-  ['remit_weight_delta', 'Weight delta (subset of shipping)'],
-  ['remit_nushop_commission', 'Nushop commission'],
-  ['remit_marketing_spend', 'Marketing spend'],
-  ['remit_return_refund', 'Return / refund'],
-  ['remit_dispute', 'Dispute'],
-  ['remit_arrears', 'Arrears'],
-  ['remit_services_spend', 'Services spend'],
-  ['remit_wallet_deduction_inflow', 'Wallet deduction inflow'],
-  ['remit_total_cod_amount', 'Total COD amount'],
-  ['remit_total_online_amount', 'Total online amount'],
-];
-
+// ---- Remittance Info: last positive vs. current payment cycle (card 15881). ----
 function renderRemittanceInfo(r){
   addModalSection('Remittance Info');
   addModalRow('Last positive cycle',
@@ -657,14 +640,6 @@ function renderRemittanceInfo(r){
     (r.remit_cur_start && r.remit_cur_end) ? (r.remit_cur_start + ' – ' + r.remit_cur_end) : null);
   const isNegative = typeof r.remit_cur_amt === 'number' && r.remit_cur_amt < 0;
   addModalRow('Current remittance amount', r.remit_cur_amt, {negative: isNegative});
-  if (isNegative){
-    const nonZero = REMIT_ATTRIBUTION_FIELDS.filter(([key]) => r[key] !== null && r[key] !== undefined && r[key] !== 0);
-    if (nonZero.length){
-      addModalSection('Attribution since last positive cycle');
-      nonZero.forEach(([key, label]) => addModalRow(label, r[key]));
-      addModalRow('Cycles since last positive', r.remit_cycles_since);
-    }
-  }
 }
 
 function openSellerModal(r){
