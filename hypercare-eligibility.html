@@ -70,7 +70,7 @@ h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.5
 .tablescroll{overflow:auto; max-width:100%;}
 table{border-collapse:collapse; width:100%; font-size:0.82rem; white-space:nowrap;}
 thead th{
-  position:sticky; top:0; background:var(--surface-2); text-align:left; padding:8px 10px;
+  position:sticky; top:0; z-index:3; background:var(--surface-2); text-align:left; padding:8px 10px;
   font-family:'IBM Plex Sans',sans-serif; font-weight:600; color:var(--ink-1); border-bottom:1px solid var(--border);
   user-select:none; white-space:nowrap;
 }
@@ -89,6 +89,17 @@ tbody td{padding:9px 12px; border-bottom:1px solid var(--border); color:var(--in
 tbody tr:last-child td{border-bottom:none;}
 td.negative{color:var(--churn-ink);}
 td.marker-yes{color:var(--churn-ink); font-weight:600;}
+
+/* ---- frozen header row + frozen first two columns (Seller ID, Seller name) ---- */
+thead th:nth-child(1), thead th:nth-child(2){ z-index:4; }
+thead th:nth-child(1){ position:sticky; left:0; }
+thead th:nth-child(2){ position:sticky; left:var(--col1-w, 170px); }
+tbody td:nth-child(1), tbody td:nth-child(2){
+  position:sticky; z-index:2; background:var(--surface);
+}
+tbody td:nth-child(1){ left:0; }
+tbody td:nth-child(2){ left:var(--col1-w, 170px); }
+thead th:nth-child(2), tbody td:nth-child(2){ box-shadow:2px 0 6px -2px rgba(0,0,0,.15); }
 
 .emptystate{padding:48px 24px; text-align:center; color:var(--ink-2);}
 .emptystate p{margin:0 auto 4px; max-width:56ch; line-height:1.6; font-size:0.92rem;}
@@ -333,7 +344,10 @@ document.addEventListener('click', (e) => {
   if (e.target.closest && e.target.closest('.th-filter-btn')) return;
   closePopover();
 });
-window.addEventListener('scroll', () => closePopover(), true);
+window.addEventListener('scroll', (e) => {
+  if (popoverEl.contains(e.target)) return;
+  closePopover();
+}, true);
 
 const FILTER_ICON_SVG = '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 3h12l-4.5 5.5v3.5l-3 1.5v-5z"/></svg>';
 
@@ -376,6 +390,14 @@ function buildHead(){
 }
 
 let lastRenderedRows = [];
+
+function updateStickyOffsets(){
+  const firstCell = (bodyRows.querySelector('tr td:nth-child(1)')) || headRow.querySelector('th:nth-child(1)');
+  if (firstCell){
+    const w = firstCell.getBoundingClientRect().width;
+    if (w > 0) tableEl.style.setProperty('--col1-w', w + 'px');
+  }
+}
 
 function render(){
   let rows = DATA.filter(r => {
@@ -420,6 +442,7 @@ function render(){
   tableEl.style.display = DATA.length ? 'table' : 'none';
   emptyState.style.display = DATA.length ? 'none' : 'block';
   lastRenderedRows = rows;
+  updateStickyOffsets();
 }
 
 function toCsvValue(v){
@@ -451,6 +474,8 @@ clearFiltersBtn.addEventListener('click', () => {
   buildHead();
   render();
 });
+
+window.addEventListener('resize', updateStickyOffsets);
 
 buildHead();
 render();
