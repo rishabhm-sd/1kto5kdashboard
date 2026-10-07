@@ -183,7 +183,7 @@ tbody tr:hover td:nth-child(1), tbody tr:hover td:nth-child(2){ background:var(-
 
   <div class="pending-badge">
     <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.8v3.6l2.4 1.4"/></svg>
-    109 sellers loaded &middot; 18 of 28 columns live &middot; 10 still pending a data source
+    111 sellers loaded &middot; 18 of 28 columns live &middot; 10 still pending a data source
   </div>
 
   <div class="toolrow">
@@ -232,6 +232,7 @@ tbody tr:hover td:nth-child(1), tbody tr:hover td:nth-child(2){ background:var(-
 <script src="sellers-data-1.js"></script>
 <script src="sellers-data-2.js"></script>
 <script src="sellers-data-3.js"></script>
+<script src="sellers-data-4.js"></script>
 <script>
 // ---- column schema (confirmed) ----
 const COLUMNS = [
@@ -266,7 +267,7 @@ const COLUMNS = [
 ];
 
 // ---- data (live, refreshed via the master BigQuery + Redshift queries) ----
-const DATA = [...SELLERS_DATA_1, ...SELLERS_DATA_2, ...SELLERS_DATA_3];
+const DATA = [...SELLERS_DATA_1, ...SELLERS_DATA_2, ...SELLERS_DATA_3, ...SELLERS_DATA_4];
 
 const headRow = document.getElementById('headRow');
 const bodyRows = document.getElementById('bodyRows');
