@@ -1,1 +1,483 @@
-PLACEHOLDER_HTML
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>1K-5K Hypercare - Hypercare Eligibility</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root{
+  --bg-canvas:#f4f6f4;
+  --surface:#ffffff;
+  --surface-2:#eef1ef;
+  --border:#dde3e0;
+  --ink-1:#161b19;
+  --ink-2:#4c5854;
+  --ink-3:#828e8a;
+  --accent:#0f6d5c;
+  --accent-ink:#ffffff;
+  --churn-bg:#fdeeec;
+  --churn-border:#d8695a;
+  --churn-ink:#a8402f;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg-canvas:#0e1210;
+    --surface:#171c1a;
+    --surface-2:#1e2422;
+    --border:#2b322f;
+    --ink-1:#f2f5f3;
+    --ink-2:#bcc7c2;
+    --ink-3:#7d8985;
+    --accent:#3fb69a;
+    --accent-ink:#08110d;
+    --churn-bg:#2a1713;
+    --churn-border:#a8402f;
+    --churn-ink:#e58c7a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg-canvas:#0e1210;
+  --surface:#171c1a;
+  --surface-2:#1e2422;
+  --border:#2b322f;
+  --ink-1:#f2f5f3;
+  --ink-2:#bcc7c2;
+  --ink-3:#7d8985;
+  --accent:#3fb69a;
+  --accent-ink:#08110d;
+  --churn-bg:#2a1713;
+  --churn-border:#a8402f;
+  --churn-ink:#e58c7a;
+}
+
+*{box-sizing:border-box;}
+body{background:var(--bg-canvas); color:var(--ink-1); font-family:'IBM Plex Sans',system-ui,sans-serif;}
+.wrap{max-width:1600px; margin:0 auto; padding:6px 24px 72px;}
+
+h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.5rem,2.4vw,2.05rem); letter-spacing:-0.01em; margin:0 0 6px; text-wrap:balance;}
+
+.pending-badge{
+  display:inline-flex; align-items:center; gap:6px; background:var(--surface-2); border:1px solid var(--border);
+  color:var(--ink-2); font-size:0.72rem; font-weight:600; letter-spacing:0.02em; text-transform:uppercase;
+  padding:5px 12px; border-radius:999px; margin-bottom:18px;
+}
+.pending-badge svg{display:block;}
+
+.toolrow{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:14px;}
+.filterlink{background:none; border:none; color:var(--ink-3); font-family:'IBM Plex Sans',sans-serif; font-size:0.74rem; text-decoration:underline; text-underline-offset:2px; cursor:pointer; padding:3px 2px;}
+.filterlink:hover{color:var(--ink-1);}
+.rowcount{color:var(--ink-3); font-size:0.78rem; font-family:'IBM Plex Mono',monospace; margin-left:auto;}
+
+.tablepanel{background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden;}
+.tablescroll{overflow:auto; max-width:100%;}
+table{border-collapse:collapse; width:100%; font-size:0.82rem; white-space:nowrap;}
+thead th{
+  position:sticky; top:0; z-index:3; background:var(--surface-2); text-align:left; padding:8px 10px;
+  font-family:'IBM Plex Sans',sans-serif; font-weight:600; color:var(--ink-1); border-bottom:1px solid var(--border);
+  user-select:none; white-space:nowrap;
+}
+thead th .arrow{display:inline-block; width:0.9em; color:var(--accent); font-size:0.72rem;}
+.th-inner{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+.th-label{cursor:pointer; display:flex; align-items:center;}
+.th-label:hover{color:var(--accent);}
+.th-filter-btn{
+  flex:0 0 auto; width:20px; height:20px; display:flex; align-items:center; justify-content:center;
+  background:transparent; border:1px solid transparent; border-radius:5px; padding:0; cursor:pointer; color:var(--ink-3);
+}
+.th-filter-btn:hover{background:var(--surface); color:var(--ink-1); border-color:var(--border);}
+.th-filter-btn.active{color:var(--accent); border-color:var(--accent); background:var(--surface);}
+.th-filter-btn svg{display:block;}
+tbody td{padding:9px 12px; border-bottom:1px solid var(--border); color:var(--ink-2); font-family:'IBM Plex Mono',monospace; font-size:0.8rem;}
+tbody tr:last-child td{border-bottom:none;}
+td.negative{color:var(--churn-ink);}
+td.marker-yes{color:var(--churn-ink); font-weight:600;}
+
+/* ---- frozen header row + frozen first two columns (Seller ID, Seller name) ---- */
+thead th:nth-child(1), thead th:nth-child(2){ z-index:4; }
+thead th:nth-child(1){ position:sticky; left:0; }
+thead th:nth-child(2){ position:sticky; left:var(--col1-w, 170px); }
+tbody td:nth-child(1), tbody td:nth-child(2){
+  position:sticky; z-index:2; background:var(--surface);
+}
+tbody td:nth-child(1){ left:0; }
+tbody td:nth-child(2){ left:var(--col1-w, 170px); }
+thead th:nth-child(2), tbody td:nth-child(2){ box-shadow:2px 0 6px -2px rgba(0,0,0,.15); }
+
+.emptystate{padding:48px 24px; text-align:center; color:var(--ink-2);}
+.emptystate p{margin:0 auto 4px; max-width:56ch; line-height:1.6; font-size:0.92rem;}
+
+/* ---- column-filter popover (Google-Sheets-style multi-select), same as
+   hypercare-sellers.html / hypercare-finance.html ---- */
+.popover{
+  position:fixed; z-index:50; background:var(--surface); border:1px solid var(--border); border-radius:10px;
+  box-shadow:0 12px 32px rgba(0,0,0,.18); padding:8px; min-width:200px; max-width:280px;
+}
+.popover-search{
+  width:100%; box-sizing:border-box; background:var(--surface-2); border:1px solid var(--border); border-radius:6px;
+  padding:6px 8px; font-family:'IBM Plex Sans',sans-serif; font-size:0.78rem; color:var(--ink-1); margin-bottom:6px;
+}
+.popover-search:focus{outline:none; border-color:var(--accent);}
+.popover-actions{display:flex; gap:10px; padding:2px 6px 8px; border-bottom:1px solid var(--border); margin-bottom:6px;}
+.popover-action{background:none; border:none; color:var(--accent); font-family:'IBM Plex Sans',sans-serif; font-size:0.76rem; font-weight:600; cursor:pointer; padding:0;}
+.popover-action:hover{text-decoration:underline;}
+.popover-list{max-height:260px; overflow-y:auto; display:flex; flex-direction:column; gap:1px;}
+.popover-item{
+  display:flex; align-items:center; gap:7px; padding:5px 6px; border-radius:6px; cursor:pointer;
+  font-family:'IBM Plex Sans',sans-serif; font-size:0.78rem; color:var(--ink-1);
+}
+.popover-item:hover{background:var(--surface-2);}
+.popover-item input{flex:0 0 auto; cursor:pointer;}
+.popover-item span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+</style>
+<div class="wrap">
+  <h1>1K-5K Hypercare &mdash; Hypercare Eligibility</h1>
+
+  <div class="pending-badge">
+    <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.8v3.6l2.4 1.4"/></svg>
+    347 sellers loaded &middot; 19 of 19 columns live &middot; HC Eligibility &amp; HC Tag computed from the 21-Day Pause / Non-Scaling / Loss Bucket rules
+  </div>
+
+  <div class="toolrow">
+    <button type="button" class="filterlink" id="clearFilters">Clear column filters</button>
+    <button type="button" class="filterlink" id="downloadCsv">Download CSV</button>
+    <span class="rowcount" id="rowcount">0 sellers</span>
+  </div>
+
+  <div class="tablepanel">
+    <div class="tablescroll">
+      <table id="dataTable">
+        <thead>
+          <tr id="headRow"></tr>
+        </thead>
+        <tbody id="bodyRows"></tbody>
+      </table>
+    </div>
+    <div class="emptystate" id="emptyState">
+      <p><b>No sellers loaded.</b> This tab lists every 1K-5K bucket seller (458 total) minus the sellers already in the Hypercare book (111 as of this refresh, tagged to GM Anshika Satpathy) &mdash; the remaining candidates for Hypercare eligibility.</p>
+    </div>
+  </div>
+</div>
+
+<div id="filterPopover" class="popover" hidden>
+  <input type="text" class="popover-search" id="popoverSearch" placeholder="Search values&hellip;">
+  <div class="popover-actions">
+    <button type="button" class="popover-action" id="popoverSelectAll">Select all</button>
+    <button type="button" class="popover-action" id="popoverClear">Clear</button>
+  </div>
+  <div class="popover-list" id="popoverList"></div>
+</div>
+<script src="eligibility-data-1.js"></script>
+<script src="eligibility-data-2.js"></script>
+<script src="eligibility-data-3.js"></script>
+<script src="eligibility-data-4.js"></script>
+<script>
+// ---- column schema ----
+// Population = every seller in the 1K-5K/HITS bucket (csv_upload.hit_master_data,
+// team='HITS' OR hit2=1, good_seller IS NULL -- 458 sellers) MINUS sellers already
+// tagged to GM Anshika Satpathy (the existing Hypercare book -- 109 of those 458
+// as of this refresh; the site-wide "104" figure quoted elsewhere reflects an
+// earlier snapshot and drifts week to week as the roster changes, same as every
+// other roster count on this site). GL/GM come from analytics.seller_console_metrics_summary
+// (gc_name/gm_name), deduped via ROW_NUMBER, whitespace-normalized. HITs Handover Date is
+// hit_master_data.hit_year_week converted to that ISO week's Monday. Spends after HITs
+// Handover sums nushop.gc_view_3 marketing_spend from that week onward. Last Spend Date is
+// the most recent day with FB spend > 0 (fb_marketing_insights, breakdown_key IS
+// NULL) in the last 400 days. 21-Day Marker = 'Yes' when today - Last Spend Date
+// >= 21 days (same threshold as the "21 days pause bucket" elsewhere on this
+// site). These two definitions (Last Spend Date / 21-Day Marker) are intentionally
+// kept separate from the churn-curve's weekly-aggregate logic used elsewhere on
+// this site -- by explicit decision, not an oversight.
+//
+// No. of Call Attempts = count of nushop.exotel_call_details rows whose call date
+// (start_time) falls AFTER that seller's Last Spend Date, open-ended through today
+// (the previous flat 400-day COUNT(*) window has been dropped entirely -- this
+// column now answers "how many times have we called since the seller went quiet").
+//
+// W-1..W-4 PNL are net_profit_percentage from analytics.seller_fb_pnl_weekly (same
+// switch from raw net_profit already applied on the All Sellers tab); W-1..W-4
+// Spend are unchanged, from the same table's trailing-4-completed-ISO-week filter,
+// shown as a positive number (the source table stores it as a negative/debit figure).
+// A -999.99 PNL% value is a pass-through data-source sentinel, not computed here.
+//
+// HC Eligibility = 'Yes' if the seller matches ANY of three bucket rules (HC Tag
+// records which one matched; checked in this order):
+//   1. 21 Days Pause      -- 21-Day Marker = 'Yes' AND No. of Call Attempts > 10
+//   2. Non-Scaling Bucket -- W-1 PNL% >= 5 AND W-2 PNL% >= 5 AND W-1 Spend AND
+//                            W-2 Spend both between Rs 3,500-14,000 inclusive
+//   3. Loss Bucket        -- at least 3 of the 4 weeks (W-1..W-4) each independently
+//                            satisfy (PNL% between -50% and 0%) AND (Spend between
+//                            Rs 3,500-14,000 inclusive) -- the 4th week's values don't
+//                            matter -- AND W-1 PNL% must be negative (not >= 0%)
+// Else HC Eligibility = 'No' and HC Tag = null.
+const COLUMNS = [
+  {key:'seller_id', label:'Seller ID'},
+  {key:'seller_name', label:'Seller name'},
+  {key:'gl_name', label:'GL Name'},
+  {key:'gm_name', label:'GM Name'},
+  {key:'hits_handover_date', label:'HITs Handover Date'},
+  {key:'spend_after_handover', label:'Spends after HITs Handover'},
+  {key:'last_spend_date', label:'Last Spend Date'},
+  {key:'marker_21day', label:'21-Day Marker'},
+  {key:'n_call_attempts', label:'No. of Call Attempts'},
+  {key:'w1_pnl', label:'W-1 PNL'},
+  {key:'w2_pnl', label:'W-2 PNL'},
+  {key:'w3_pnl', label:'W-3 PNL'},
+  {key:'w4_pnl', label:'W-4 PNL'},
+  {key:'w1_spend', label:'W-1 Spend'},
+  {key:'w2_spend', label:'W-2 Spend'},
+  {key:'w3_spend', label:'W-3 Spend'},
+  {key:'w4_spend', label:'W-4 Spend'},
+  {key:'hc_eligibility', label:'HC Eligibility'},
+  {key:'hc_tag', label:'HC Tag'},
+];
+
+const DATA = [...ELIGIBILITY_DATA_1, ...ELIGIBILITY_DATA_2, ...ELIGIBILITY_DATA_3, ...ELIGIBILITY_DATA_4];
+
+const headRow = document.getElementById('headRow');
+const bodyRows = document.getElementById('bodyRows');
+const clearFiltersBtn = document.getElementById('clearFilters');
+const downloadCsvBtn = document.getElementById('downloadCsv');
+const rowcountEl = document.getElementById('rowcount');
+const emptyState = document.getElementById('emptyState');
+const tableEl = document.getElementById('dataTable');
+const popoverEl = document.getElementById('filterPopover');
+const popoverSearchEl = document.getElementById('popoverSearch');
+const popoverListEl = document.getElementById('popoverList');
+const popoverSelectAllBtn = document.getElementById('popoverSelectAll');
+const popoverClearBtn = document.getElementById('popoverClear');
+
+let sortKey = null;
+let sortDir = 1;
+
+const colFilterValues = {};
+const NEGATIVE_HIGHLIGHT_KEYS = ['w1_pnl', 'w2_pnl', 'w3_pnl', 'w4_pnl'];
+
+function valueToFilterString(v){
+  return (v === null || v === undefined || v === '') ? '__BLANK__' : String(v);
+}
+
+function distinctValuesFor(key){
+  const vals = new Set(DATA.map(r => valueToFilterString(r[key])));
+  const arr = [...vals];
+  arr.sort((a, b) => {
+    if (a === '__BLANK__') return 1;
+    if (b === '__BLANK__') return -1;
+    return a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'});
+  });
+  return arr;
+}
+
+let popoverKey = null;
+let currentFilterBtn = null;
+
+function updateFilterBtnState(){
+  if (currentFilterBtn) currentFilterBtn.classList.toggle('active', !!colFilterValues[popoverKey]);
+}
+
+function applyPopoverSearch(){
+  const q = popoverSearchEl.value.trim().toLowerCase();
+  popoverListEl.querySelectorAll('.popover-item').forEach(item => {
+    const text = item.querySelector('span').textContent.toLowerCase();
+    item.style.display = text.includes(q) ? '' : 'none';
+  });
+}
+
+function openPopoverFor(key, btn){
+  popoverKey = key;
+  currentFilterBtn = btn;
+  const all = distinctValuesFor(key);
+  const selected = colFilterValues[key] ? colFilterValues[key] : new Set(all);
+  popoverSearchEl.value = '';
+  popoverListEl.innerHTML = '';
+  all.forEach(v => {
+    const item = document.createElement('label');
+    item.className = 'popover-item';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = selected.has(v);
+    cb.addEventListener('change', () => {
+      if (!colFilterValues[key]) colFilterValues[key] = new Set(all);
+      if (cb.checked) colFilterValues[key].add(v); else colFilterValues[key].delete(v);
+      if (colFilterValues[key].size === all.length) delete colFilterValues[key];
+      updateFilterBtnState();
+      render();
+    });
+    const span = document.createElement('span');
+    span.textContent = v === '__BLANK__' ? '(Blanks)' : v;
+    item.appendChild(cb);
+    item.appendChild(span);
+    popoverListEl.appendChild(item);
+  });
+  const rect = btn.getBoundingClientRect();
+  popoverEl.hidden = false;
+  const top = Math.min(rect.bottom + 4, window.innerHeight - 60);
+  const left = Math.min(rect.left, window.innerWidth - 292);
+  popoverEl.style.top = top + 'px';
+  popoverEl.style.left = Math.max(8, left) + 'px';
+  popoverSearchEl.focus();
+}
+
+function closePopover(){
+  popoverKey = null;
+  currentFilterBtn = null;
+  popoverEl.hidden = true;
+}
+
+popoverSearchEl.addEventListener('input', applyPopoverSearch);
+popoverSelectAllBtn.addEventListener('click', () => {
+  if (!popoverKey) return;
+  delete colFilterValues[popoverKey];
+  const key = popoverKey, btn = currentFilterBtn;
+  openPopoverFor(key, btn);
+  updateFilterBtnState();
+  render();
+});
+popoverClearBtn.addEventListener('click', () => {
+  if (!popoverKey) return;
+  colFilterValues[popoverKey] = new Set();
+  const key = popoverKey, btn = currentFilterBtn;
+  openPopoverFor(key, btn);
+  updateFilterBtnState();
+  render();
+});
+popoverEl.addEventListener('click', (e) => e.stopPropagation());
+document.addEventListener('click', (e) => {
+  if (popoverEl.hidden) return;
+  if (e.target.closest && e.target.closest('.th-filter-btn')) return;
+  closePopover();
+});
+window.addEventListener('scroll', (e) => {
+  if (popoverEl.contains(e.target)) return;
+  closePopover();
+}, true);
+
+const FILTER_ICON_SVG = '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 3h12l-4.5 5.5v3.5l-3 1.5v-5z"/></svg>';
+
+function buildHead(){
+  headRow.innerHTML = '';
+  COLUMNS.forEach(col => {
+    const th = document.createElement('th');
+    const inner = document.createElement('div');
+    inner.className = 'th-inner';
+
+    const labelWrap = document.createElement('span');
+    labelWrap.className = 'th-label';
+    labelWrap.textContent = col.label + ' ';
+    const arrow = document.createElement('span');
+    arrow.className = 'arrow';
+    arrow.textContent = sortKey === col.key ? (sortDir === 1 ? '▲' : '▼') : '';
+    labelWrap.appendChild(arrow);
+    labelWrap.addEventListener('click', () => {
+      if (sortKey === col.key) sortDir = -sortDir; else { sortKey = col.key; sortDir = 1; }
+      buildHead();
+      render();
+    });
+
+    const filterBtn = document.createElement('button');
+    filterBtn.type = 'button';
+    filterBtn.className = 'th-filter-btn' + (colFilterValues[col.key] ? ' active' : '');
+    filterBtn.setAttribute('aria-label', 'Filter ' + col.label);
+    filterBtn.innerHTML = FILTER_ICON_SVG;
+    filterBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (popoverKey === col.key && !popoverEl.hidden){ closePopover(); return; }
+      openPopoverFor(col.key, filterBtn);
+    });
+
+    inner.appendChild(labelWrap);
+    inner.appendChild(filterBtn);
+    th.appendChild(inner);
+    headRow.appendChild(th);
+  });
+}
+
+let lastRenderedRows = [];
+
+function updateStickyOffsets(){
+  const firstCell = (bodyRows.querySelector('tr td:nth-child(1)')) || headRow.querySelector('th:nth-child(1)');
+  if (firstCell){
+    const w = firstCell.getBoundingClientRect().width;
+    if (w > 0) tableEl.style.setProperty('--col1-w', w + 'px');
+  }
+}
+
+function render(){
+  let rows = DATA.filter(r => {
+    return Object.keys(colFilterValues).every(key => {
+      const set = colFilterValues[key];
+      if (!set) return true;
+      return set.has(valueToFilterString(r[key]));
+    });
+  });
+  if (sortKey){
+    rows = rows.slice().sort((a,b) => {
+      const av = a[sortKey], bv = b[sortKey];
+      const an = Number(av), bn = Number(bv);
+      let cmp;
+      if (!Number.isNaN(an) && !Number.isNaN(bn) && av !== '' && bv !== '' && av !== null && bv !== null){
+        cmp = an - bn;
+      } else {
+        cmp = String(av ?? '').localeCompare(String(bv ?? ''));
+      }
+      return cmp * sortDir;
+    });
+  }
+  bodyRows.innerHTML = '';
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    COLUMNS.forEach(c => {
+      const td = document.createElement('td');
+      td.textContent = r[c.key] ?? '';
+      if (NEGATIVE_HIGHLIGHT_KEYS.includes(c.key) && typeof r[c.key] === 'number' && r[c.key] < 0){
+        td.classList.add('negative');
+      }
+      if (c.key === 'marker_21day' && r[c.key] === 'Yes'){
+        td.classList.add('marker-yes');
+      }
+      tr.appendChild(td);
+    });
+    bodyRows.appendChild(tr);
+  });
+  rowcountEl.textContent = rows.length + (rows.length === 1 ? ' seller' : ' sellers') +
+    (rows.length === DATA.length ? '' : ' of ' + DATA.length) +
+    (DATA.length ? '' : ' (no data loaded)');
+  tableEl.style.display = DATA.length ? 'table' : 'none';
+  emptyState.style.display = DATA.length ? 'none' : 'block';
+  lastRenderedRows = rows;
+  updateStickyOffsets();
+}
+
+function toCsvValue(v){
+  if (v === null || v === undefined) return '';
+  const s = String(v);
+  if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+function downloadCsv(){
+  const lines = [COLUMNS.map(c => toCsvValue(c.label)).join(',')];
+  lastRenderedRows.forEach(r => {
+    lines.push(COLUMNS.map(c => toCsvValue(r[c.key])).join(','));
+  });
+  const blob = new Blob([lines.join('\r\n')], {type: 'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'hypercare-eligibility-' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+downloadCsvBtn.addEventListener('click', downloadCsv);
+
+clearFiltersBtn.addEventListener('click', () => {
+  Object.keys(colFilterValues).forEach(k => delete colFilterValues[k]);
+  closePopover();
+  buildHead();
+  render();
+});
+
+window.addEventListener('resize', updateStickyOffsets);
+
+buildHead();
+render();
+</script>
+</body></html>
