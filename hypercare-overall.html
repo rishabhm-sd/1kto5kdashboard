@@ -64,11 +64,12 @@ h1{font-family:'Sora',system-ui,sans-serif; font-weight:700; font-size:clamp(1.5
 <script src="sellers-data-1.js"></script>
 <script src="sellers-data-2.js"></script>
 <script src="sellers-data-3.js"></script>
+<script src="sellers-data-4.js"></script>
 <script>
 // ---- Full per-seller data, same source files as hypercare-sellers.html, kept in
 // sync with every weekly refresh. Only the fields needed for bucket metrics are
 // read here (gl_name, revival_tag, pnl_tag, yesterday_spend, yesterday_arr). ----
-const ALL_SELLERS = [...SELLERS_DATA_1, ...SELLERS_DATA_2, ...SELLERS_DATA_3];
+const ALL_SELLERS = [...SELLERS_DATA_1, ...SELLERS_DATA_2, ...SELLERS_DATA_3, ...SELLERS_DATA_4];
 
 // ---- GL -> bucket mapping. Edit the `gls` lists freely (names must match the
 // gl_name values in the data above exactly); a GL not listed in any bucket just
